@@ -1,0 +1,11 @@
+.pio/
+.vscode/
+.DS_Store
+.env
+.env.*
+!.env.example
+config/mqtt.local.js
+config/firebase.local.js
+*.pem
+*.key
+*.secret
