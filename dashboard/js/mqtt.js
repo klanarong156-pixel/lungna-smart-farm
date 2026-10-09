@@ -10,6 +10,7 @@
     subscribed: new WeakSet(),
     pending: new Map(),
     pendingMode: null,
+    pendingSchedules: new Map(),
     watchdog: null,
     reconnectTimer: null,
     reconnectAttempt: 0,
@@ -174,6 +175,19 @@
           }
           return;
         }
+        const scheduleTopic = /^smartfarm\/schedule\/([^/]+)\/status$/.exec(topic);
+        if (scheduleTopic) {
+          const id = scheduleTopic[1];
+          const schedule = FarmState.normalizeSchedule(id, JSON.parse(value));
+          FarmState.setSchedule(id, schedule);
+          const pending = this.pendingSchedules.get(id);
+          if (pending && JSON.stringify(pending.target.slots) === JSON.stringify(schedule.slots)) {
+            clearTimeout(pending.timer);
+            this.pendingSchedules.delete(id);
+            pending.resolve(true);
+          }
+          return;
+        }
         if (topic.startsWith('smartfarm/relay/') && topic.endsWith('/status')) {
           const id = topic.split('/')[2];
           const status = value.trim();
@@ -238,6 +252,33 @@
       return promise;
     },
 
+    commandSchedule(id, payload) {
+      let target;
+      try { target = FarmState.normalizeSchedule(id, payload); }
+      catch (error) { return Promise.reject(error); }
+      if (!this.client?.connected) return Promise.reject(Error('MQTT ยังไม่เชื่อมต่อ'));
+      if (FarmState.get().espOnline !== true) return Promise.reject(Error('ESP ออฟไลน์หรือยังไม่มี heartbeat ล่าสุด'));
+      if (this.pendingSchedules.has(id)) return Promise.reject(Error('กำลังรอ ESP ยืนยันตารางเวลานี้'));
+
+      const request = { target, resolve: null, timer: null };
+      const promise = new Promise((resolve, reject) => {
+        request.resolve = resolve;
+        request.timer = setTimeout(() => {
+          this.pendingSchedules.delete(id);
+          reject(Error('ยังไม่ได้รับ schedule/status ยืนยันจาก ESP ภายในเวลาที่กำหนด'));
+        }, cfg.scheduleCommandTimeoutMs || cfg.commandTimeoutMs);
+      });
+      this.pendingSchedules.set(id, request);
+      this.client.publish(topics.scheduleSet(id), JSON.stringify(target), { qos: 1, retain: false }, error => {
+        if (!error) return;
+        clearTimeout(request.timer);
+        this.pendingSchedules.delete(id);
+        request.resolve(false);
+        FarmState.addError('mqtt-schedule-publish', error.message || String(error));
+      });
+      return promise;
+    },
+
     resolveAll(reason) {
       for (const [id, pending] of this.pending) {
         clearTimeout(pending.timer);
@@ -250,6 +291,12 @@
         this.pendingMode.resolve(false);
         this.pendingMode = null;
         FarmState.addError('mode-unconfirmed', reason);
+      }
+      for (const [id, pending] of this.pendingSchedules) {
+        clearTimeout(pending.timer);
+        this.pendingSchedules.delete(id);
+        pending.resolve(false);
+        FarmState.addError('schedule-unconfirmed', `${id}: ${reason}`);
       }
     },
 

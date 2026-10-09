@@ -12,7 +12,7 @@ Browser GitHub Pages/PWA ↔ MQTT over WSS ↔ HiveMQ Cloud ↔ ESP8266 NodeMCU 
 
 ## MQTT
 
-Firmware TLS: HiveMQ Cloud port 8883. Browser: secure WebSocket port 8884 `/mqtt`. Topics: `smartfarm/status/online`, `smartfarm/status/device`, `smartfarm/sensor/dht11`, `smartfarm/relay/{pump|zone1|lighthome|lightsala}/{set|status}`, `smartfarm/mode/{set|status}`. Exact contract/payload ใน [`docs/mqtt-topics.md`](docs/mqtt-topics.md) และผลตรวจ source ใน [`docs/compatibility-report.md`](docs/compatibility-report.md). ใช้ broker ACL จำกัด topic scope: credential ของ static browser client ไม่สามารถซ่อนจาก user ของ browser ได้.
+Firmware TLS: HiveMQ Cloud port 8883. Browser: secure WebSocket port 8884 `/mqtt`. Topics: `smartfarm/status/online`, `smartfarm/status/device`, `smartfarm/sensor/dht11`, `smartfarm/relay/{pump|zone1|lighthome|lightsala}/{set|status}`, `smartfarm/mode/{set|status}`, `smartfarm/schedule/{id}/{set|status}`. Exact contract/payload ใน [`docs/mqtt-topics.md`](docs/mqtt-topics.md) และผลตรวจ source ใน [`docs/compatibility-report.md`](docs/compatibility-report.md). ใช้ broker ACL จำกัด topic scope: credential ของ static browser client ไม่สามารถซ่อนจาก user ของ browser ได้.
 
 ## Hardware and firmware
 
@@ -33,7 +33,7 @@ Firebase is intentionally not connected in this static-only baseline. `config/fi
 
 ## Tests and known limits
 
-Static and browser tests validate JS/JSON, MQTT state/command acknowledgement, routes, responsive layout and UI. Physical MQTT/ESP integration, relay/pump safety tests and OTA require actual hardware/broker access. The dashboard does not include a schedule-slot editor; firmware schedules run under AUTO. Finance persistence is local to a browser; Admin does not implement user authentication. See [`docs/relay-test-matrix.md`](docs/relay-test-matrix.md) and [`docs/compatibility-report.md`](docs/compatibility-report.md).
+Static and browser tests validate JS/JSON, MQTT state/relay/mode/schedule acknowledgement, routes, responsive layout and UI. Physical MQTT/ESP integration, relay/pump safety tests and OTA require actual hardware/broker access. Schedule editing works through the existing firmware contract; firmware rejection cases without a status response surface as dashboard timeouts. Finance persistence is local to a browser; Admin does not implement user authentication. See [`docs/relay-test-matrix.md`](docs/relay-test-matrix.md) and [`docs/compatibility-report.md`](docs/compatibility-report.md).
 
 ## Version
 

@@ -5,14 +5,17 @@ class CE { constructor(type, options = {}) { this.type = type; this.detail = opt
 const config = {
   mqtt: {
     commandTimeoutMs: 100,
+    scheduleCommandTimeoutMs: 100,
     topics: {
       online: 'smartfarm/status/online', device: 'smartfarm/status/device', dht11: 'smartfarm/sensor/dht11',
       modeStatus: 'smartfarm/mode/status', modeSet: 'smartfarm/mode/set',
-      relayStatus: id => `smartfarm/relay/${id}/status`, relaySet: id => `smartfarm/relay/${id}/set`
+      relayStatus: id => `smartfarm/relay/${id}/status`, relaySet: id => `smartfarm/relay/${id}/set`,
+      scheduleStatus: id => `smartfarm/schedule/${id}/status`, scheduleSet: id => `smartfarm/schedule/${id}/set`
     }, subscriptions: []
   },
   relays: [{ id: 'pump' }, { id: 'zone1' }]
 };
+config.scheduleSlotCount = 4;
 const store = { getItem: () => null, setItem() {}, removeItem() {} };
 const context = {
   console, Date, Math, JSON, Number, String, Object, Array, Set, Map, Error, Promise,
@@ -58,8 +61,38 @@ manager.client = {
   manager.message('smartfarm/relay/pump/status', 'ON', false);
   assert.equal(await relayPromise, true);
   assert.equal(state.get().relays.pump, true);
+
+  const schedule = { slots: [
+    { enabled: true, on: '06:00', off: '06:15' },
+    { enabled: false, on: '00:00', off: '00:00' },
+    { enabled: false, on: '00:00', off: '00:00' },
+    { enabled: false, on: '00:00', off: '00:00' }
+  ] };
+  const schedulePromise = manager.commandSchedule('pump', schedule);
+  assert.equal(published.at(-1).topic, 'smartfarm/schedule/pump/set');
+  assert.equal(published.at(-1).options.qos, 1);
+  assert.equal(published.at(-1).options.retain, false);
+  assert.equal(JSON.stringify(JSON.parse(published.at(-1).payload)), JSON.stringify(schedule));
+  assert.equal(manager.pendingSchedules.has('pump'), true, 'broker PUBACK is not ESP schedule ACK');
+  manager.message('smartfarm/schedule/pump/status', JSON.stringify(schedule), false);
+  assert.equal(await schedulePromise, true);
+  assert.equal(state.get().schedules.pump.slots[0].on, '06:00');
+
+  const unacknowledged = { slots: [
+    { enabled: true, on: '07:00', off: '07:15' },
+    { enabled: false, on: '00:00', off: '00:00' },
+    { enabled: false, on: '00:00', off: '00:00' },
+    { enabled: false, on: '00:00', off: '00:00' }
+  ] };
+  await assert.rejects(manager.commandSchedule('pump', unacknowledged), /schedule\/status/);
+  assert.equal(manager.pendingSchedules.has('pump'), false, 'timed-out ESP ACK clears pending request');
+  assert.equal(state.get().schedules.pump.slots[0].on, '06:00', 'unconfirmed schedule never overwrites known ESP state');
+
+  await assert.rejects(manager.commandSchedule('pump', { slots: [{ enabled: true, on: '06:00', off: '06:30' }] }), /ช่วงเวลา/);
   state.setEspOffline('test');
   assert.equal(state.get().relays.pump, null);
+  await assert.rejects(manager.commandSchedule('pump', schedule), /ESP ออฟไลน์/);
+  assert.equal(state.get().schedules.pump, null);
   assert.equal(state.get().mode, null);
-  console.log('PASS MQTT contract: mode and relay command publish, status ACK, unsupported SCHEDULE mode, offline reset');
+  console.log('PASS MQTT contract: relay/mode/schedule commands, schedule ESP ACK, invalid payload and offline reset');
 })().catch(error => { console.error(error); process.exitCode = 1; });

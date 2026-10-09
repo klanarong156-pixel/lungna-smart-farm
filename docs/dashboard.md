@@ -3,7 +3,7 @@
 ## Pages
 
 - หน้าหลัก: MQTT/ESP status, relay snapshot และ sensor DHT11.
-- ระบบน้ำ: relay actions และ AUTO/MANUAL mode commands ซึ่งรอ status acknowledgement จาก ESP; schedule slots ยังไม่มีหน้าแก้ไข.
+- ระบบน้ำ: relay actions, AUTO/MANUAL mode commands และ schedule editor 4 ช่วงต่อรีเลย์; ตารางแสดงจาก ESP, ตรวจเวลาซ้ำ/ช่วงทับซ้อนก่อนส่ง และรอ `schedule/status` ยืนยัน.
 - การเงิน: browser-local income/expense ledger, ผลผลิต/ปริมาณ/ผู้รับซื้อ, เงินที่รับแล้ว/ยอดค้างรับ, กำไร-ขาดทุน และ CSV export; ทำงานออฟไลน์.
 - อากาศ: Open-Meteo forecast แยกจาก sensor data.
 - ตั้งค่า: operator ป้อน MQTT user/password; password session-only เป็นค่าเริ่มต้น; checkbox จึงจะเก็บใน localStorage.
@@ -16,5 +16,6 @@
 3. กด “เชื่อมต่อ”; default คือเก็บใน session ของแท็บ/เบราว์เซอร์.
 4. ตรวจ MQTT ONLINE และ ESP ONLINE แยกกัน; ESP ต้องมี heartbeat สด.
 5. สำหรับ relay action ต้อง online ทั้ง MQTT และ ESP และมี relay state จริง.
+6. การตั้งตารางเลือกรีเลย์ แล้วแก้ได้ 4 ช่วงเวลา/รีเลย์; schedule ทำงานบน ESP ทุกวันเมื่อเป็น AUTO และเวลาของ ESP (RTC/NTP) ใช้ได้.
 
 ไม่มี credentials จริงใน Git repository. Browser client เป็น public client; ใช้ ACL จำกัดสิทธิ์ อย่าใช้ admin broker credential.

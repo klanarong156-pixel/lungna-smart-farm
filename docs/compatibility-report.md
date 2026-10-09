@@ -14,6 +14,7 @@
 | Relay command/status | Firmware บรรทัด 1358–1363 publish retained ON/OFF; contract ระบุ command non-retained | publish non-retained `ON`/`OFF`; รอ status จริง | ไม่มี optimistic UI; timeout แสดงไม่ยืนยัน | MQTT publish ACK ไม่ใช่ ESP ACK |
 | Pump / emergency | firmware `relaySetRaw`, emergency, OTA safe-state; contract บรรทัด 48–52 | ใช้ firmware logic เดิมทั้งหมด | ไม่มี safety logic ย้ายมา dashboard | ESP เป็น controller จริง |
 | Mode | firmware `publishModeStatus`, callback; contract บรรทัด 23–25 | AUTO/MANUAL เท่านั้น | SCHEDULE ไม่ใช่ mode ใน firmware ที่ตรวจพบ; schedules ทำงานภายใต้ AUTO | ไม่แสดง mode ที่ firmware ไม่ได้รายงาน |
+| Schedule | firmware parser `smartfarm/schedule/{id}/set`, `publishScheduleStatus`; 4 relays × 4 slots | dashboard reads retained status and publishes four `enabled/on/off` slots | ใช้ HH:MM, every day, no enabled-slot overlaps, overnight supported; schedule runs only in AUTO | waits for matching `schedule/status`; some firmware rejection paths send no schedule-status ACK, so UI reports timeout rather than success |
 | Wi-Fi/reconnect | Firmware มี WiFiManager, retry; MQTT exponential backoff constants 5–60 วินาที | ใช้ firmware source เดิม | ต้องตั้ง WiFi/MQTT ผ่าน provisioning จริง | ไม่สร้างค่าจำลอง |
 | Online/LWT | Firmware บรรทัด 1874–1884 LWT retained false, online true; heartbeat retained/device JSON ทุก 10 วินาที | status/online, status/device, watchdog 25s | retained heartbeat ไม่ยืนยัน live | ป้องกัน retained snapshot หลอก online |
 | DHT11 | firmware `DHT dht(DHT_PIN,DHT11)`, D2/GPIO4; publish `smartfarm/sensor/dht11` | ใช้ schema JSON temperature/humidity | ไม่มีค่า 0 ปลอม | null แสดง “ยังไม่มีข้อมูล” |
@@ -27,13 +28,14 @@
 ## MQTT Contract
 
 - Broker: `25305924f68c41f2a1e089a1836d3287.s1.eu.hivemq.cloud` (จาก firmware source; ESP TLS port `8883`); Browser WSS `8884`, path `/mqtt`.
-- Browser subscribes: `smartfarm/status/online`, `smartfarm/status/device`, `smartfarm/sensor/dht11`, `smartfarm/relay/+/status`, `smartfarm/mode/status`.
+- Browser subscribes: `smartfarm/status/online`, `smartfarm/status/device`, `smartfarm/sensor/dht11`, `smartfarm/relay/+/status`, `smartfarm/mode/status`, `smartfarm/schedule/+/status`.
 - Commands: `smartfarm/relay/{relay}/set`; raw payload `ON` หรือ `OFF`, QoS 1, retained false.
 - Relay state: `smartfarm/relay/{relay}/status`; raw payload `ON` หรือ `OFF`, retained true.
 - ESP presence: `smartfarm/status/online`, retained `true`; LWT retained `false`.
 - Heartbeat: `smartfarm/status/device` JSON retained; firmware publishes regularly; dashboard only treats non-retained fresh heartbeat as current liveness.
 - Sensor: `smartfarm/sensor/dht11` JSON with numeric `temperature` / `humidity` fields when a valid reading exists.
-- Mode: `smartfarm/mode/status` raw `AUTO` or `MANUAL`; dashboard publishes the existing `/mode/set` topic and waits for status confirmation. `SCHEDULE` is not a firmware mode; the firmware's stored schedule slots run under AUTO. A schedule-slot editor is not included in this dashboard version.
+- Mode: `smartfarm/mode/status` raw `AUTO` or `MANUAL`; dashboard publishes the existing `/mode/set` topic and waits for status confirmation. `SCHEDULE` is not a firmware mode; stored schedule slots run under AUTO.
+- Schedule: `smartfarm/schedule/{relay}/set` JSON with exactly four `{enabled,on,off}` slots, each time `HH:MM`; Dashboard uses QoS 1 / retained false and waits for matching `smartfarm/schedule/{relay}/status` (retained true). Firmware's invalid-time/overlap rejection does not always publish a schedule status, so the dashboard surfaces timeout and does not claim acceptance.
 
 ## Source files examined
 
