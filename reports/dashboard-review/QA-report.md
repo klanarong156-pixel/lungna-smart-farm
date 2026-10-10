@@ -15,10 +15,10 @@
 | Browser JavaScript console/page errors | PASS | ไม่พบข้อผิดพลาดระหว่าง browser walkthrough |
 | Weather API | PASS (sandbox run) | Open-Meteo ส่ง current conditions และ 3-day forecast กลับมาในการทดสอบนี้; ข้อมูลอาจเปลี่ยน/บริการภายนอกอาจไม่พร้อมภายหลัง |
 | PWA offline installation/cache update | NOT TESTED | เพิ่ม `lungna-shell-v3`; ยังไม่ได้ทดสอบ offline mode บนอุปกรณ์จริง/Pages deployment |
-| GitHub Actions บน commit ใหม่ | NOT TESTED | workflow ได้รับ static test เพิ่ม แต่ยังไม่มี push จึงยังไม่มี run ใหม่ |
+| GitHub Actions บน commit `1ab2eec` | PASS | [Dashboard checks + firmware build](https://github.com/klanarong156-pixel/lungna-smart-farm/actions/runs/38064632049) สำเร็จ |
 | MQTT broker credentials/connectivity | NOT TESTED | ไม่ได้ป้อน credentials และไม่ได้เชื่อม broker ใน browser test |
 | ESP8266 heartbeat, relay switching, schedule execution, DHT11/RTC | NOT TESTED | ต้องเชื่อม hardware จริง; ไม่อ้างว่าผ่าน hardware integration |
-| Deploy GitHub Pages | NOT TESTED | ยังไม่ได้ push/deploy การเปลี่ยนแปลงขึ้น production |
+| Deploy GitHub Pages | PASS | [Deploy run](https://github.com/klanarong156-pixel/lungna-smart-farm/actions/runs/38064632040) สำเร็จ; production URL ตอบ HTTP 200 และมี route connection/events |
 
 ## การปรับที่ส่งมอบ
 
@@ -35,4 +35,4 @@
 
 ## Git/deployment
 
-ทำงานบน branch `main` ที่ clone ใน workspace; การเปลี่ยนแปลงยังไม่ได้ commit หรือ push. การ push จะกระตุ้น workflow และเผยแพร่หน้า GitHub Pages ตามการตั้งค่าปัจจุบัน จึงยังไม่ได้เผยแพร่โดยไม่มีคำสั่งให้ทำเช่นนั้น
+โค้ด Dashboard เผยแพร่จาก commit `1ab2eec` บน `main`; production URL: https://klanarong156-pixel.github.io/lungna-smart-farm/. GitHub Pages deployment และ firmware/dashboard validation ผ่าน. MQTT broker/device hardware integration ยังไม่ได้ทดสอบ.
