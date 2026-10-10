@@ -7,3 +7,12 @@
 - PlatformIO NodeMCU build succeeds; RAM 51.6%, Flash 58.0%; release binary and SHA-256 verified in `releases/firmware/` and `docs/build-report.md`.
 - Dashboard schedule editor configures four daily slots per relay, validates HH:MM and overlaps (including overnight intervals), publishes the existing MQTT contract, and waits for `schedule/status` before claiming success.
 - Static regression and dashboard browser smoke tests pass. Physical ESP/MQTT integration, real relay behavior and OTA remain pending hardware verification.
+
+## Dashboard UI refresh — 2026-10-10
+
+- Reorganized the application into the requested seven shared-shell pages: Home, Water, Devices, Connection, Weather, Settings, and Data/Events.
+- Added shared green design tokens, distinct MQTT/ESP badges, desktop sidebar, seven-item mobile bottom navigation with safe-area padding, and consistent footer.
+- Added device inventory populated only from firmware telemetry, explicit not-installed Soil Sensor state, real connection details, and session-observed MQTT event filters.
+- Expanded Open-Meteo presentation to current humidity/wind/rain chance and three-day forecast; weather remains separate from DHT11.
+- Preserved the existing local-only finance ledger within the Data page; did not change firmware or MQTT topics/payloads.
+- Bumped PWA cache to `lungna-shell-v3` so users receive the updated app shell. Hardware/MQTT integration is not claimed as tested by this UI update.

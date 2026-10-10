@@ -8,7 +8,9 @@ Browser GitHub Pages/PWA ↔ MQTT over WSS ↔ HiveMQ Cloud ↔ ESP8266 NodeMCU 
 
 ## Dashboard
 
-หน้า mobile-first: Home, Smart Water, Finance, Weather, Settings และ Admin. Relay state starts at `null` และแสดง “ยังไม่มีข้อมูล”; relay และ AUTO/MANUAL controls รอ status จาก ESP จริง. MQTT user/password ให้ผู้ดูแลป้อนในหน้า Settings; ไม่มี password/token จริงใน source. โดยปริยายเก็บ credentials ใน session storage. Finance เก็บใน localStorage browser ปัจจุบัน; ยังไม่มี cross-device/cloud sync.
+Dashboard ใช้ shared shell 7 หน้า: หน้าหลัก, ระบบน้ำ, อุปกรณ์, การเชื่อมต่อ, สภาพอากาศ, ตั้งค่า และข้อมูล. มี shared header/footer, desktop sidebar และ mobile bottom navigation. Relay state เริ่ม `null`; controls รอ status จาก ESP. Soil Sensor แสดงว่าไม่ได้ติดตั้ง; event timeline แสดงเฉพาะข้อมูลที่สังเกตได้จริงใน session. สมุดบัญชีเดิมยังอยู่ในหน้า “ข้อมูล” และเก็บ localStorage เท่านั้น.
+
+MQTT user/password ให้ผู้ดูแลป้อนที่หน้า “การเชื่อมต่อ”; โดยปริยายเก็บ credentials ใน session storage. Weather page เรียก Open-Meteo แยกจาก DHT11; integrations ที่ยังไม่มี เช่น Telegram/notification ระบุชัดว่าไม่ได้เชื่อม.
 
 ## MQTT
 
@@ -25,7 +27,7 @@ Firmware TLS: HiveMQ Cloud port 8883. Browser: secure WebSocket port 8884 `/mqtt
 3. Workflow `.github/workflows/pages.yml` uploads contents of `dashboard/` to Pages.
 4. Expected URL: https://klanarong156-pixel.github.io/lungna-smart-farm/ (available only after Pages has been enabled and Actions deploy succeeds).
 
-PWA needs HTTPS. Offline shell caches only static shell; it never caches relay state as current.
+PWA needs HTTPS. Offline shell cache version is `lungna-shell-v3`; it caches static shell only, never relay state as current.
 
 ## Firebase, weather, data
 
@@ -33,7 +35,7 @@ Firebase is intentionally not connected in this static-only baseline. `config/fi
 
 ## Tests and known limits
 
-Static and browser tests validate JS/JSON, MQTT state/relay/mode/schedule acknowledgement, routes, responsive layout and UI. Physical MQTT/ESP integration, relay/pump safety tests and OTA require actual hardware/broker access. Schedule editing works through the existing firmware contract; firmware rejection cases without a status response surface as dashboard timeouts. Finance persistence is local to a browser; Admin does not implement user authentication. See [`docs/relay-test-matrix.md`](docs/relay-test-matrix.md) and [`docs/compatibility-report.md`](docs/compatibility-report.md).
+Static/regression tests validate JS/JSON, MQTT state/relay/mode/schedule acknowledgement, seven routes, shared navigation and DOM IDs. Browser visual checks are run at desktop and mobile widths; they do not substitute for actual hardware. Physical MQTT/ESP integration, relay/pump safety tests and OTA require actual hardware/broker access. Schedule editing uses the existing firmware contract; firmware rejection cases without status response surface as timeouts. Finance persistence is local to a browser; Admin has no backend authentication. See [`docs/relay-test-matrix.md`](docs/relay-test-matrix.md) and [`docs/compatibility-report.md`](docs/compatibility-report.md).
 
 ## Version
 

@@ -2,16 +2,19 @@
 
 ## Pages
 
-- หน้าหลัก: MQTT/ESP status, relay snapshot และ sensor DHT11.
+- หน้าหลัก: shared header with distinct MQTT/ESP status, farm overview, DHT11, firmware metadata และ relay snapshot.
 - ระบบน้ำ: relay actions, AUTO/MANUAL mode commands และ schedule editor 4 ช่วงต่อรีเลย์; ตารางแสดงจาก ESP, ตรวจเวลาซ้ำ/ช่วงทับซ้อนก่อนส่ง และรอ `schedule/status` ยืนยัน.
-- การเงิน: browser-local income/expense ledger, ผลผลิต/ปริมาณ/ผู้รับซื้อ, เงินที่รับแล้ว/ยอดค้างรับ, กำไร-ขาดทุน และ CSV export; ทำงานออฟไลน์.
-- อากาศ: Open-Meteo forecast แยกจาก sensor data.
-- ตั้งค่า: operator ป้อน MQTT user/password; password session-only เป็นค่าเริ่มต้น; checkbox จึงจะเก็บใน localStorage.
-- Admin: สรุป configuration/read-only; ไม่มี backend user management/Auth ในรุ่นนี้.
+- อุปกรณ์: ESP8266/DHT11/DS3231/relay inventory; Soil Sensor แสดงว่าไม่ได้ติดตั้ง และไม่สร้างค่าจำลอง.
+- การเชื่อมต่อ: MQTT broker status, ESP heartbeat age, reconnect/error counters, credentials form และ diagnostic timeline.
+- สภาพอากาศ: Open-Meteo current conditions และ forecast 3 วัน แยกจาก DHT11.
+- ตั้งค่า: working accordions; Wi-Fi/Telegram/notification ที่ไม่มี integration จริงระบุชัดว่ายังไม่ได้เชื่อม.
+- ข้อมูล: session-observed MQTT events ที่กรองได้; สมุดรายรับ/รายจ่ายเดิมยังเป็น browser-local disclosure.
+
+Desktop uses one shared left green sidebar; mobile uses a safe-area-aware seven-item bottom navigation. Shared footer and CSS design tokens are reused across routes.
 
 ## MQTT setup
 
-1. เปิดหน้า Settings หลัง deploy HTTPS.
+1. เปิดหน้า “การเชื่อมต่อ” หลัง deploy HTTPS.
 2. ใส่ MQTT username/password ที่มี HiveMQ ACL สำหรับ topics ของ dashboard.
 3. กด “เชื่อมต่อ”; default คือเก็บใน session ของแท็บ/เบราว์เซอร์.
 4. ตรวจ MQTT ONLINE และ ESP ONLINE แยกกัน; ESP ต้องมี heartbeat สด.

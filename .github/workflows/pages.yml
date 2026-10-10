@@ -29,6 +29,7 @@ jobs:
           node tests/state-contract.test.cjs
           node tests/mqtt-contract.test.cjs
           node tests/paths.test.cjs
+          node tests/dashboard-pages.test.cjs
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
