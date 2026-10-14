@@ -1,4 +1,4 @@
-const CACHE = 'lungna-shell-v3';
+const CACHE = 'lungna-shell-v4';
 const SHELL = [
   './', './index.html', './css/app.css', './js/config.js', './js/state.js',
   './js/mqtt.js', './js/app.js', './manifest.json',
