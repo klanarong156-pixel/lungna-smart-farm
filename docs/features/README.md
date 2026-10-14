@@ -28,12 +28,13 @@
 | Dashboard UI/route | syntax checks, `tests/dashboard-pages.test.cjs`, `tests/paths.test.cjs`, browser check มือถือและ desktop |
 | State/MQTT command | `tests/state-contract.test.cjs`, `tests/mqtt-contract.test.cjs`, ตรวจ topic/payload/ACK และ offline/unknown paths |
 | Firmware/ฮาร์ดแวร์ | PlatformIO `pio run -e nodemcuv2`, firmware contract tests และระบุ hardware-only tests ที่ยังไม่ได้ทำ |
-| PWA/offline/cache | ทดสอบ install/activate/upgrade/offline fallback; ยืนยันว่า cache ของ app อื่นยังอยู่ |
+| PWA/offline/cache | ทดสอบ install/activate/upgrade/offline fallback; ยืนยันว่า cache ของ app อื่นยังอยู่ด้วย `tests/service-worker-cache.test.cjs` |
 | Data/persistence | schema/validation, migration/rollback plan และทดสอบข้อมูลเดิมก่อนเปลี่ยน storage |
 
 ไม่อ้างว่า hardware/MQTT integration ผ่าน หากไม่ได้ทดสอบกับอุปกรณ์และ broker ที่เกี่ยวข้องจริง
 
-## Known follow-ups จาก PR #2
+## งานต่อยอดที่ทำใน branch นี้
 
-- จำกัด Service Worker activation cleanup ให้ลบเฉพาะ cache ที่ขึ้นต้นด้วย namespace ของ Smart Farm
-- ปรับ README และ CHANGELOG ให้ระบุ PWA cache version `v4` ให้ตรงกับ production
+- [x] จำกัด Service Worker cleanup ให้ลบเฉพาะ cache namespace `lungna-shell-*` ของ Smart Farm และ preserve cache ของแอปอื่น
+- [x] อัปเดตเอกสาร, Settings label และ offline shell เป็น cache `v5`
+- [x] ปรับโครงสร้าง dashboard เพื่อลดจุดควบคุม/ข้อมูลซ้ำ และเพิ่ม regression tests
