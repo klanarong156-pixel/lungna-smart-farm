@@ -8,9 +8,11 @@ Browser GitHub Pages/PWA ↔ MQTT over WSS ↔ HiveMQ Cloud ↔ ESP8266 NodeMCU 
 
 ## Dashboard
 
-Dashboard ใช้ shared shell 7 หน้า: หน้าหลัก, ระบบน้ำ, อุปกรณ์, การเชื่อมต่อ, สภาพอากาศ, ตั้งค่า และข้อมูล. มี shared header/footer, desktop sidebar และ mobile bottom navigation. Relay state เริ่ม `null`; controls รอ status จาก ESP. Soil Sensor แสดงว่าไม่ได้ติดตั้ง; event timeline แสดงเฉพาะข้อมูลที่สังเกตได้จริงใน session. สมุดบัญชีเดิมยังอยู่ในหน้า “ข้อมูล” และเก็บ localStorage เท่านั้น.
+Dashboard ใช้ shared shell 7 หน้า: หน้าหลัก, ระบบน้ำ, อุปกรณ์, การเชื่อมต่อ, สภาพอากาศ, ตั้งค่า และข้อมูล. Home แสดง snapshot โดยไม่ทำซ้ำ sensor cards; คำสั่ง relay/AUTO/MANUAL/schedule รวมไว้ที่หน้า “ระบบน้ำ” จุดเดียว. หน้าอุปกรณ์เน้น controller/sensor health, ส่วนหน้าอากาศเน้น forecast. Sidebar บน desktop และ bottom navigation บนมือถือยังคงอยู่. Relay state เริ่ม `null`; controls รอ status จาก ESP. Soil Sensor แสดงว่าไม่ได้ติดตั้ง; event timeline แสดงเฉพาะข้อมูลที่สังเกตได้จริงใน session. สมุดบัญชีเดิมยังอยู่ในหน้า “ข้อมูล” และเก็บ localStorage เท่านั้น.
 
-MQTT user/password ให้ผู้ดูแลป้อนที่หน้า “การเชื่อมต่อ”; โดยปริยายเก็บ credentials ใน session storage. Weather page เรียก Open-Meteo แยกจาก DHT11; integrations ที่ยังไม่มี เช่น Telegram/notification ระบุชัดว่าไม่ได้เชื่อม.
+โลโก้ใหม่ใช้ตราสัญลักษณ์ใบอ่อนและร่องแปลง พร้อมชื่อภาษาไทยเป็นข้อความจริงในเว็บ; PWA icons อัปเดตตามแบรนด์.
+
+MQTT user/password ให้ผู้ดูแลป้อนที่หน้า “การเชื่อมต่อ”; โดยปริยายเก็บ credentials ใน session storage. Weather page เรียก Open-Meteo แยกจาก DHT11; integration ที่ยังไม่มีจะไม่ถูกนำเสนอเป็นฟังก์ชันที่ใช้งานได้.
 
 ## MQTT
 
@@ -27,7 +29,7 @@ Firmware TLS: HiveMQ Cloud port 8883. Browser: secure WebSocket port 8884 `/mqtt
 3. Workflow `.github/workflows/pages.yml` uploads contents of `dashboard/` to Pages.
 4. Expected URL: https://klanarong156-pixel.github.io/lungna-smart-farm/ (available only after Pages has been enabled and Actions deploy succeeds).
 
-PWA needs HTTPS. Offline shell cache version is `lungna-shell-v3`; it caches static shell only, never relay state as current.
+PWA needs HTTPS. Offline shell cache version is `lungna-shell-v5`; it caches static shell only, never relay state as current. Service Worker activation removes only older `lungna-shell-*` caches and preserves unrelated caches on the same origin.
 
 ## Firebase, weather, data
 
@@ -35,7 +37,7 @@ Firebase is intentionally not connected in this static-only baseline. `config/fi
 
 ## Tests and known limits
 
-Static/regression tests validate JS/JSON, MQTT state/relay/mode/schedule acknowledgement, seven routes, shared navigation and DOM IDs. Browser visual checks are run at desktop and mobile widths; they do not substitute for actual hardware. Physical MQTT/ESP integration, relay/pump safety tests and OTA require actual hardware/broker access. Schedule editing uses the existing firmware contract; firmware rejection cases without status response surface as timeouts. Finance persistence is local to a browser; Admin has no backend authentication. See [`docs/relay-test-matrix.md`](docs/relay-test-matrix.md) and [`docs/compatibility-report.md`](docs/compatibility-report.md).
+Static/regression tests validate JS/JSON, MQTT state/relay/mode/schedule acknowledgement, seven routes, shared navigation, unique control surfaces and Service Worker cache isolation. Browser visual checks are run at desktop and mobile widths; they do not substitute for actual hardware. Physical MQTT/ESP integration, relay/pump safety tests and OTA require actual hardware/broker access. Schedule editing uses the existing firmware contract; firmware rejection cases without status response surface as timeouts. Finance persistence is local to a browser; Admin has no backend authentication. See [`docs/relay-test-matrix.md`](docs/relay-test-matrix.md) and [`docs/compatibility-report.md`](docs/compatibility-report.md).
 
 ## Version
 

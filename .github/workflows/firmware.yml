@@ -22,10 +22,12 @@ jobs:
           node --check dashboard/js/state.js
           node --check dashboard/js/mqtt.js
           node --check dashboard/js/app.js
+          node --check dashboard/sw.js
           node tests/state-contract.test.cjs
           node tests/mqtt-contract.test.cjs
           node tests/paths.test.cjs
           node tests/dashboard-pages.test.cjs
+          node tests/service-worker-cache.test.cjs
           python -m json.tool dashboard/manifest.json >/dev/null
   firmware-build:
     runs-on: ubuntu-latest

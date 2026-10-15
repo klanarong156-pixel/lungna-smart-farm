@@ -1,5 +1,13 @@
 # Changelog
 
+## Dashboard UX refresh — 2026-10-15
+
+- Rebuilt Home as a farm command center, consolidated water mode/relay/schedule controls into one dedicated page, removed repeated sensor and relay panels, and trimmed inactive settings shortcuts/placeholders.
+- Reorganized Water, Devices, Weather and Settings into page-specific workspaces while preserving all MQTT, schedule, finance, weather and device-detail workflows.
+- Added a modern leaf-and-field emblem and refreshed the PWA icons; the Thai farm name remains rendered as real text.
+- Bumped the offline shell to `lungna-shell-v5`; Service Worker activation now deletes only older `lungna-shell-*` caches and preserves other applications' caches.
+- Added regression coverage for unique control surfaces and cache isolation. Firmware, MQTT topics/payloads and safety logic are unchanged.
+
 ## V7.2.0 — production baseline
 
 - Initialize clean production repository, mobile-first dashboard, MQTT state manager with relay/mode ACKs and bounded exponential reconnect, PWA shell, local finance ledger with receivables/export, weather forecast view, and compatibility documentation.

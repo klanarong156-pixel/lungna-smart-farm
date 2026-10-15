@@ -15,7 +15,15 @@ assert.match(html, /class="bottom-nav"[\s\S]*data-nav="events"/);
 for (const token of ['--primary:','--primary-dark:','--primary-light:','--background:','--surface:','--surface-soft:','--text:','--text-muted:','--border:','--success:','--warning:','--danger:','--info:']) assert.ok(css.includes(token), `missing design token ${token}`);
 assert.match(html, /DHT11/);
 assert.match(html, /Soil Sensor/);
-assert.match(html, /lungna-shell-v4/);
+assert.match(html, /lungna-shell-v5/);
+assert.match(html, /logo-suanlungna-modern\.png/);
+assert.match(html, /class="home-hero"/);
+assert.match(html, /class="water-workspace"[\s\S]*id="waterRelays"/);
+assert.match(html, /class="weather-layout"/);
+assert.match(html, /class="settings-layout"/);
+for (const duplicateId of ['homeRelays','homeTempAgain','homeHumidityAgain','homeHeartbeat','homeMqttStatus','weatherSensorTemp','weatherSensorHumidity','deviceRelays','refreshBtn']) {
+  assert.doesNotMatch(html, new RegExp(`id="${duplicateId}"`), `duplicate surface ${duplicateId} should be removed`);
+}
 assert.match(css, /--background:#0B1220/);
 assert.match(css, /--surface:#111C30/);
 assert.match(css, /--surface-soft:#18263B/);
@@ -23,6 +31,7 @@ assert.match(css, /--primary:#39F5A5/);
 assert.match(css, /prefers-reduced-motion:reduce/);
 const app = fs.readFileSync('dashboard/js/app.js', 'utf8');
 assert.match(app, /page === 'finance'[\s\S]*?financeDisclosure\.open = true/);
+assert.doesNotMatch(app, /homeRelays|homeTempAgain|weatherSensorTemp|deviceRelays|homeMqttStatus|refreshBtn/);
 assert.match(fs.readFileSync('dashboard/finance/index.html', 'utf8'), /index\.html#finance/);
 assert.match(fs.readFileSync('dashboard/manifest.json', 'utf8'), /"theme_color":"#0B1220"/);
-console.log('PASS dashboard pages: seven routes, shared shell, responsive navigation, Dark Tech tokens, Finance deep link');
+console.log('PASS dashboard pages: seven routes, redesigned layouts, unique water controls, Finance deep link, Dark Tech tokens');
