@@ -1,10 +1,13 @@
 # Changelog
 
-## Map-first Home redesign — 2026-10-16 (pending review)
+## Full Dashboard redesign — 2026-10-17 (pending review)
 
-- Replaced the Home snapshot cards with an accessible schematic zone map mapped to the existing four relay IDs; selecting a zone navigates to its existing Water control and does not send a command from Home.
-- Kept the map explicitly non-geographic and displayed only actual ESP/DHT11 telemetry; no coordinates, sensor placement, soil readings or history were invented.
-- Bumped the PWA shell cache to `lungna-shell-v7`; this change is pending review and has not been deployed.
+- Expanded the redesign from Home to every route and reduced primary navigation from seven entries to six real-use workspaces: Home, Water, Devices, System, Weather, Records.
+- Mapped the four user-marked device points as relative schematic markers; selecting a marker only opens the existing Water control and never sends a command from Home.
+- Merged MQTT connection and actual web-system tools into System; removed the unused static admin-info shortcut and the uninstalled Soil Sensor card. Preserved relay/schedule safety, credential handling, and firmware acknowledgement.
+- Consolidated session-only event history and browser-local finance records under Records, preserving finance entries, clear confirmation, and CSV export. Added legacy hash aliases.
+- Replaced visible exact farm-point weather labels with a coarse regional forecast reference; the forecast may differ from conditions at the parcel and remains separate from DHT11/control.
+- Bumped the PWA shell cache to `lungna-shell-v8`. This change is pending review and has not been merged or deployed.
 
 ## Bright Farm dashboard refresh — 2026-10-16
 

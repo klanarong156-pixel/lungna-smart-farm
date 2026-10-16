@@ -265,3 +265,92 @@ html,body{background:var(--background);color:var(--text)}body{background:radial-
 @media(min-width:1024px){.home-map-layout{grid-template-columns:minmax(0,1.5fr) minmax(290px,.82fr);gap:17px}.farm-map-card{position:sticky;top:94px}.home-live-panel{padding:18px}.farm-map-footer{align-items:flex-start;flex-direction:column;gap:7px}}
 @media(max-width:520px){.farm-map-card{padding:12px;border-radius:16px}.farm-map-heading h2,.home-panel-heading h2{font-size:16px}.farm-map-footer{align-items:flex-start;flex-direction:column;gap:8px}.farm-map-legend{gap:12px}.home-live-panel{padding:15px}.home-status-list{gap:0 9px}.home-climate-value{padding:11px 9px}.home-live-mark{font-size:9px;padding:6px 7px}}
 @media(prefers-reduced-motion:reduce){.farm-zone .zone-shape{transition:none}html{scroll-behavior:auto}}
+
+
+/* Whole-dashboard refinement: relative parcel schematic, compact real-use routes. */
+.farm-map-card{background:linear-gradient(160deg,#fff,#f8fcf8);border-color:#d7e8db;box-shadow:0 12px 30px #17643b12}
+.farm-map-heading h2{color:var(--text)}
+.farm-map-heading .eyebrow{color:var(--primary-dark)}
+.farm-map-source{border-color:#d4e8da;background:#f1faf3;color:#4f7660}
+.map-ground{fill:#f7fbf7;stroke:#e1ebe2;stroke-width:2}
+.map-field{fill:#eaf5eb;stroke:#27704c;stroke-width:5}
+.map-field-rows{fill:none;stroke:#bdcfbf;stroke-width:1.2;opacity:.8}
+.map-lane{fill:none;stroke:#d5e2d7;stroke-width:20;stroke-linecap:round;opacity:.9}
+.map-lane-edge{fill:none;stroke:#9db8a3;stroke-width:1.2;stroke-dasharray:4 7;stroke-linecap:round;opacity:.8}
+.farm-zone{cursor:pointer;outline:none}
+.zone-pin{fill:#fff;stroke:#27704c;stroke-width:3;transition:fill .15s ease,stroke .15s ease,filter .15s ease}
+.zone-number{fill:#1b5c3e;font:800 17px Manrope,'IBM Plex Sans Thai',sans-serif;pointer-events:none}
+.zone-label{fill:#244635;font:700 12px 'IBM Plex Sans Thai',sans-serif;paint-order:stroke;stroke:#f4faf4;stroke-width:3px;stroke-linejoin:round;pointer-events:none}
+.zone-status{fill:#668174;font:600 10px 'IBM Plex Sans Thai',sans-serif;paint-order:stroke;stroke:#f4faf4;stroke-width:2px;stroke-linejoin:round;pointer-events:none}
+.farm-zone[data-state=on] .zone-pin{fill:#0b8452;stroke:#fff;filter:drop-shadow(0 3px 6px #087a4333)}
+.farm-zone[data-state=on] .zone-number{fill:#fff}
+.farm-zone[data-state=on] .zone-status{fill:#087a43}
+.farm-zone[data-state=off] .zone-pin{fill:#edf3ee;stroke:#789081}
+.farm-zone[data-state=off] .zone-number{fill:#52675a}
+.farm-zone[aria-current=true] .zone-pin,.farm-zone:hover .zone-pin,.farm-zone:focus-visible .zone-pin{stroke:#e19a27;stroke-width:4;filter:drop-shadow(0 0 7px #e19a2744)}
+.farm-zone:focus-visible .zone-label,.farm-zone:focus-visible .zone-status{fill:#123b29}
+.farm-map-disclaimer{color:#63796c}
+.farm-map-legend{color:#526b5c}
+.legend-on{background:#0b8452}.legend-off{background:#8a9b8f}.legend-unknown{background:#bdc9bf}
+.device-card.controller-card{grid-row:auto;grid-column:span 2}
+.system-overview-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}
+.system-card{min-width:0;padding:20px}
+.system-card h2{margin:0;font-size:18px}
+.system-card .eyebrow{margin-bottom:4px}
+.system-card .config-detail b{overflow-wrap:anywhere}
+.system-advanced{margin:14px 0;padding:0}
+.system-advanced>summary{padding:16px 18px;display:flex;align-items:center;gap:12px;cursor:pointer;list-style:none}
+.system-advanced>summary::-webkit-details-marker{display:none}
+.system-advanced>summary b{font-size:14px}
+.system-advanced>summary small{margin-left:auto;color:var(--text-muted);font-size:11px;text-align:right}
+.system-advanced>.config-detail{margin:0 18px 18px}
+.connection-form{margin:14px 0}
+.system-tools{margin:14px 0;padding:20px}
+.system-tools>p.muted{line-height:1.6}
+.system-version-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0}
+.system-version-grid>div{min-width:0;padding:12px;border:1px solid var(--border);border-radius:13px;background:#f7fbf8}
+.system-version-grid span,.system-version-grid b{display:block;overflow-wrap:anywhere}
+.system-version-grid span{font-size:11px;color:var(--text-muted)}
+.system-version-grid b{margin-top:5px;font-size:13px;color:var(--text)}
+#systemCheckResult{min-height:18px}
+.weather-aside .weather-note{min-height:unset;line-height:1.65}
+.weather-aside .weather-note p{font-size:12px}
+.forecast-days{grid-template-columns:repeat(3,minmax(0,1fr))}
+.records-page .page-heading{margin-bottom:18px}
+.finance-tools{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:14px 0 0;padding:14px;border:1px solid var(--border);border-radius:14px;background:#f8fbf8}
+.finance-tools .muted{margin:0;line-height:1.55}
+#eventList{margin-top:12px}
+@media(max-width:759px){
+  .system-overview-grid{grid-template-columns:1fr}
+  .device-card.controller-card{grid-column:auto}
+  .system-version-grid{grid-template-columns:1fr}
+  .system-advanced>summary{align-items:flex-start;flex-direction:column;gap:4px}
+  .system-advanced>summary small{margin:0;text-align:left}
+  .finance-tools{align-items:stretch;flex-direction:column}
+  .finance-tools .button{width:100%}
+}
+@media(max-width:520px){
+  .farm-map-svg{max-height:none}
+  .zone-label{font-size:11px}
+  .zone-status{font-size:9px}
+  .farm-map-footer{align-items:flex-start;flex-direction:column}
+  .forecast-days{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(prefers-reduced-motion:reduce){.zone-pin{transition:none!important}}
+
+
+/* Small-screen refinements discovered in the six-route preview. */
+.home-live-mark b{font-weight:600}
+.filter-pills{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.filter-pills button{min-height:42px;flex:0 0 auto;white-space:nowrap}
+.finance-disclosure>summary{display:flex;align-items:center;gap:12px;padding:18px;cursor:pointer;list-style:none}
+.finance-disclosure>summary::-webkit-details-marker{display:none}
+.finance-disclosure>summary b{font-size:15px}
+.finance-disclosure>summary small{margin-left:auto;color:var(--text-muted);font-size:11px;text-align:right}
+@media(max-width:759px){
+  .filter-pills{flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;padding:0 2px 6px;scrollbar-width:thin}
+  .finance-disclosure>summary{align-items:flex-start;flex-direction:column;gap:4px}
+  .finance-disclosure>summary small{margin:0;text-align:left}
+}
+
+@media(max-width:759px){.filter-pills{flex-wrap:wrap;overflow:visible}}

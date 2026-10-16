@@ -13,23 +13,29 @@
   function addEvent(type, title, detail, status = 'info', at = Date.now()) {
     events.unshift({ type, title, detail, status, at });
     if (events.length > 150) events.length = 150;
-    renderEvents(); renderEvents('connectionTimeline');
+    renderEvents();
   }
-  function renderEvents(target = 'eventList') {
-    const root = $(target); if (!root) return;
+  function renderEvents() {
+    const root = $('eventList'); if (!root) return;
     const rows = events.filter(e => activeFilter === 'all' || e.type === activeFilter);
     root.innerHTML = rows.length ? rows.map(e => `<article class="event-item"><span class="event-mark event-${esc(e.type)}">${({relay:'◉',temperature:'🌡',humidity:'💧',esp:'⌁',mqtt:'⌁',error:'!',system:'▣'})[e.type] || '•'}</span><div class="event-copy"><b>${esc(e.title)}</b><small>${esc(e.detail)}</small></div><div class="event-meta"><time>${new Date(e.at).toLocaleString('th-TH',{dateStyle:'short',timeStyle:'medium'})}</time><span class="event-status ${esc(e.status)}">${esc(e.status==='ok'?'รับข้อมูล':e.status==='error'?'ผิดพลาด':e.status==='pending'?'รอยืนยัน':'ข้อมูล')}</span></div></article>`).join('') : '<p class="empty-state">ยังไม่มีเหตุการณ์ในหมวดนี้ · จะแสดงเมื่อ Dashboard ได้รับข้อมูลจริง</p>';
   }
   function navigate(page) {
-    if (page === 'finance') {
-      page = 'events';
-      const financeDisclosure = document.querySelector('.finance-disclosure');
-      if (financeDisclosure) financeDisclosure.open = true;
-    }
+    const openFinance = page === 'finance';
+    const aliases = { 'connection-page': 'system', settings: 'system', events: 'records', finance: 'records' };
+    page = aliases[page] || page;
     if (!document.querySelector(`[data-page="${page}"]`)) page = 'home';
     document.querySelectorAll('.page').forEach(n => n.classList.toggle('active', n.dataset.page === page));
     document.querySelectorAll('[data-nav]').forEach(n => n.classList.toggle('active', n.dataset.nav === page));
-    history.replaceState(null, '', `#${page}`); window.scrollTo(0, 0);
+    history.replaceState(null, '', `#${page}`);
+    window.scrollTo(0, 0);
+    if (openFinance) {
+      const financeDisclosure = $('financeDisclosure');
+      if (financeDisclosure) {
+        financeDisclosure.open = true;
+        requestAnimationFrame(() => financeDisclosure.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }));
+      }
+    }
   }
   document.querySelectorAll('[data-nav]').forEach(el => el.addEventListener('click', () => navigate(el.dataset.nav)));
   window.addEventListener('hashchange', () => navigate(location.hash.slice(1)));
@@ -127,10 +133,10 @@
     if ($('connectionHeroState')) $('connectionHeroState').textContent = connectionCopy[2];
     const espStatus = s.espOnline === true ? 'ออนไลน์' : s.espOnline === false ? 'ออฟไลน์' : 'ยังไม่มีข้อมูล';
     $('headerEsp').dataset.state = s.espOnline === true ? 'online' : s.espOnline === false ? 'error' : 'unknown'; $('headerEsp').querySelector('span').textContent = `ESP · ${espStatus}`;
-    $('settingsConnection').textContent = labels[s.connection] || s.connection; $('mqttReason').textContent = s.connectionReason;
+    $('systemConnection').textContent = labels[s.connection] || s.connection; $('mqttReason').textContent = s.connectionReason;
     $('modeValue').textContent = txt(s.mode); $('waterMode').textContent = txt(s.mode); $('modeFeedback').textContent = modePending ? `กำลังรอ ESP ยืนยัน ${modePending}…` : '';
     document.querySelectorAll('[data-mode]').forEach(b => { b.disabled = s.connection !== 'online' || s.espOnline !== true || Boolean(modePending); b.classList.toggle('primary', s.mode === b.dataset.mode); });
-    $('waterDevice').textContent = espStatus; $('settingsEsp').textContent = espStatus;
+    $('waterDevice').textContent = espStatus; $('systemEsp').textContent = espStatus;
     $('lastSeen').textContent = s.heartbeatAt ? `Heartbeat ล่าสุด ${new Date(s.heartbeatAt).toLocaleTimeString('th-TH')}` : 'รอ heartbeat จาก ESP8266';
     const temp = detail(s.temperature, ' °C'), humid = detail(s.humidity, ' %'); $('temperature').textContent = temp; $('humidity').textContent = humid; renderFarmMap(s);
     $('waterRelays').innerHTML = SmartFarmConfig.relays.map(r => relayMarkup(r,s)).join(''); bindRelayButtons();
@@ -139,6 +145,7 @@
     const d = s.device || {}, firmware = txt(d.firmware), uptime = Number.isFinite(d.uptimeSec) ? `${Math.floor(d.uptimeSec/3600)} ชม. ${Math.floor((d.uptimeSec%3600)/60)} นาที` : null;
     $('firmwareVersion').textContent = firmware; $('footerFirmware').textContent = firmware; $('deviceFirmware').textContent = firmware; $('connectionFirmware').textContent = firmware; $('deviceId').textContent = txt(d.device_id);
     $('homeEsp').textContent = espStatus; $('homeEsp').dataset.state = s.espOnline === true ? 'online' : s.espOnline === false ? 'offline' : 'unknown'; $('homeLiveTitle').closest('.home-live-panel').dataset.espState = $('homeEsp').dataset.state; $('homeEspMeta').textContent = [Number.isFinite(d.rssi)?`RSSI ${d.rssi} dBm`:null,d.firmware?`FW ${d.firmware}`:null].filter(Boolean).join(' · ') || 'RSSI / Firmware รอข้อมูล';
+    const homeLiveMark = $('homeLiveMark'); homeLiveMark.dataset.state = $('homeEsp').dataset.state; homeLiveMark.querySelector('b').textContent = s.espOnline === true ? 'กำลังรับข้อมูล' : s.espOnline === false ? 'ESP ออฟไลน์' : 'รอข้อมูล';
     $('deviceEspStatus').textContent = espStatus; $('deviceEspStatus').classList.toggle('online',s.espOnline === true); $('deviceUptime').textContent = txt(uptime); $('deviceRssi').textContent = detail(Number.isFinite(d.rssi)?d.rssi:null,' dBm'); $('deviceHeap').textContent = detail(Number.isFinite(d.heap)?d.heap:null,' bytes'); $('deviceReset').textContent = txt(d.resetReason);
     $('deviceIp').textContent = txt(d.ip); $('connectionRssi').textContent = detail(Number.isFinite(d.rssi)?d.rssi:null,' dBm'); $('rtcState').textContent = typeof d.rtc === 'boolean' ? (d.rtc?'พร้อม':'ไม่พร้อม') : 'ยังไม่มีข้อมูล'; $('espClock').textContent = txt(d.time); $('espDate').textContent = txt(d.date); $('sensorStatus').textContent = s.temperature !== null || s.humidity !== null ? 'ได้รับข้อมูล' : 'รอ DHT11'; $('deviceTemp').textContent = temp; $('deviceHumidity').textContent = humid; $('sensorUpdated').textContent = sensorUpdatedAt ? new Date(sensorUpdatedAt).toLocaleString('th-TH') : 'ยังไม่มีข้อมูล';
     $('footerUpdated').textContent = s.heartbeatAt ? new Date(s.heartbeatAt).toLocaleTimeString('th-TH') : 'ยังไม่มีข้อมูล';
@@ -198,8 +205,7 @@
     finally { btn.disabled=false; }
   }
   $('weatherRefresh').addEventListener('click',loadWeather); loadWeather();
-  $('systemCheck').addEventListener('click',async()=>{const result=$('systemCheckResult');result.textContent='กำลังตรวจไฟล์และความพร้อมของระบบ…';try{const checks=await Promise.all(['./','./manifest.json','./sw.js','./js/config.js','./js/state.js','./js/mqtt.js','./js/app.js'].map(async p=>{const r=await fetch(p,{cache:'no-store'});return r.ok;}));const manifest=await fetch('./manifest.json',{cache:'no-store'});await manifest.json();result.textContent=checks.every(Boolean)?'ตรวจไฟล์ Dashboard และ manifest ผ่าน · MQTT/ESP ยังต้องตรวจจากการเชื่อมต่อจริง':'พบไฟล์ที่โหลดไม่สำเร็จ';}catch(e){result.textContent=`ตรวจระบบไม่สำเร็จ: ${e.message}`;}});
-  $('showAdminInfo').addEventListener('click',()=>{const target=$('adminInfo');target.scrollIntoView({behavior:'smooth',block:'center'});target.classList.add('focus-highlight');setTimeout(()=>target.classList.remove('focus-highlight'),1400);});
+  $('systemCheck').addEventListener('click',async()=>{const result=$('systemCheckResult');result.textContent='กำลังตรวจไฟล์และความพร้อมของระบบ…';try{const checks=await Promise.all(['./index.html','./css/app.css','./manifest.json','./sw.js','./js/config.js','./js/state.js','./js/mqtt.js','./js/app.js'].map(async p=>{const r=await fetch(p,{cache:'no-store'});return r.ok;}));const manifest=await fetch('./manifest.json',{cache:'no-store'});await manifest.json();result.textContent=checks.every(Boolean)?'ตรวจไฟล์ Dashboard และ manifest ผ่าน · MQTT/ESP ยังต้องตรวจจากการเชื่อมต่อจริง':'พบไฟล์ที่โหลดไม่สำเร็จ';}catch(e){result.textContent=`ตรวจระบบไม่สำเร็จ: ${e.message}`;}});
   $('reloadDashboard').addEventListener('click',async()=>{if(navigator.serviceWorker?.controller){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.update()));}location.reload();});
   if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(e=>FarmState.addError('service-worker',e.message)));
   window.addEventListener('farm:esp-timeout',()=>toast('ไม่ได้รับ heartbeat จาก ESP · แสดงออฟไลน์')); window.addEventListener('farm:presence-offline',()=>toast('ESP รายงานออฟไลน์'));

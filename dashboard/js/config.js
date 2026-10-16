@@ -32,5 +32,6 @@ window.SmartFarmConfig = Object.freeze({
     { id: 'lighthome', label: 'ไฟบ้าน', pin: 'D7 / GPIO13', icon: '⌂' },
     { id: 'lightsala', label: 'ไฟศาลา', pin: 'D8 / GPIO15', icon: '✦' }
   ],
-  weather: { latitude: 7.798754, longitude: 99.990505, timezone: 'Asia/Bangkok' }
+  // Coarse regional forecast reference only; never use the farm's exact position.
+  weather: { latitude: 7.5, longitude: 100.0, timezone: 'Asia/Bangkok' }
 });
