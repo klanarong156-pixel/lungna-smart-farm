@@ -40,6 +40,15 @@
       store.setItem(this.credentialKeys[1], pass);
     },
 
+    autoConnect() {
+      const credentials = this.credentials();
+      if (!credentials.pass) {
+        FarmState.setConnection('offline', 'พร้อมเชื่อมต่ออัตโนมัติ · รอ password ครั้งแรก');
+        return false;
+      }
+      return this.connect(credentials.user, credentials.pass, credentials.remember);
+    },
+
     connect(user, pass, remember) {
       if (typeof window.mqtt === 'undefined') {
         FarmState.setConnection('error', 'ไม่พบ MQTT.js');

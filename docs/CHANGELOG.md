@@ -1,5 +1,11 @@
 # Changelog
 
+## Bright Farm dashboard refresh — 2026-10-16
+
+- Reworked the dashboard into a brighter farm-oriented visual hierarchy with clearer status cards, warmer accents, and a simplified connection workspace.
+- Added automatic MQTT connection on page load when credentials already exist in browser storage; first-time setup still requires the operator to enter the password and credentials are never committed to source.
+- Added live connection hero status and bumped the PWA shell cache to `lungna-shell-v6` so the new UI is picked up after deployment.
+
 ## Dashboard UX refresh — 2026-10-15
 
 - Rebuilt Home as a farm command center, consolidated water mode/relay/schedule controls into one dedicated page, removed repeated sensor and relay panels, and trimmed inactive settings shortcuts/placeholders.

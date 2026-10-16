@@ -15,12 +15,14 @@ assert.match(html, /class="bottom-nav"[\s\S]*data-nav="events"/);
 for (const token of ['--primary:','--primary-dark:','--primary-light:','--background:','--surface:','--surface-soft:','--text:','--text-muted:','--border:','--success:','--warning:','--danger:','--info:']) assert.ok(css.includes(token), `missing design token ${token}`);
 assert.match(html, /DHT11/);
 assert.match(html, /Soil Sensor/);
-assert.match(html, /lungna-shell-v5/);
+assert.match(html, /lungna-shell-v6/);
 assert.match(html, /logo-suanlungna-modern\.png/);
 assert.match(html, /class="home-hero"/);
 assert.match(html, /class="water-workspace"[\s\S]*id="waterRelays"/);
 assert.match(html, /class="weather-layout"/);
 assert.match(html, /class="settings-layout"/);
+assert.match(html, /class="connection-hero"[\s\S]*id="mqttAutoStatus"/);
+assert.match(html, /บันทึกและเชื่อมต่อครั้งแรก/);
 for (const duplicateId of ['homeRelays','homeTempAgain','homeHumidityAgain','homeHeartbeat','homeMqttStatus','weatherSensorTemp','weatherSensorHumidity','deviceRelays','refreshBtn']) {
   assert.doesNotMatch(html, new RegExp(`id="${duplicateId}"`), `duplicate surface ${duplicateId} should be removed`);
 }
