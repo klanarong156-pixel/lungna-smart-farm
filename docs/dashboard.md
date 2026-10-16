@@ -2,7 +2,7 @@
 
 ## Pages
 
-- หน้าหลัก: shared header with distinct MQTT/ESP status, farm overview, DHT11, firmware metadata และ relay snapshot.
+- หน้าหลัก: map-first schematic selector สำหรับรีเลย์ `pump`, `zone1`, `lighthome`, `lightsala` พร้อม live relay state จาก ESP; ผังไม่ระบุตำแหน่ง/ขนาดจริง และการเลือกโซนเปิดหน้า “ระบบน้ำ” โดยไม่ส่งคำสั่งจาก Home. แสดง DHT11 และ controller telemetry ที่ได้รับจริงเท่านั้น.
 - ระบบน้ำ: relay actions, AUTO/MANUAL mode commands และ schedule editor 4 ช่วงต่อรีเลย์; ตารางแสดงจาก ESP, ตรวจเวลาซ้ำ/ช่วงทับซ้อนก่อนส่ง และรอ `schedule/status` ยืนยัน.
 - อุปกรณ์: ESP8266/DHT11/DS3231/relay inventory; Soil Sensor แสดงว่าไม่ได้ติดตั้ง และไม่สร้างค่าจำลอง.
 - การเชื่อมต่อ: MQTT broker status, ESP heartbeat age, reconnect/error counters, credentials form และ diagnostic timeline.

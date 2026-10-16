@@ -6,7 +6,7 @@
   const labels = { offline: 'ออฟไลน์', connecting: 'กำลังเชื่อมต่อ', online: 'ออนไลน์', reconnecting: 'กำลังเชื่อมต่อใหม่', error: 'ผิดพลาด' };
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
   const relayPending = new Set(), schedulePending = new Set();
-  let modePending = null, scheduleFeedback = '', toastTimer, activeFilter = 'all';
+  let modePending = null, scheduleFeedback = '', toastTimer, activeFilter = 'all', selectedFarmRelay = null;
   let lastConnection = null, connectedSince = null, reconnectCount = 0, sensorUpdatedAt = null, lastHeartbeatSeen = 0;
   const events = [];
   function toast(message) { const t = $('toast'); t.textContent = message; t.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 3200); }
@@ -35,10 +35,34 @@
   window.addEventListener('hashchange', () => navigate(location.hash.slice(1)));
   navigate(location.hash.slice(1) || 'home');
 
+  function openFarmZone(relayId) {
+    if (!SmartFarmConfig.relays.some(relay => relay.id === relayId)) return;
+    selectedFarmRelay = relayId;
+    $('scheduleRelay').value = relayId;
+    scheduleFeedback = '';
+    renderScheduleEditor(FarmState.get());
+    navigate('water');
+    requestAnimationFrame(() => {
+      const card = [...document.querySelectorAll('#waterRelays [data-relay]')].find(item => item.dataset.relay === relayId);
+      if (!card) return;
+      card.classList.add('farm-relay-target');
+      card.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
+      card.focus({ preventScroll: true });
+    });
+  }
+  document.querySelectorAll('[data-farm-zone]').forEach(zone => {
+    zone.addEventListener('click', () => openFarmZone(zone.dataset.farmZone));
+    zone.addEventListener('keydown', event => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      openFarmZone(zone.dataset.farmZone);
+    });
+  });
+
   function relayMarkup(r, s, simple = false) {
     const val = s.relays[r.id], state = val === true ? 'เปิด' : val === false ? 'ปิด' : 'ยังไม่มีข้อมูล';
     const pending = relayPending.has(r.id);
-    return `<article class="card relay-card" data-relay="${esc(r.id)}"><div class="relay-top"><span class="relay-icon">${esc(r.icon)}</span>${!simple ? `<span class="card-label">${esc(r.pin)}</span>` : ''}</div><div class="relay-control"><div><div class="relay-name">${esc(r.label)}</div><div class="relay-state ${val === true ? 'on' : val === false ? 'off' : ''}">${pending ? 'กำลังรอ ESP ยืนยัน…' : state}</div></div><button class="button ${val === true ? 'secondary' : 'primary'} relay-button" data-relay-toggle="${esc(r.id)}" ${pending || s.connection !== 'online' || s.espOnline !== true || val === null ? 'disabled' : ''}>${pending ? 'รอ ESP' : val === true ? 'ปิด' : 'เปิด'}</button></div></article>`;
+    return `<article class="card relay-card" data-relay="${esc(r.id)}" tabindex="-1"><div class="relay-top"><span class="relay-icon">${esc(r.icon)}</span>${!simple ? `<span class="card-label">${esc(r.pin)}</span>` : ''}</div><div class="relay-control"><div><div class="relay-name">${esc(r.label)}</div><div class="relay-state ${val === true ? 'on' : val === false ? 'off' : ''}">${pending ? 'กำลังรอ ESP ยืนยัน…' : state}</div></div><button class="button ${val === true ? 'secondary' : 'primary'} relay-button" data-relay-toggle="${esc(r.id)}" ${pending || s.connection !== 'online' || s.espOnline !== true || val === null ? 'disabled' : ''}>${pending ? 'รอ ESP' : val === true ? 'ปิด' : 'เปิด'}</button></div></article>`;
   }
   function renderScheduleEditor(s) {
     const id = $('scheduleRelay').value, relay = SmartFarmConfig.relays.find(item => item.id === id), slots = s.schedules?.[id]?.slots, pending = schedulePending.has(id);
@@ -78,6 +102,23 @@
     }));
   }
   function detail(value, suffix = '') { return value === null || value === undefined || value === '' ? 'ยังไม่มีข้อมูล' : `${value}${suffix}`; }
+  function renderFarmMap(s) {
+    document.querySelectorAll('[data-farm-zone]').forEach(zone => {
+      const relayId = zone.dataset.farmZone;
+      const relay = SmartFarmConfig.relays.find(item => item.id === relayId);
+      const value = s.relays?.[relayId];
+      const state = value === true ? 'on' : value === false ? 'off' : 'unknown';
+      const spoken = value === true ? 'เปิด' : value === false ? 'ปิด' : 'ยังไม่มีข้อมูล';
+      zone.dataset.state = state;
+      zone.setAttribute('aria-pressed', value === true ? 'true' : value === false ? 'false' : 'mixed');
+      zone.setAttribute('aria-current', selectedFarmRelay === relayId ? 'true' : 'false');
+      zone.setAttribute('aria-label', `${relay?.label || relayId} · ${spoken} · เลือกเพื่อเปิดศูนย์ควบคุม`);
+      const title = zone.querySelector('title');
+      if (title) title.textContent = `${relay?.label || relayId} · ${spoken}`;
+      const status = zone.querySelector('[data-zone-status]');
+      if (status) status.textContent = value === true ? 'เปิด' : value === false ? 'ปิด' : 'รอข้อมูล';
+    });
+  }
   function render(s) {
     const conn = $('connection'); conn.dataset.state = s.connection; conn.querySelector('span').textContent = `MQTT · ${labels[s.connection] || s.connection}`;
     const connectionCopy = { offline: ['พร้อมเชื่อมต่อ', 'รอ credential สำหรับการเชื่อมต่อครั้งแรก', 'พร้อม'], connecting: ['กำลังเชื่อมต่อ MQTT', 'กำลังตรวจสอบ broker และสมัครรับข้อมูลจากฟาร์ม', 'กำลังเชื่อมต่อ'], online: ['เชื่อมต่อ MQTT แล้ว', 'กำลังรอ heartbeat และสถานะจริงจาก ESP8266', 'ออนไลน์'], reconnecting: ['กำลังเชื่อมต่อใหม่', s.connectionReason || 'ระบบจะลองเชื่อมต่อใหม่อัตโนมัติ', 'กำลังลองใหม่'], error: ['เชื่อมต่อไม่สำเร็จ', s.connectionReason || 'ตรวจสอบ credential และการเข้าถึง broker', 'ต้องตรวจสอบ'] }[s.connection] || ['สถานะ MQTT', s.connectionReason || 'ยังไม่มีข้อมูล', 'ตรวจสอบ'];
@@ -91,12 +132,13 @@
     document.querySelectorAll('[data-mode]').forEach(b => { b.disabled = s.connection !== 'online' || s.espOnline !== true || Boolean(modePending); b.classList.toggle('primary', s.mode === b.dataset.mode); });
     $('waterDevice').textContent = espStatus; $('settingsEsp').textContent = espStatus;
     $('lastSeen').textContent = s.heartbeatAt ? `Heartbeat ล่าสุด ${new Date(s.heartbeatAt).toLocaleTimeString('th-TH')}` : 'รอ heartbeat จาก ESP8266';
-    const temp = detail(s.temperature, ' °C'), humid = detail(s.humidity, ' %'); $('temperature').textContent = temp; $('humidity').textContent = humid;
+    const temp = detail(s.temperature, ' °C'), humid = detail(s.humidity, ' %'); $('temperature').textContent = temp; $('humidity').textContent = humid; renderFarmMap(s);
     $('waterRelays').innerHTML = SmartFarmConfig.relays.map(r => relayMarkup(r,s)).join(''); bindRelayButtons();
+    if (selectedFarmRelay) [...document.querySelectorAll('#waterRelays [data-relay]')].find(item => item.dataset.relay === selectedFarmRelay)?.classList.add('farm-relay-target');
     const relayValues = Object.values(s.relays), known = relayValues.filter(v => v !== null); $('homeRelaySummary').textContent = known.length ? `${known.filter(v=>v).length} เปิด · ${known.filter(v=>!v).length} ปิด` : 'ยังไม่มีข้อมูล';
     const d = s.device || {}, firmware = txt(d.firmware), uptime = Number.isFinite(d.uptimeSec) ? `${Math.floor(d.uptimeSec/3600)} ชม. ${Math.floor((d.uptimeSec%3600)/60)} นาที` : null;
     $('firmwareVersion').textContent = firmware; $('footerFirmware').textContent = firmware; $('deviceFirmware').textContent = firmware; $('connectionFirmware').textContent = firmware; $('deviceId').textContent = txt(d.device_id);
-    $('homeEsp').textContent = espStatus; $('homeEspMeta').textContent = [Number.isFinite(d.rssi)?`RSSI ${d.rssi} dBm`:null,d.firmware?`FW ${d.firmware}`:null].filter(Boolean).join(' · ') || 'RSSI / Firmware รอข้อมูล';
+    $('homeEsp').textContent = espStatus; $('homeEsp').dataset.state = s.espOnline === true ? 'online' : s.espOnline === false ? 'offline' : 'unknown'; $('homeLiveTitle').closest('.home-live-panel').dataset.espState = $('homeEsp').dataset.state; $('homeEspMeta').textContent = [Number.isFinite(d.rssi)?`RSSI ${d.rssi} dBm`:null,d.firmware?`FW ${d.firmware}`:null].filter(Boolean).join(' · ') || 'RSSI / Firmware รอข้อมูล';
     $('deviceEspStatus').textContent = espStatus; $('deviceEspStatus').classList.toggle('online',s.espOnline === true); $('deviceUptime').textContent = txt(uptime); $('deviceRssi').textContent = detail(Number.isFinite(d.rssi)?d.rssi:null,' dBm'); $('deviceHeap').textContent = detail(Number.isFinite(d.heap)?d.heap:null,' bytes'); $('deviceReset').textContent = txt(d.resetReason);
     $('deviceIp').textContent = txt(d.ip); $('connectionRssi').textContent = detail(Number.isFinite(d.rssi)?d.rssi:null,' dBm'); $('rtcState').textContent = typeof d.rtc === 'boolean' ? (d.rtc?'พร้อม':'ไม่พร้อม') : 'ยังไม่มีข้อมูล'; $('espClock').textContent = txt(d.time); $('espDate').textContent = txt(d.date); $('sensorStatus').textContent = s.temperature !== null || s.humidity !== null ? 'ได้รับข้อมูล' : 'รอ DHT11'; $('deviceTemp').textContent = temp; $('deviceHumidity').textContent = humid; $('sensorUpdated').textContent = sensorUpdatedAt ? new Date(sensorUpdatedAt).toLocaleString('th-TH') : 'ยังไม่มีข้อมูล';
     $('footerUpdated').textContent = s.heartbeatAt ? new Date(s.heartbeatAt).toLocaleTimeString('th-TH') : 'ยังไม่มีข้อมูล';

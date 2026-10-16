@@ -1,5 +1,11 @@
 # Changelog
 
+## Map-first Home redesign — 2026-10-16 (pending review)
+
+- Replaced the Home snapshot cards with an accessible schematic zone map mapped to the existing four relay IDs; selecting a zone navigates to its existing Water control and does not send a command from Home.
+- Kept the map explicitly non-geographic and displayed only actual ESP/DHT11 telemetry; no coordinates, sensor placement, soil readings or history were invented.
+- Bumped the PWA shell cache to `lungna-shell-v7`; this change is pending review and has not been deployed.
+
 ## Bright Farm dashboard refresh — 2026-10-16
 
 - Reworked the dashboard into a brighter farm-oriented visual hierarchy with clearer status cards, warmer accents, and a simplified connection workspace.

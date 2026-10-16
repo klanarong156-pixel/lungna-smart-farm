@@ -5,7 +5,7 @@ const vm = require('node:vm');
 (async () => {
   const source = fs.readFileSync('dashboard/sw.js', 'utf8');
   const handlers = {};
-  const existing = ['lungna-shell-v3','lungna-shell-v4','lungna-shell-v5','unrelated-workbox-cache','another-app-cache','lungna-shell-v6'];
+  const existing = ['lungna-shell-v3','lungna-shell-v4','lungna-shell-v5','lungna-shell-v6','unrelated-workbox-cache','another-app-cache','lungna-shell-v7'];
   const deleted = [];
   const self = {
     addEventListener: (name, handler) => { handlers[name] = handler; },
@@ -22,9 +22,9 @@ const vm = require('node:vm');
   let activation;
   handlers.activate({ waitUntil: promise => { activation = promise; } });
   await activation;
-  assert.deepEqual(JSON.parse(JSON.stringify(deleted.sort())), ['lungna-shell-v3','lungna-shell-v4','lungna-shell-v5']);
-  assert.match(source, /const CACHE = 'lungna-shell-v6'/);
+  assert.deepEqual(JSON.parse(JSON.stringify(deleted.sort())), ['lungna-shell-v3','lungna-shell-v4','lungna-shell-v5','lungna-shell-v6']);
+  assert.match(source, /const CACHE = 'lungna-shell-v7'/);
   assert.match(source, /key\.startsWith\(OWNED_CACHE_PREFIX\)/);
   assert.match(source, /assets\/logo\/logo-suanlungna-modern\.png/);
-  console.log('PASS service worker cache: v6, old dashboard caches only, other namespaces preserved');
+  console.log('PASS service worker cache: v7, old dashboard caches only, other namespaces preserved');
 })().catch(error => { console.error(error); process.exitCode = 1; });

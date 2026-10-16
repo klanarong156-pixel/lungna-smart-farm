@@ -24,19 +24,47 @@
   </aside>
   <main id="main">
     <section class="page active page-home" id="page-home" data-page="home">
-      <div class="page-heading home-heading"><div><p class="eyebrow">FARM COMMAND CENTER</p><h1>ภาพรวมสวน</h1><p class="muted">ข้อมูลสำคัญที่ได้รับจริงจากฟาร์ม · อัปเดตตามสถานะ ESP</p></div><span class="home-heading-tag">FIELD OVERVIEW</span></div>
-      <section class="home-hero" aria-label="ภาพรวมสวนลุงนะ">
-        <div class="home-hero-copy"><span class="hero-kicker">สวนลุงนะ · SMART FARM</span><h2>จัดการสวน<br><em>จากข้อมูลจริง</em></h2><p id="lastSeen">รอ heartbeat จาก ESP8266</p><div class="home-hero-mode"><span>โหมดควบคุมจาก ESP</span><strong id="modeValue" class="mode-value">ยังไม่มีข้อมูล</strong></div><button class="button primary" data-nav="water">เปิดศูนย์ควบคุมระบบน้ำ <span aria-hidden="true">↗</span></button></div>
-        <div class="home-hero-mark"><img src="./assets/logo/logo-suanlungna-modern.png" alt=""><span>สวนลุงนะ</span><small>SMART FARM</small></div>
-      </section>
-      <div class="section-title home-section-heading"><div><p class="eyebrow">FARM SNAPSHOT</p><h2>สถานะสำคัญ</h2></div><span>สถานะจากอุปกรณ์จริง</span></div>
-      <div class="metric-grid home-metric-grid">
-        <article class="card metric-card"><span class="metric-icon">🌡</span><span class="card-label">อุณหภูมิฟาร์ม</span><strong id="temperature">ยังไม่มีข้อมูล</strong><small>DHT11 · °C</small></article>
-        <article class="card metric-card"><span class="metric-icon">💧</span><span class="card-label">ความชื้นอากาศ</span><strong id="humidity">ยังไม่มีข้อมูล</strong><small>DHT11 · %</small></article>
-        <article class="card metric-card"><span class="metric-icon">⌁</span><span class="card-label">ESP8266</span><strong id="homeEsp">ยังไม่มีข้อมูล</strong><small id="homeEspMeta">RSSI / Firmware รอข้อมูล</small></article>
-        <article class="card metric-card"><span class="metric-icon">◉</span><span class="card-label">สถานะระบบน้ำ</span><strong id="homeRelaySummary">ยังไม่มีข้อมูล</strong><small>จำนวน relay ที่ได้รับ status</small></article>
+      <div class="page-heading home-heading"><div><p class="eyebrow">FARM MAP · LIVE STATUS</p><h1>ผังฟาร์มและสถานะสด</h1><p class="muted">เลือกโซนเพื่อเปิดรีเลย์ที่เกี่ยวข้องในศูนย์ควบคุม</p></div><span class="home-heading-tag">MAP FIRST</span></div>
+      <div class="home-map-layout">
+        <section class="farm-map-card" aria-labelledby="farmMapTitle">
+          <div class="farm-map-heading"><div><p class="eyebrow">สวนลุงนะ · SMART FARM</p><h2 id="farmMapTitle">พื้นที่และโซนควบคุม</h2></div><span class="farm-map-source">สถานะจาก ESP</span></div>
+          <svg class="farm-map-svg" viewBox="0 0 640 420" role="group" aria-labelledby="farmMapSvgTitle farmMapSvgDesc">
+            <title id="farmMapSvgTitle">ผัง schematic สำหรับเลือกโซนควบคุม</title>
+            <desc id="farmMapSvgDesc">แผนผังประกอบด้วยปั๊มน้ำ โซน 1 บ้าน และศาลา ใช้เลือกรีเลย์เท่านั้น ไม่แสดงตำแหน่งหรือขนาดพื้นที่จริง</desc>
+            <defs><pattern id="fieldRows" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M0 20L20 0" stroke="#285342" stroke-width="1.2" opacity=".65"/></pattern></defs>
+            <rect class="map-ground" x="8" y="8" width="624" height="404" rx="26"/>
+            <path class="map-field" d="M22 36Q155 8 265 34T610 35V380Q488 404 360 380T25 386Z"/>
+            <path class="map-field-lines" d="M25 80C180 54 382 55 615 82M20 350C180 324 410 330 620 356M270 35C250 146 260 264 275 390M420 30C400 143 408 266 426 390"/>
+            <path class="map-lane" d="M28 300C138 280 176 293 245 290S370 267 438 225 534 211 615 224"/>
+            <path class="map-lane-edge" d="M28 300C138 280 176 293 245 290S370 267 438 225 534 211 615 224"/>
+            <g class="farm-zone" data-farm-zone="pump" data-state="unknown" role="button" tabindex="0" aria-pressed="mixed" aria-current="false" aria-label="ปั๊มน้ำ · ยังไม่มีข้อมูล · เลือกเพื่อเปิดศูนย์ควบคุม">
+              <title>ปั๊มน้ำ · ยังไม่มีข้อมูล</title><rect class="zone-shape" x="34" y="154" width="164" height="124" rx="24"/>
+              <text class="zone-icon" x="116" y="198" text-anchor="middle" aria-hidden="true">◉</text><text class="zone-label" x="116" y="230" text-anchor="middle">ปั๊มน้ำ</text><text class="zone-status" data-zone-status x="116" y="254" text-anchor="middle">รอข้อมูล</text>
+            </g>
+            <g class="farm-zone" data-farm-zone="zone1" data-state="unknown" role="button" tabindex="0" aria-pressed="mixed" aria-current="false" aria-label="โซน 1 · ยังไม่มีข้อมูล · เลือกเพื่อเปิดศูนย์ควบคุม">
+              <title>โซน 1 · ยังไม่มีข้อมูล</title><path class="zone-shape zone-field-shape" d="M226 70Q328 47 433 72L438 203Q331 225 224 201Z"/>
+              <text class="zone-icon" x="331" y="119" text-anchor="middle" aria-hidden="true">♧</text><text class="zone-label" x="331" y="153" text-anchor="middle">โซน 1</text><text class="zone-status" data-zone-status x="331" y="179" text-anchor="middle">รอข้อมูล</text>
+            </g>
+            <g class="farm-zone" data-farm-zone="lighthome" data-state="unknown" role="button" tabindex="0" aria-pressed="mixed" aria-current="false" aria-label="ไฟบ้าน · ยังไม่มีข้อมูล · เลือกเพื่อเปิดศูนย์ควบคุม">
+              <title>ไฟบ้าน · ยังไม่มีข้อมูล</title><path class="zone-shape" d="M462 72H600V184H462Z"/>
+              <text class="zone-icon" x="531" y="112" text-anchor="middle" aria-hidden="true">⌂</text><text class="zone-label" x="531" y="143" text-anchor="middle">บ้าน</text><text class="zone-status" data-zone-status x="531" y="166" text-anchor="middle">รอข้อมูล</text>
+            </g>
+            <g class="farm-zone" data-farm-zone="lightsala" data-state="unknown" role="button" tabindex="0" aria-pressed="mixed" aria-current="false" aria-label="ไฟศาลา · ยังไม่มีข้อมูล · เลือกเพื่อเปิดศูนย์ควบคุม">
+              <title>ไฟศาลา · ยังไม่มีข้อมูล</title><path class="zone-shape" d="M462 240H600V354H462Z"/>
+              <text class="zone-icon" x="531" y="280" text-anchor="middle" aria-hidden="true">⌂</text><text class="zone-label" x="531" y="311" text-anchor="middle">ศาลา</text><text class="zone-status" data-zone-status x="531" y="335" text-anchor="middle">รอข้อมูล</text>
+            </g>
+          </svg>
+          <div class="farm-map-footer"><p class="farm-map-disclaimer">ผัง schematic สำหรับเลือกรีเลย์ · ไม่ใช่แผนที่หรือการระบุตำแหน่งจริง</p><div class="farm-map-legend" aria-label="คำอธิบายสถานะ"><span><i class="legend-on"></i>เปิด</span><span><i class="legend-off"></i>ปิด</span><span><i class="legend-unknown"></i>รอข้อมูล</span></div></div>
+        </section>
+        <aside class="home-telemetry" aria-label="ข้อมูลสถานะจริงจากฟาร์ม">
+          <section class="card home-live-panel" aria-labelledby="homeLiveTitle">
+            <div class="home-panel-heading"><div><p class="eyebrow">LIVE TELEMETRY</p><h2 id="homeLiveTitle">ข้อมูลจากอุปกรณ์</h2></div><span class="home-live-mark"><i></i>สถานะสด</span></div>
+            <div class="home-climate-grid"><div class="home-climate-value"><span>อุณหภูมิ</span><strong id="temperature">ยังไม่มีข้อมูล</strong><small>DHT11 · °C</small></div><div class="home-climate-value"><span>ความชื้นอากาศ</span><strong id="humidity">ยังไม่มีข้อมูล</strong><small>DHT11 · %</small></div></div>
+            <dl class="home-status-list"><div><dt>ESP8266</dt><dd id="homeEsp">ยังไม่มีข้อมูล</dd><small id="homeEspMeta">RSSI / Firmware รอข้อมูล</small></div><div><dt>โหมด firmware</dt><dd id="modeValue" class="mode-value">ยังไม่มีข้อมูล</dd><small id="lastSeen" role="status">รอ heartbeat จาก ESP8266</small></div><div class="home-relay-summary"><dt>สถานะรีเลย์</dt><dd id="homeRelaySummary">ยังไม่มีข้อมูล</dd><small>นับเฉพาะ status ที่ได้รับจาก ESP</small></div></dl>
+          </section>
+          <section class="home-control-card" aria-labelledby="homeControlTitle"><p class="eyebrow">CONTROL CENTER</p><h2 id="homeControlTitle">จัดการระบบน้ำ</h2><p>เลือกโหมด ตารางเวลา หรือสั่งรีเลย์ได้ในหน้าควบคุม โดย ESP8266 เป็นผู้ยืนยันคำสั่งและดูแล safety</p><button class="button primary" data-nav="water">เปิดศูนย์ควบคุม <span aria-hidden="true">↗</span></button></section>
+        </aside>
       </div>
-      <section class="home-next-step"><div class="home-next-icon" aria-hidden="true">◉</div><div><p class="eyebrow">ONE CONTROL CENTER</p><h2>รวมการควบคุมระบบน้ำไว้หน้าเดียว</h2><p>เลือกโหมด ควบคุม relay และแก้ตารางเวลาได้ในหน้าระบบน้ำ โดย ESP8266 ยังเป็นผู้ยืนยันคำสั่งและดูแล safety</p></div><button class="button secondary" data-nav="water">ไปที่ระบบน้ำ <span aria-hidden="true">→</span></button></section>
     </section>
     <section class="page page-water" id="page-water" data-page="water">
       <div class="page-heading"><div><p class="eyebrow">IRRIGATION CONTROL</p><h1>ศูนย์ควบคุมระบบน้ำ</h1><p class="muted">สั่งงานและตั้งตารางจากพื้นที่เดียว · ทุกคำสั่งรอ ESP8266 ยืนยัน</p></div></div>
@@ -82,7 +110,7 @@
     <section class="page page-settings" id="page-settings" data-page="settings">
       <div class="page-heading"><div><p class="eyebrow">SYSTEM & DATA</p><h1>ระบบและข้อมูลในเครื่อง</h1><p class="muted">ตัดเมนูลัดและ integration placeholder ออก · คงไว้เฉพาะการตรวจระบบกับการจัดการข้อมูล</p></div></div>
       <div class="settings-layout">
-        <details class="card settings-accordion system-accordion" open><summary><span>▣</span><b>สถานะระบบ</b><small>เวอร์ชัน, cache และการตรวจสอบ</small></summary><div class="config-detail"><span>Firmware baseline</span><b id="firmwareVersion">ยังไม่มีข้อมูล</b><span>Dashboard version</span><b id="dashboardVersion">v1.3.0</b><span>Cache version</span><b>lungna-shell-v6</b></div><div class="button-row"><button class="button secondary" id="systemCheck">ตรวจสอบระบบ</button><button class="button secondary" id="reloadDashboard">โหลด Dashboard ใหม่</button><button class="button secondary" id="showAdminInfo">ข้อมูลผู้ดูแล</button></div><p id="systemCheckResult" class="muted" role="status"></p></details>
+        <details class="card settings-accordion system-accordion" open><summary><span>▣</span><b>สถานะระบบ</b><small>เวอร์ชัน, cache และการตรวจสอบ</small></summary><div class="config-detail"><span>Firmware baseline</span><b id="firmwareVersion">ยังไม่มีข้อมูล</b><span>Dashboard version</span><b id="dashboardVersion">v1.3.0</b><span>Cache version</span><b>lungna-shell-v7</b></div><div class="button-row"><button class="button secondary" id="systemCheck">ตรวจสอบระบบ</button><button class="button secondary" id="reloadDashboard">โหลด Dashboard ใหม่</button><button class="button secondary" id="showAdminInfo">ข้อมูลผู้ดูแล</button></div><p id="systemCheckResult" class="muted" role="status"></p></details>
         <details class="card settings-accordion ledger-accordion"><summary><span>⌂</span><b>ข้อมูลการเงินในเครื่อง</b><small>local-only · ไม่ sync ขึ้น cloud</small></summary><p>รายการเดิมยังอยู่ใน localStorage ของเบราว์เซอร์นี้ การล้างข้อมูลจะลบรายการทั้งหมดในเครื่องนี้เท่านั้น</p><div class="button-row"><button class="button secondary" data-nav="events">เปิดสมุดบัญชี</button><button class="button danger-button" id="clearLocal">ล้างข้อมูลการเงินในเครื่องนี้</button></div></details>
       </div>
       <article id="adminInfo" class="card admin-info"><div class="panel-heading"><div><p class="eyebrow">ADMIN & INTEGRATIONS</p><h2>ข้อมูลผู้ดูแลระบบ</h2></div></div><p class="muted">ไม่มี backend authentication หรือการจัดการผู้ใช้ในเวอร์ชันนี้ · ไม่อ้างว่ามีการยืนยันตัวตน</p><div class="config-detail"><span>Firmware baseline</span><b>V7.2.0-OTA-STABLE</b><span>Firebase</span><b>ไม่ได้เชื่อมต่อ</b><span>Weather API</span><b>Open-Meteo · สาธารณะ</b></div></article>
