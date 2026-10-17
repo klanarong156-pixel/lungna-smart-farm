@@ -1,5 +1,14 @@
 # Changelog
 
+## Full Dashboard redesign — 2026-10-17 (pending review)
+
+- Expanded the redesign from Home to every route and reduced primary navigation from seven entries to six real-use workspaces: Home, Water, Devices, System, Weather, Records.
+- Mapped the four user-marked device points as relative schematic markers; selecting a marker only opens the existing Water control and never sends a command from Home.
+- Merged MQTT connection and actual web-system tools into System; removed the unused static admin-info shortcut and the uninstalled Soil Sensor card. Preserved relay/schedule safety, credential handling, and firmware acknowledgement.
+- Consolidated session-only event history and browser-local finance records under Records, preserving finance entries, clear confirmation, and CSV export. Added legacy hash aliases.
+- Replaced visible exact farm-point weather labels with a coarse regional forecast reference; the forecast may differ from conditions at the parcel and remains separate from DHT11/control.
+- Bumped the PWA shell cache to `lungna-shell-v8`. This change is pending review and has not been merged or deployed.
+
 ## Bright Farm dashboard refresh — 2026-10-16
 
 - Reworked the dashboard into a brighter farm-oriented visual hierarchy with clearer status cards, warmer accents, and a simplified connection workspace.
