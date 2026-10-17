@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#12A95B"><meta name="description" content="สวนลุงนะ SMART FARM — ระบบติดตามฟาร์มและสั่งงานผ่าน ESP8266/MQTT">
+  <meta name="theme-color" content="#F4F1E8"><meta name="description" content="สวนลุงนะ SMART FARM — ระบบติดตามฟาร์มและสั่งงานผ่าน ESP8266/MQTT">
   <title>สวนลุงนะ · SMART FARM</title>
   <link rel="manifest" href="./manifest.json"><link rel="icon" href="./assets/icons/icon-192.png"><link rel="apple-touch-icon" href="./assets/icons/icon-192.png">
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -16,15 +16,14 @@
     <a class="brand" href="#home"><img src="./assets/logo/logo-suanlungna-modern.png" alt=""><span><b>สวนลุงนะ</b><small>SMART FARM</small></span></a>
     <div class="header-status" aria-label="สถานะระบบ">
       <span id="connection" class="connection-pill" data-state="offline"><i></i><span>MQTT · ออฟไลน์</span></span>
-      <span id="headerEsp" class="connection-pill" data-state="unknown"><i></i><span>ESP · ยังไม่มีข้อมูล</span></span>
     </div>
   </header>
   <aside class="sidebar" aria-label="เมนูหลัก">
-    <button data-nav="home" class="active"><span>⌂</span>หน้าหลัก</button><button data-nav="water"><span>◉</span>ระบบน้ำ</button><button data-nav="devices"><span>▣</span>อุปกรณ์</button><button data-nav="system"><span>⌁</span>ระบบ</button><button data-nav="weather"><span>☼</span>สภาพอากาศ</button><button data-nav="records"><span>≡</span>บันทึก</button>
+    <button data-nav="home" class="active"><span>⌂</span>หน้าหลัก</button><button data-nav="water"><span>◉</span>ระบบน้ำ</button><button data-nav="devices"><span>▣</span>อุปกรณ์</button><button data-nav="system"><span>⌁</span>ระบบ</button><button data-nav="weather"><span>☼</span>อากาศ</button><button data-nav="records"><span>≡</span>บันทึก</button>
   </aside>
   <main id="main">
     <section class="page active page-home" id="page-home" data-page="home">
-      <div class="page-heading home-heading"><div><p class="eyebrow">FARM MAP · LIVE STATUS</p><h1>ผังฟาร์มและสถานะสด</h1><p class="muted">เลือกโซนเพื่อเปิดรีเลย์ที่เกี่ยวข้องในศูนย์ควบคุม</p></div><span class="home-heading-tag">MAP FIRST</span></div>
+      <div class="page-heading home-heading"><div><p class="eyebrow">สวนลุงนะ · SMART FARM</p><h1>ภาพรวมสวนวันนี้</h1><p class="muted">ดูผังและสถานะอุปกรณ์จากจุดเดียว</p></div><span class="home-heading-tag">ข้อมูลสดจากอุปกรณ์</span></div>
       <div class="home-map-layout">
         <section class="farm-map-card" aria-labelledby="farmMapTitle">
           <div class="farm-map-heading"><div><p class="eyebrow">สวนลุงนะ · SMART FARM</p><h2 id="farmMapTitle">พื้นที่และโซนควบคุม</h2></div><span class="farm-map-source">ภาพประกอบ · สถานะจาก ESP</span></div>
@@ -54,7 +53,7 @@
         </section>
         <aside class="home-telemetry" aria-label="ข้อมูลสถานะจริงจากฟาร์ม">
           <section class="card home-live-panel" aria-labelledby="homeLiveTitle">
-            <div class="home-panel-heading"><div><p class="eyebrow">LIVE TELEMETRY</p><h2 id="homeLiveTitle">ข้อมูลจากอุปกรณ์</h2></div><span class="home-live-mark" id="homeLiveMark" role="status"><i></i><b>รอข้อมูล</b></span></div>
+            <div class="home-panel-heading"><div><p class="eyebrow">สถานะจากอุปกรณ์</p><h2 id="homeLiveTitle">ข้อมูลจากอุปกรณ์</h2></div></div>
             <div class="home-climate-grid"><div class="home-climate-value"><span>อุณหภูมิ</span><strong id="temperature">ยังไม่มีข้อมูล</strong><small>DHT11 · °C</small></div><div class="home-climate-value"><span>ความชื้นอากาศ</span><strong id="humidity">ยังไม่มีข้อมูล</strong><small>DHT11 · %</small></div></div>
             <dl class="home-status-list"><div><dt>ESP8266</dt><dd id="homeEsp">ยังไม่มีข้อมูล</dd><small id="homeEspMeta">RSSI / Firmware รอข้อมูล</small></div><div><dt>โหมด firmware</dt><dd id="modeValue" class="mode-value">ยังไม่มีข้อมูล</dd><small id="lastSeen" role="status">รอ heartbeat จาก ESP8266</small></div><div class="home-relay-summary"><dt>สถานะรีเลย์</dt><dd id="homeRelaySummary">ยังไม่มีข้อมูล</dd><small>นับเฉพาะ status ที่ได้รับจาก ESP</small></div></dl>
           </section>
@@ -63,7 +62,7 @@
       </div>
     </section>
     <section class="page page-water" id="page-water" data-page="water">
-      <div class="page-heading"><div><p class="eyebrow">IRRIGATION CONTROL</p><h1>ศูนย์ควบคุมระบบน้ำ</h1><p class="muted">สั่งงานและตั้งตารางจากพื้นที่เดียว · ทุกคำสั่งรอ ESP8266 ยืนยัน</p></div></div>
+      <div class="page-heading"><div><p class="eyebrow">IRRIGATION CONTROL</p><h1>ระบบน้ำ</h1><p class="muted">ควบคุมรีเลย์และตั้งตารางเวลา · รอ ESP8266 ยืนยันทุกคำสั่ง</p></div></div>
       <div class="notice"><b>ความปลอดภัย</b><span>ESP8266 เป็นผู้ควบคุมรีเลย์และ safety logic · Dashboard ไม่เปลี่ยนสถานะล่วงหน้า</span></div>
       <div class="water-workspace">
         <div class="water-control-column">
@@ -75,7 +74,7 @@
       </div>
     </section>
     <section class="page page-devices" id="page-devices" data-page="devices">
-      <div class="page-heading"><div><p class="eyebrow">DEVICE HEALTH</p><h1>อุปกรณ์ในฟาร์ม</h1><p class="muted">ข้อมูลสุขภาพ controller และ sensor · การควบคุม relay อยู่ในศูนย์ระบบน้ำ</p></div></div>
+      <div class="page-heading"><div><p class="eyebrow">DEVICE HEALTH</p><h1>อุปกรณ์</h1><p class="muted">ดูข้อมูลสุขภาพ controller และ sensor ที่ติดตั้งจริง</p></div></div>
       <div class="device-grid">
         <article class="card device-card controller-card"><div class="device-title"><span class="device-icon">⌁</span><div><h2>ESP8266 Controller</h2><span id="deviceEspStatus" class="status-badge">ยังไม่มีข้อมูล</span></div></div><div class="config-detail"><span>Firmware</span><b id="deviceFirmware">ยังไม่มีข้อมูล</b><span>เวลาทำงาน</span><b id="deviceUptime">ยังไม่มีข้อมูล</b><span>Wi-Fi RSSI</span><b id="deviceRssi">ยังไม่มีข้อมูล</b><span>Free Heap</span><b id="deviceHeap">ยังไม่มีข้อมูล</b><span>Reset Reason</span><b id="deviceReset">ยังไม่มีข้อมูล</b><span>Device ID</span><b id="deviceId">ยังไม่มีข้อมูล</b></div></article>
         <article class="card device-card sensor-device-card"><div class="device-title"><span class="device-icon">🌡</span><div><h2>DHT11</h2><span id="sensorStatus" class="status-badge">ยังไม่มีข้อมูล</span></div></div><div class="detail-grid"><div class="detail-item"><span>อุณหภูมิ</span><b id="deviceTemp">ยังไม่มีข้อมูล</b></div><div class="detail-item"><span>ความชื้น</span><b id="deviceHumidity">ยังไม่มีข้อมูล</b></div></div><p class="muted">อัปเดตล่าสุด: <span id="sensorUpdated">ยังไม่มีข้อมูล</span></p></article>
@@ -83,38 +82,49 @@
       </div>
     </section>
     <section class="page" id="page-system" data-page="system">
-      <div class="page-heading"><div><p class="eyebrow">SYSTEM CONNECTION</p><h1>ระบบและการเชื่อมต่อ</h1><p class="muted">สถานะ MQTT/ESP, credential และเครื่องมือดูแล Dashboard อยู่ในหน้าเดียว</p></div><span class="home-heading-tag connection-page-tag">AUTO CONNECT</span></div>
+      <div class="page-heading"><div><p class="eyebrow">SYSTEM CONNECTION</p><h1>ระบบ</h1><p class="muted">ตั้งค่าการเชื่อมต่อและตรวจสอบ Dashboard</p></div><span class="home-heading-tag connection-page-tag">การเชื่อมต่อ</span></div>
       <article class="connection-hero"><div class="connection-hero-icon">⌁</div><div><p class="eyebrow">LIVE CONNECTION</p><h2 id="mqttAutoStatus">กำลังเตรียมการเชื่อมต่อ</h2><p id="mqttAutoDetail">กำลังตรวจสอบ credential ที่บันทึกไว้ในเบราว์เซอร์</p></div><span id="connectionHeroState" class="connection-hero-state">กำลังตรวจสอบ</span></article>
       <div class="system-overview-grid">
-        <article class="card system-card"><p class="eyebrow">MQTT BROKER</p><h2>การเชื่อมต่อ</h2><div class="config-detail"><span>Broker</span><b id="brokerHost">HiveMQ Cloud</b><span>WSS / Path</span><b>8884 · /mqtt</b><span>สถานะ</span><b id="systemConnection">ออฟไลน์</b><span>เชื่อมต่อตั้งแต่</span><b id="connectedSince">ยังไม่มีข้อมูล</b><span>จำนวน reconnect</span><b id="reconnectCount">0</b><span>ข้อผิดพลาดล่าสุด</span><b id="lastError">ยังไม่มีข้อมูล</b><span>รายละเอียด</span><b id="mqttReason">ยังไม่ได้เชื่อมต่อ</b></div></article>
+        <article class="card system-card"><p class="eyebrow">MQTT BROKER</p><h2>รายละเอียดการเชื่อมต่อ</h2><div class="config-detail"><span>Broker</span><b id="brokerHost">HiveMQ Cloud</b><span>WSS / Path</span><b>8884 · /mqtt</b><span>เชื่อมต่อตั้งแต่</span><b id="connectedSince">ยังไม่มีข้อมูล</b><span>จำนวน reconnect</span><b id="reconnectCount">0</b><span>ข้อผิดพลาดล่าสุด</span><b id="lastError">ยังไม่มีข้อมูล</b><span>รายละเอียด</span><b id="mqttReason">ยังไม่ได้เชื่อมต่อ</b></div></article>
         <article class="card system-card"><p class="eyebrow">ESP8266 STATUS</p><h2>Controller</h2><div class="config-detail"><span>สถานะ</span><b id="systemEsp">ยังไม่มีข้อมูล</b><span>Heartbeat ล่าสุด</span><b id="connectionHeartbeat">ยังไม่มีข้อมูล</b><span>อายุ Heartbeat</span><b id="heartbeatAge">ยังไม่มีข้อมูล</b><span>Wi-Fi RSSI</span><b id="connectionRssi">ยังไม่มีข้อมูล</b><span>Firmware</span><b id="connectionFirmware">ยังไม่มีข้อมูล</b></div></article>
       </div>
       <details class="card system-advanced"><summary><b>รายละเอียดเครือข่ายอุปกรณ์</b><small>แสดงเฉพาะเมื่อจำเป็นสำหรับการตรวจสอบ</small></summary><div class="config-detail"><span>IP ที่ ESP รายงาน</span><b id="deviceIp">ยังไม่มีข้อมูล</b></div></details>
       <article class="card form-card connection-form"><div class="panel-heading"><div><p class="eyebrow">FIRST-TIME SETUP</p><h2>ตั้งค่า MQTT ครั้งแรก</h2></div><span class="status-badge neutral">MQTT</span></div><p class="muted">Credential เก็บในเบราว์เซอร์นี้เท่านั้น: ไม่เลือก “จำไว้” จะใช้ session นี้; เลือกเพื่อเก็บใน localStorage และ auto-connect ครั้งถัดไป. เว็บไซต์นี้ไม่มี backend authentication.</p><label>Username<input id="mqttUser" autocomplete="username" value="smartfarm"></label><label>Password<input id="mqttPass" type="password" autocomplete="current-password" placeholder="กรอก MQTT password ครั้งแรก"></label><label class="check-row"><input id="rememberMqtt" type="checkbox"><span>จำ credential ในเบราว์เซอร์นี้ (localStorage)</span></label><div class="button-row"><button id="connectBtn" class="button primary">บันทึกและเชื่อมต่อครั้งแรก</button><button id="disconnectBtn" class="button secondary">ตัดการเชื่อมต่อ</button><button id="clearCredentials" class="button danger-button">ล้าง credential</button></div><p id="mqttFeedback" class="muted" role="status"></p></article>
-      <section class="system-tools card" aria-labelledby="systemToolsTitle"><div class="panel-heading"><div><p class="eyebrow">DASHBOARD CARE</p><h2 id="systemToolsTitle">ตรวจและโหลดเว็บ</h2></div></div><p class="muted">ตรวจไฟล์หน้าเว็บและ manifest เท่านั้น · ไม่ใช่การทดสอบ MQTT, ESP หรืออุปกรณ์จริง</p><div class="system-version-grid"><div><span>Dashboard</span><b id="dashboardVersion">v1.3.0</b></div><div><span>Firmware baseline</span><b id="firmwareVersion">ยังไม่มีข้อมูล</b></div><div><span>Shell cache</span><b>lungna-shell-v8</b></div></div><div class="button-row"><button class="button secondary" id="systemCheck">ตรวจไฟล์เว็บ</button><button class="button secondary" id="reloadDashboard">โหลด Dashboard ใหม่</button></div><p id="systemCheckResult" class="muted" role="status" aria-live="polite"></p></section>
+      <section class="system-tools card" aria-labelledby="systemToolsTitle"><div class="panel-heading"><div><p class="eyebrow">DASHBOARD CARE</p><h2 id="systemToolsTitle">ตรวจและโหลดเว็บ</h2></div></div><p class="muted">ตรวจไฟล์หน้าเว็บและ manifest เท่านั้น · ไม่ใช่การทดสอบ MQTT, ESP หรืออุปกรณ์จริง</p><div class="system-version-grid"><div><span>Dashboard</span><b id="dashboardVersion">v1.4.0</b></div><div><span>Firmware baseline</span><b id="firmwareVersion">ยังไม่มีข้อมูล</b></div><div><span>Shell cache</span><b>lungna-shell-v9</b></div></div><div class="button-row"><button class="button secondary" id="systemCheck">ตรวจไฟล์เว็บ</button><button class="button secondary" id="reloadDashboard">โหลด Dashboard ใหม่</button></div><p id="systemCheckResult" class="muted" role="status" aria-live="polite"></p></section>
     </section>
     <section class="page page-weather" id="page-weather" data-page="weather">
-      <div class="page-heading"><div><p class="eyebrow">WEATHER OUTLOOK</p><h1>พยากรณ์อากาศ</h1><p class="muted">พยากรณ์ระดับภูมิภาคโดยประมาณ · แยกจาก DHT11</p></div><button class="icon-btn" id="weatherRefresh" aria-label="โหลดพยากรณ์ใหม่">↻</button></div>
+      <div class="page-heading"><div><p class="eyebrow">WEATHER OUTLOOK</p><h1>อากาศ</h1><p class="muted">พยากรณ์ระดับภูมิภาค แยกจากค่าของ DHT11</p></div><button class="icon-btn" id="weatherRefresh" aria-label="โหลดพยากรณ์ใหม่">↻</button></div>
       <div class="weather-layout">
         <div class="weather-main-column">
           <div class="weather-main card"><div class="weather-main-top"><span class="eyebrow">CURRENT OUTLOOK · OPEN-METEO</span><span class="weather-source-mark" aria-hidden="true">☼</span></div><strong id="forecastTemp">ยังไม่มีข้อมูล</strong><span id="forecastSummary">ยังไม่ได้โหลดพยากรณ์</span><div class="weather-current-grid"><span>ความชื้นภายนอก <b id="weatherHumidity">—</b></span><span>ลม <b id="weatherWind">—</b></span><span>โอกาสฝน <b id="weatherRain">—</b></span></div><small id="forecastUpdated">พื้นที่โดยประมาณ · กำลังรอข้อมูล</small></div>
           <article class="card forecast-panel"><div class="panel-heading"><div><p class="eyebrow">NEXT THREE DAYS</p><h2>พยากรณ์รายวัน</h2></div><span class="panel-mark">03</span></div><div id="forecastDays" class="forecast-days"><span class="muted">ยังไม่มีข้อมูล</span></div></article>
         </div>
-        <aside class="weather-aside"><article class="card weather-note"><span aria-hidden="true">i</span><p><b>พยากรณ์ระดับภูมิภาคโดยประมาณ</b><br>ไม่ใช้หรือแสดงพิกัดฟาร์มแบบละเอียด จึงอาจคลาดเคลื่อนจากสภาพอากาศ ณ แปลงจริง</p></article><article class="card weather-note"><span aria-hidden="true">i</span><p>ข้อมูล Open-Meteo ใช้ประกอบการวางแผนเท่านั้น · ไม่ใช่ค่าจาก DHT11 และไม่ควบคุมปั๊มหรือ safety logic ของ ESP</p></article></aside>
+        <aside class="weather-aside"><article class="card weather-note"><span aria-hidden="true">i</span><p><b>พยากรณ์ภูมิภาค · Open-Meteo</b><br>ใช้วางแผนเท่านั้น อาจคลาดเคลื่อนจากสภาพอากาศในแปลง ไม่ใช่ค่าจาก DHT11 และไม่ควบคุมปั๊มหรือ safety logic ของ ESP</p></article></aside>
       </div><p id="weatherError" class="error-text" role="status"></p>
     </section>
     <section class="page" id="page-records" data-page="records">
-      <div class="page-heading"><div><p class="eyebrow">SYSTEM HISTORY</p><h1>บันทึก</h1><p class="muted">เหตุการณ์ที่สังเกตใน session นี้ และสมุดบัญชีที่เก็บในเบราว์เซอร์นี้</p></div></div>
-      <div id="eventFilters" class="filter-pills" role="group" aria-label="กรองเหตุการณ์"><button class="active" data-filter="all">ทั้งหมด</button><button data-filter="relay">Relay</button><button data-filter="temperature">อุณหภูมิ</button><button data-filter="humidity">ความชื้น</button><button data-filter="esp">ESP</button><button data-filter="mqtt">MQTT</button></div>
-      <div id="eventList" class="event-list card"><p class="muted">ยังไม่มีเหตุการณ์ใน session นี้</p></div>
-      <details class="card finance-disclosure" id="financeDisclosure"><summary><b>สมุดบัญชีสวนและการเงิน</b><small>ข้อมูล localStorage เดิม ไม่ใช่ MQTT telemetry</small></summary>
-        <div class="finance-totals"><article class="card"><span>รายรับ</span><strong id="incomeTotal">฿0.00</strong></article><article class="card"><span>รายจ่าย</span><strong id="expenseTotal">฿0.00</strong></article><article class="card"><span>กำไร/ขาดทุน</span><strong id="netTotal">฿0.00</strong></article><article class="card"><span>ยอดค้างรับ</span><strong id="receivablesTotal">฿0.00</strong></article></div>
-        <form id="financeForm" class="card form-card"><h2>เพิ่มรายการ</h2><label>ประเภท<select name="type"><option value="income">รายรับ</option><option value="expense">รายจ่าย</option></select></label><label>รายละเอียด<input name="description" required maxlength="100" placeholder="เช่น ขายผลผลิต / ค่าปุ๋ย"></label><label>มูลค่ารายการ (บาท)<input name="amount" type="number" min="0.01" step="0.01" required></label><label>ผลผลิต/พืช (ถ้ามี)<input name="product" maxlength="80"></label><label>ปริมาณผลผลิต (ถ้ามี)<input name="quantity" type="number" min="0" step="0.01"></label><label>หน่วย<input name="unit" maxlength="20"></label><label>ผู้รับซื้อ/ลูกหนี้<input name="buyer" maxlength="100"></label><label>รับเงินแล้ว (บาท)<input name="paid" type="number" min="0" step="0.01" value="0"></label><label>วันที่<input name="date" type="date" required></label><button class="button primary">บันทึกรายการ</button></form>
-        <div class="section-title"><h2>รายการล่าสุด</h2><button class="text-link" id="exportFinance">ส่งออกรายงาน CSV</button></div><div id="financeList" class="finance-list"></div><div class="finance-tools"><p class="muted">รายการเก็บใน localStorage ของเบราว์เซอร์นี้เท่านั้น · ส่งออก CSV เป็นสำเนาสำรองได้</p><button class="button danger-button" id="clearLocal">ล้างข้อมูลการเงินในเบราว์เซอร์นี้</button></div>
-      </details>
+      <div class="page-heading"><div><p class="eyebrow">RECORDS</p><h1>บันทึก</h1><p class="muted">ประวัติเหตุการณ์และสมุดบัญชี แยกดูเป็นแท็บ</p></div></div>
+      <div class="records-tabs" role="tablist" aria-label="ประเภทบันทึก">
+        <button id="recordsEventsTab" class="records-tab active" type="button" role="tab" aria-controls="recordsEventsPanel" aria-selected="true" data-records-view="events">เหตุการณ์</button>
+        <button id="recordsFinanceTab" class="records-tab" type="button" role="tab" aria-controls="recordsFinancePanel" aria-selected="false" data-records-view="finance">รายรับ–รายจ่าย</button>
+      </div>
+      <section id="recordsEventsPanel" class="records-panel" role="tabpanel" aria-labelledby="recordsEventsTab">
+        <div id="eventFilters" class="filter-pills" role="group" aria-label="กรองเหตุการณ์"><button class="active" data-filter="all">ทั้งหมด</button><button data-filter="relay">Relay</button><button data-filter="temperature">อุณหภูมิ</button><button data-filter="humidity">ความชื้น</button><button data-filter="esp">ESP</button><button data-filter="mqtt">MQTT</button></div>
+        <div id="eventList" class="event-list card"><p class="muted">ยังไม่มีเหตุการณ์ใน session นี้</p></div>
+        <p class="records-footnote">เหตุการณ์เก็บชั่วคราวใน session นี้ · หายเมื่อโหลดหน้าใหม่</p>
+      </section>
+      <section id="recordsFinancePanel" class="records-panel" role="tabpanel" aria-labelledby="recordsFinanceTab" hidden>
+        <section class="finance-workspace" id="financeDisclosure" aria-labelledby="financeTitle">
+          <div class="section-title"><div><p class="eyebrow">LOCAL LEDGER</p><h2 id="financeTitle">สมุดบัญชีสวน</h2></div><button class="button secondary" id="exportFinance">ส่งออก CSV</button></div>
+          <div class="finance-totals"><article class="card"><span>รายรับ</span><strong id="incomeTotal">฿0.00</strong></article><article class="card"><span>รายจ่าย</span><strong id="expenseTotal">฿0.00</strong></article><article class="card"><span>สุทธิ</span><strong id="netTotal">฿0.00</strong></article><article class="card"><span>ค้างรับ</span><strong id="receivablesTotal">฿0.00</strong></article></div>
+          <details class="finance-entry-card"><summary>เพิ่มรายการ</summary><form id="financeForm" class="card form-card"><label>ประเภท<select name="type"><option value="income">รายรับ</option><option value="expense">รายจ่าย</option></select></label><label>รายละเอียด<input name="description" required maxlength="100" placeholder="เช่น ขายผลผลิต / ค่าปุ๋ย"></label><label>มูลค่ารายการ (บาท)<input name="amount" type="number" min="0.01" step="0.01" required></label><label>ผลผลิต/พืช (ถ้ามี)<input name="product" maxlength="80"></label><label>ปริมาณผลผลิต (ถ้ามี)<input name="quantity" type="number" min="0" step="0.01"></label><label>หน่วย<input name="unit" maxlength="20"></label><label>ผู้รับซื้อ/ลูกหนี้<input name="buyer" maxlength="100"></label><label>รับเงินแล้ว (บาท)<input name="paid" type="number" min="0" step="0.01" value="0"></label><label>วันที่<input name="date" type="date" required></label><button class="button primary">บันทึกรายการ</button></form></details>
+          <div class="section-title"><h2>รายการล่าสุด</h2></div><div id="financeList" class="finance-list"></div>
+          <div class="finance-tools"><p class="muted">ข้อมูลเก็บใน localStorage ของเบราว์เซอร์นี้เท่านั้น</p><button class="button danger-button" id="clearLocal">ล้างข้อมูลการเงิน</button></div>
+        </section>
+      </section>
     </section>
   </main>
-  <footer class="site-footer"><span>สวนลุงนะ • Smart Farm</span><span>Firmware <b id="footerFirmware">ยังไม่มีข้อมูล</b> · Dashboard v1.3.0 · <span id="footerUpdated">ยังไม่มีข้อมูล</span></span></footer>
+  <footer class="site-footer"><span>สวนลุงนะ • Smart Farm</span><span>Firmware <b id="footerFirmware">ยังไม่มีข้อมูล</b> · Dashboard v1.4.0 · <span id="footerUpdated">ยังไม่มีข้อมูล</span></span></footer>
   <nav class="bottom-nav" aria-label="เมนูหลัก"><button data-nav="home" class="active"><span>⌂</span><small>หน้าหลัก</small></button><button data-nav="water"><span>◉</span><small>ระบบน้ำ</small></button><button data-nav="devices"><span>▣</span><small>อุปกรณ์</small></button><button data-nav="system"><span>⌁</span><small>ระบบ</small></button><button data-nav="weather"><span>☼</span><small>อากาศ</small></button><button data-nav="records"><span>≡</span><small>บันทึก</small></button></nav>
 </div><div id="toast" class="toast" role="status" aria-live="polite"></div>
 </body></html>

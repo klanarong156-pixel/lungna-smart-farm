@@ -1,5 +1,11 @@
 # Changelog
 
+## Compact field-journal dashboard — 2026-10-17
+
+- Applied the approved warm-ivory, forest-green and muted-terracotta visual direction across all six dashboard routes, with tighter spacing and a responsive desktop sidebar/mobile navigation.
+- Removed the duplicate global ESP badge, consolidated the regional-weather caveats, and split Events and Finance into tabs while preserving legacy `#events` and `#finance` links and local finance data.
+- Preserved existing relay, AUTO/MANUAL, schedule, telemetry and safety behavior; bumped the PWA shell cache to `lungna-shell-v9` and updated the app theme metadata.
+
 ## Full Dashboard redesign — 2026-10-17 (pending review)
 
 - Expanded the redesign from Home to every route and reduced primary navigation from seven entries to six real-use workspaces: Home, Water, Devices, System, Weather, Records.

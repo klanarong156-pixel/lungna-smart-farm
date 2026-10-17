@@ -20,8 +20,20 @@
     const rows = events.filter(e => activeFilter === 'all' || e.type === activeFilter);
     root.innerHTML = rows.length ? rows.map(e => `<article class="event-item"><span class="event-mark event-${esc(e.type)}">${({relay:'◉',temperature:'🌡',humidity:'💧',esp:'⌁',mqtt:'⌁',error:'!',system:'▣'})[e.type] || '•'}</span><div class="event-copy"><b>${esc(e.title)}</b><small>${esc(e.detail)}</small></div><div class="event-meta"><time>${new Date(e.at).toLocaleString('th-TH',{dateStyle:'short',timeStyle:'medium'})}</time><span class="event-status ${esc(e.status)}">${esc(e.status==='ok'?'รับข้อมูล':e.status==='error'?'ผิดพลาด':e.status==='pending'?'รอยืนยัน':'ข้อมูล')}</span></div></article>`).join('') : '<p class="empty-state">ยังไม่มีเหตุการณ์ในหมวดนี้ · จะแสดงเมื่อ Dashboard ได้รับข้อมูลจริง</p>';
   }
+  function setRecordsView(view) {
+    const showFinance = view === 'finance';
+    $('recordsEventsPanel').hidden = showFinance;
+    $('recordsFinancePanel').hidden = !showFinance;
+    $('recordsEventsTab').classList.toggle('active', !showFinance);
+    $('recordsFinanceTab').classList.toggle('active', showFinance);
+    $('recordsEventsTab').setAttribute('aria-selected', String(!showFinance));
+    $('recordsFinanceTab').setAttribute('aria-selected', String(showFinance));
+    $('recordsEventsTab').tabIndex = showFinance ? -1 : 0;
+    $('recordsFinanceTab').tabIndex = showFinance ? 0 : -1;
+  }
   function navigate(page) {
     const openFinance = page === 'finance';
+    const openEvents = page === 'events';
     const aliases = { 'connection-page': 'system', settings: 'system', events: 'records', finance: 'records' };
     page = aliases[page] || page;
     if (!document.querySelector(`[data-page="${page}"]`)) page = 'home';
@@ -29,15 +41,11 @@
     document.querySelectorAll('[data-nav]').forEach(n => n.classList.toggle('active', n.dataset.nav === page));
     history.replaceState(null, '', `#${page}`);
     window.scrollTo(0, 0);
-    if (openFinance) {
-      const financeDisclosure = $('financeDisclosure');
-      if (financeDisclosure) {
-        financeDisclosure.open = true;
-        requestAnimationFrame(() => financeDisclosure.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }));
-      }
-    }
+    if (openFinance) setRecordsView('finance');
+    else if (openEvents) setRecordsView('events');
   }
   document.querySelectorAll('[data-nav]').forEach(el => el.addEventListener('click', () => navigate(el.dataset.nav)));
+  document.querySelectorAll('[data-records-view]').forEach(el => el.addEventListener('click', () => setRecordsView(el.dataset.recordsView)));
   window.addEventListener('hashchange', () => navigate(location.hash.slice(1)));
   navigate(location.hash.slice(1) || 'home');
 
@@ -132,8 +140,7 @@
     if ($('mqttAutoDetail')) $('mqttAutoDetail').textContent = connectionCopy[1];
     if ($('connectionHeroState')) $('connectionHeroState').textContent = connectionCopy[2];
     const espStatus = s.espOnline === true ? 'ออนไลน์' : s.espOnline === false ? 'ออฟไลน์' : 'ยังไม่มีข้อมูล';
-    $('headerEsp').dataset.state = s.espOnline === true ? 'online' : s.espOnline === false ? 'error' : 'unknown'; $('headerEsp').querySelector('span').textContent = `ESP · ${espStatus}`;
-    $('systemConnection').textContent = labels[s.connection] || s.connection; $('mqttReason').textContent = s.connectionReason;
+    $('mqttReason').textContent = s.connectionReason;
     $('modeValue').textContent = txt(s.mode); $('waterMode').textContent = txt(s.mode); $('modeFeedback').textContent = modePending ? `กำลังรอ ESP ยืนยัน ${modePending}…` : '';
     document.querySelectorAll('[data-mode]').forEach(b => { b.disabled = s.connection !== 'online' || s.espOnline !== true || Boolean(modePending); b.classList.toggle('primary', s.mode === b.dataset.mode); });
     $('waterDevice').textContent = espStatus; $('systemEsp').textContent = espStatus;
@@ -144,8 +151,7 @@
     const relayValues = Object.values(s.relays), known = relayValues.filter(v => v !== null); $('homeRelaySummary').textContent = known.length ? `${known.filter(v=>v).length} เปิด · ${known.filter(v=>!v).length} ปิด` : 'ยังไม่มีข้อมูล';
     const d = s.device || {}, firmware = txt(d.firmware), uptime = Number.isFinite(d.uptimeSec) ? `${Math.floor(d.uptimeSec/3600)} ชม. ${Math.floor((d.uptimeSec%3600)/60)} นาที` : null;
     $('firmwareVersion').textContent = firmware; $('footerFirmware').textContent = firmware; $('deviceFirmware').textContent = firmware; $('connectionFirmware').textContent = firmware; $('deviceId').textContent = txt(d.device_id);
-    $('homeEsp').textContent = espStatus; $('homeEsp').dataset.state = s.espOnline === true ? 'online' : s.espOnline === false ? 'offline' : 'unknown'; $('homeLiveTitle').closest('.home-live-panel').dataset.espState = $('homeEsp').dataset.state; $('homeEspMeta').textContent = [Number.isFinite(d.rssi)?`RSSI ${d.rssi} dBm`:null,d.firmware?`FW ${d.firmware}`:null].filter(Boolean).join(' · ') || 'RSSI / Firmware รอข้อมูล';
-    const homeLiveMark = $('homeLiveMark'); homeLiveMark.dataset.state = $('homeEsp').dataset.state; homeLiveMark.querySelector('b').textContent = s.espOnline === true ? 'กำลังรับข้อมูล' : s.espOnline === false ? 'ESP ออฟไลน์' : 'รอข้อมูล';
+    $('homeEsp').textContent = espStatus; $('homeEsp').dataset.state = s.espOnline === true ? 'online' : s.espOnline === false ? 'offline' : 'unknown'; $('homeEspMeta').textContent = [Number.isFinite(d.rssi)?`RSSI ${d.rssi} dBm`:null,d.firmware?`FW ${d.firmware}`:null].filter(Boolean).join(' · ') || 'RSSI / Firmware รอข้อมูล';
     $('deviceEspStatus').textContent = espStatus; $('deviceEspStatus').classList.toggle('online',s.espOnline === true); $('deviceUptime').textContent = txt(uptime); $('deviceRssi').textContent = detail(Number.isFinite(d.rssi)?d.rssi:null,' dBm'); $('deviceHeap').textContent = detail(Number.isFinite(d.heap)?d.heap:null,' bytes'); $('deviceReset').textContent = txt(d.resetReason);
     $('deviceIp').textContent = txt(d.ip); $('connectionRssi').textContent = detail(Number.isFinite(d.rssi)?d.rssi:null,' dBm'); $('rtcState').textContent = typeof d.rtc === 'boolean' ? (d.rtc?'พร้อม':'ไม่พร้อม') : 'ยังไม่มีข้อมูล'; $('espClock').textContent = txt(d.time); $('espDate').textContent = txt(d.date); $('sensorStatus').textContent = s.temperature !== null || s.humidity !== null ? 'ได้รับข้อมูล' : 'รอ DHT11'; $('deviceTemp').textContent = temp; $('deviceHumidity').textContent = humid; $('sensorUpdated').textContent = sensorUpdatedAt ? new Date(sensorUpdatedAt).toLocaleString('th-TH') : 'ยังไม่มีข้อมูล';
     $('footerUpdated').textContent = s.heartbeatAt ? new Date(s.heartbeatAt).toLocaleTimeString('th-TH') : 'ยังไม่มีข้อมูล';

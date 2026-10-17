@@ -354,3 +354,173 @@ html,body{background:var(--background);color:var(--text)}body{background:radial-
 }
 
 @media(max-width:759px){.filter-pills{flex-wrap:wrap;overflow:visible}}
+
+
+/* Field journal redesign approved for the six-route dashboard. */
+:root{
+  --primary:#55794e;
+  --primary-dark:#2f5638;
+  --primary-light:#e8efe2;
+  --background:#f4f1e8;
+  --surface:#fffdf8;
+  --surface-soft:#f0eee3;
+  --text:#24352a;
+  --text-muted:#718076;
+  --border:#e1dfd3;
+  --success:#37784d;
+  --warning:#b47b31;
+  --danger:#b65b4c;
+  --info:#4b7787;
+  --radius-card:16px;
+  --shadow-card:0 5px 18px #302b1d0a;
+  --forest:var(--primary-dark);
+  --leaf:var(--primary);
+  --mint:var(--primary-light);
+  --ink:var(--text);
+  --muted:var(--text-muted);
+  --paper:var(--background);
+  --white:var(--surface);
+  --line:var(--border);
+  --red:var(--danger);
+  --amber:var(--warning);
+  --radius:var(--radius-card);
+  --shadow:var(--shadow-card);
+  color-scheme:light;
+}
+html,body{background:var(--background);color:var(--text)}
+body{background:linear-gradient(180deg,#f8f6ef 0%,var(--background) 100%)}
+.app-shell{width:min(100%,1680px);max-width:1680px;margin:0 auto;min-height:100dvh;padding-bottom:calc(82px + env(safe-area-inset-bottom))}
+.topbar{height:72px;background:#fffdf8f2;border-color:var(--border);box-shadow:0 3px 14px #302b1d08;padding:0 clamp(16px,3vw,38px)}
+.brand{color:var(--text)}.brand small,.eyebrow,.site-footer span:first-child{color:var(--primary-dark)}
+.brand img{width:42px;height:42px}.brand b{font-size:17px}.brand small{letter-spacing:1.4px}
+.connection-pill{min-width:auto;padding:7px 11px;background:var(--surface);border-color:var(--border);color:var(--text-muted)}
+.connection-pill[data-state=online] i{background:var(--success);box-shadow:0 0 0 4px #37784d1b}
+.connection-pill[data-state=connecting] i,.connection-pill[data-state=reconnecting] i{background:var(--warning)}
+.connection-pill[data-state=error] i{background:var(--danger)}
+.connection-pill[data-state=unknown] i{background:#a7b0a6}
+.app-shell main{margin-left:0;padding:24px 16px 38px}
+.page{max-width:1380px;margin:0 auto}.page-heading{margin:2px 0 18px;gap:12px}
+.page h1{font-size:clamp(25px,3vw,32px);letter-spacing:-.4px;color:var(--text)}
+.page-heading .muted{margin-top:5px;font-size:12px}.eyebrow{font-size:9px;letter-spacing:1.25px;color:#71846a}
+.card,.finance-item{background:var(--surface);border-color:var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card);color:var(--text)}
+.card:hover{border-color:#c9cbb9}.muted,.card-label,.card p,.card small{color:var(--text-muted)}
+.card h2,.card h3,.section-title h2{color:var(--text)}
+.button{border-radius:11px;transition:background .15s ease,transform .15s ease}
+.button.primary{background:var(--primary-dark);color:#fff}.button.primary:hover{background:#3d6944}
+.button.secondary{background:var(--primary-light);border:1px solid #d6e1d0;color:var(--primary-dark)}
+.button.secondary:hover{background:#dce8d5;border-color:#bdcfb5}
+.button.danger-button{background:#f8e9e3;border:1px solid #ecd2c8;color:#9b473c}
+.button:disabled{opacity:1!important;background:#eeece4!important;border:1px solid #dfddd4!important;color:#999b91!important;cursor:not-allowed}
+.status-badge{background:#f0efe7;color:#6d776b}.status-badge.online{background:#e5efe1;color:var(--success)}
+.page-heading .home-heading-tag{padding:7px 10px;border-color:#e7ddc1;background:#faf3df;color:#98713b;font:600 10px 'IBM Plex Sans Thai',sans-serif;letter-spacing:0}
+.home-map-layout{grid-template-columns:minmax(0,1.45fr) minmax(280px,.8fr);gap:14px}
+.farm-map-card{background:#fffdf8;border-color:var(--border);border-radius:16px;box-shadow:var(--shadow-card)}
+.farm-map-heading h2,.home-panel-heading h2{color:var(--text);font-size:16px}
+.farm-map-heading .eyebrow{color:#71846a}.farm-map-source{border-color:var(--border);background:#f3f1e8;color:var(--text-muted)}
+.map-ground{fill:#f8f6ee;stroke:#e7e3d5}.map-field{fill:#e9efe1;stroke:#55794e}
+.map-field-rows{stroke:#bdc9b5}.map-lane{stroke:#e0ddcf}.map-lane-edge{stroke:#b6b29f}
+.zone-pin{stroke:#55794e}.zone-number{fill:#2f5638}.zone-label,.zone-status{stroke:#f8f6ee}.zone-label{fill:#334b37}.zone-status{fill:#718076}
+.farm-zone[data-state=on] .zone-pin{fill:#55794e;stroke:#fff}.farm-zone[data-state=on] .zone-status{fill:#2f5638}
+.farm-zone[data-state=off] .zone-pin{fill:#f2f0e6;stroke:#899888}.farm-zone[data-state=off] .zone-number{fill:#647364}
+.farm-zone[aria-current=true] .zone-pin,.farm-zone:hover .zone-pin,.farm-zone:focus-visible .zone-pin{stroke:#bc8540;filter:drop-shadow(0 0 6px #bc854022)}
+.farm-map-disclaimer{color:var(--text-muted)}.farm-map-legend{color:#5f7162}.legend-on{background:var(--success)}.legend-off{background:#929b8f}.legend-unknown{background:#bdc3b8}
+.home-telemetry{gap:12px}.home-live-panel{gap:13px;padding:16px}.home-climate-value{background:#f7f5ed;border-color:#ebe8dc;padding:11px}
+.home-climate-value span,.home-climate-value small{color:var(--text-muted)}.home-climate-value strong{color:var(--text);font-size:clamp(16px,1.8vw,21px)}
+.home-status-list>div{border-color:var(--border);padding:9px 0}.home-status-list dd{color:var(--text)}
+.home-control-card{padding:16px;border:1px solid #e5e0d0;border-radius:15px;background:#f4f1e6;box-shadow:none}
+.home-control-card h2{color:var(--text);font-size:16px}.home-control-card p:not(.eyebrow){margin:5px 0 10px;color:var(--text-muted);font-size:11px}
+.home-control-card .button{width:auto;min-height:40px;padding:9px 13px}
+.water-workspace{gap:14px}.water-control-column{gap:11px}.water-status{min-height:0;padding:12px 15px;border-left:3px solid var(--primary);background:#f7f5ed}
+.notice{background:#faf3df;border-color:#e9ddbd;color:#745a31;border-radius:12px;padding:11px 14px;font-size:11px}
+.mode-control-card{border-left-color:var(--primary);padding:16px}.mode-control-card>p{font-size:11px;line-height:1.55}
+.relay-panel,.schedule-panel{padding:17px}.panel-heading h2,.schedule-panel h2{font-size:16px!important}
+.panel-mark{width:29px;height:29px;border-color:var(--border);background:#f1efe5;color:#8b7958}
+.water-control-column .relay-list{gap:8px}.water-control-column .relay-list .relay-card{min-height:116px;padding:12px;border-radius:13px}
+.relay-card{background:#fffdf8;border-color:var(--border)}.relay-icon,.device-icon{background:var(--primary-light);color:var(--primary-dark)}
+.relay-state.on{color:var(--success)}.relay-state.off{color:#758073}
+.schedule-panel{position:static;border-radius:16px}.schedule-panel #scheduleModeHint{background:#f4f2e9;border-color:var(--border)}
+.schedule-slot{background:#faf9f4;border-color:var(--border)}.schedule-slot legend{color:var(--primary-dark)}
+.schedule-relay-label select,.schedule-time-fields input,.form-card input,.form-card select{background:#fffefa;border-color:#dcded1;color:var(--text);color-scheme:light}
+.schedule-time-fields input:disabled{background:#f0eee6;color:#a0a197}.schedule-empty{background:#f7f5ed;border-color:#d9d6c9}
+.device-grid{gap:12px}.device-card{padding:17px;border-radius:15px}.device-title{margin-bottom:12px}.device-title h2{font-size:15px}
+.config-detail{gap:9px 12px;font-size:11px}.detail-item,.forecast-day{background:#f7f5ed;border-color:#ebe8dd;color:var(--text)}
+.system-overview-grid{gap:12px}.system-card{padding:17px}.system-card h2{font-size:16px}.system-card .config-detail{margin-top:12px}
+.connection-hero{grid-template-columns:44px minmax(0,1fr) auto;gap:12px;margin-bottom:12px;padding:15px 17px;border-color:#e5dec9;border-radius:15px;background:linear-gradient(110deg,#eff2e7,#faf4e4);box-shadow:none}
+.connection-hero-icon{width:42px;height:42px;border-radius:13px;background:#e0e8d6;color:var(--primary-dark);font-size:22px}
+.connection-hero h2{font-size:17px}.connection-hero p{font-size:11px}.connection-hero-state{background:#fffdf8;color:var(--primary-dark)}
+.connection-form,.system-tools{padding:17px}.system-version-grid>div{background:#f7f5ed;border-color:var(--border)}
+.system-advanced{border-radius:14px}.system-advanced>summary{padding:13px 16px}.system-advanced>.config-detail{margin:0 16px 15px}
+.weather-layout{grid-template-columns:minmax(0,1.35fr) minmax(230px,.65fr);gap:13px}
+.weather-main{min-height:0;padding:20px;background:linear-gradient(135deg,#edf1e3,#fffdf8);border-color:#e2e4d7;border-radius:16px}
+.weather-main strong{color:var(--primary-dark);font-size:clamp(40px,5vw,56px)}.weather-main>span:not(.eyebrow){color:var(--text);font-size:13px}
+.weather-main .eyebrow{color:#71846a}.weather-source-mark{background:#faf1d8;border-color:#ebdfbf;color:#b47b31}
+.weather-current-grid span{background:#faf9f3;border-color:#ebe8dd;color:var(--text-muted)}.weather-current-grid b{color:var(--text)}.weather-main>small{color:var(--text-muted)}
+.forecast-panel{padding:17px}.forecast-days{gap:7px;margin-top:10px}.forecast-day{min-height:100px;padding:10px 5px;border-radius:12px;font-size:10px}
+.weather-aside{display:block}.weather-aside .weather-note{padding:14px;background:#f1f2e8;border-color:#e1e2d6}.weather-note>span{background:#e1e9d8;color:var(--primary-dark)}.weather-aside .weather-note p{font-size:11px;line-height:1.7}
+.records-tabs{display:flex;gap:4px;width:max-content;max-width:100%;margin:0 0 14px;padding:4px;border:1px solid var(--border);border-radius:12px;background:#eeece2}
+.records-tab{min-height:38px;padding:7px 16px;border:0;border-radius:9px;background:transparent;color:var(--text-muted);font:600 12px 'IBM Plex Sans Thai',sans-serif;cursor:pointer}
+.records-tab.active{background:var(--surface);color:var(--primary-dark);box-shadow:0 2px 8px #302b1d0c}
+.records-tab:focus-visible{outline:2px solid #b47b31;outline-offset:2px}
+.records-panel[hidden]{display:none!important}.records-panel{min-width:0}
+.records-footnote{margin:9px 2px 0;color:var(--text-muted);font-size:10px}
+.filter-pills{gap:6px}.filter-pills button{min-height:36px;padding:7px 11px;border-radius:999px;background:var(--surface);border-color:var(--border);color:var(--text-muted);font-size:11px}
+.filter-pills button.active{background:var(--primary-dark);border-color:var(--primary-dark);color:#fff}
+#eventList{margin-top:9px;padding:10px 16px}.event-item{border-color:var(--border);padding:12px 0}
+.event-mark{background:#f0eee5;color:#687563}.event-mqtt,.event-esp{background:#e9eef0}.event-relay{background:#e8efe2}.event-error{background:#f7e8e2}
+.event-status{color:var(--info)}.event-status.ok{color:var(--success)}.event-status.error{color:var(--danger)}.event-status.pending{color:var(--warning)}
+.empty-state{color:var(--text-muted)}.finance-workspace>.section-title{margin:0 0 12px;align-items:center}
+.finance-workspace>.section-title h2{font-size:18px}.finance-workspace>.section-title .eyebrow{margin-bottom:2px}
+.finance-totals{max-width:none;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-bottom:12px}
+.finance-totals .card{padding:12px;background:#fffdf8}.finance-totals span{color:var(--text-muted)}.finance-totals strong{font-size:16px;color:var(--text)}
+.finance-entry-card{margin:0 0 14px;border:1px solid var(--border);border-radius:13px;background:var(--surface);box-shadow:var(--shadow-card)}
+.finance-entry-card>summary{padding:12px 15px;color:var(--primary-dark);font-size:12px;font-weight:700;cursor:pointer;list-style:none}
+.finance-entry-card>summary::-webkit-details-marker{display:none}.finance-entry-card>summary::after{content:'＋';float:right;color:var(--primary)}
+.finance-entry-card[open]>summary::after{content:'−'}
+.finance-entry-card .form-card{margin:0 10px 10px;padding:13px;border-color:var(--border);box-shadow:none}
+#financeForm .button{grid-column:1/-1}.finance-list{gap:7px}.finance-item{padding:11px 13px;border-radius:12px}.finance-item .income{color:var(--success)}.finance-item .expense{color:var(--danger)}
+.finance-tools{margin-top:12px;padding:11px 13px;background:#f7f5ed;border-color:var(--border)}
+.site-footer{max-width:1380px;margin:0 auto;padding:13px 20px;border-color:var(--border);color:var(--text-muted);font-size:10px}
+.toast{background:#2f5638;border-color:#55794e;color:#fff;box-shadow:var(--shadow-card)}
+:focus-visible{outline:2px solid #b47b31;outline-offset:3px}
+@media(min-width:760px){
+  .app-shell{padding-bottom:24px}.topbar{padding-left:28px}
+  .sidebar{position:fixed;z-index:12;top:92px;left:max(16px,calc((100% - 1680px)/2 + 18px));display:grid;width:205px;gap:4px;padding:9px;border:1px solid var(--border);border-radius:15px;background:var(--surface);box-shadow:var(--shadow-card)}
+  .sidebar button{display:flex;align-items:center;gap:11px;min-height:43px;padding:0 12px;border:0;border-radius:10px;background:transparent;color:var(--text-muted);font:500 12px 'IBM Plex Sans Thai',sans-serif;text-align:left;cursor:pointer}
+  .sidebar button span{display:grid;place-items:center;width:22px;color:#7f8d78;font-size:17px}
+  .sidebar button.active,.sidebar button:hover{background:#e8efe2;color:var(--primary-dark)}.sidebar button.active span{color:var(--primary-dark)}
+  .app-shell main{margin-left:225px;padding:30px clamp(24px,4vw,58px) 44px}
+  .bottom-nav{display:none!important}.page{max-width:1400px}.site-footer{padding-left:clamp(24px,4vw,58px);padding-right:clamp(24px,4vw,58px)}
+  .home-map-layout{grid-template-columns:minmax(0,1.5fr) minmax(280px,.82fr)}.farm-map-card{position:sticky;top:90px}
+  .home-climate-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.weather-main{max-width:none}.form-card{max-width:none}
+  #financeForm{grid-template-columns:repeat(2,minmax(0,1fr))}#financeForm .button{grid-column:1/-1}
+}
+@media(max-width:759px){
+  .sidebar{display:none}.app-shell main{margin-left:0;padding:22px 14px 34px}.bottom-nav{width:100%;padding:7px 4px calc(7px + env(safe-area-inset-bottom));background:#fffdf8f2;border-color:var(--border);box-shadow:0 -4px 18px #302b1d0a}
+  .bottom-nav button{min-width:0;min-height:51px;gap:2px;border-radius:10px;color:#7b877b}.bottom-nav button span{font-size:18px}.bottom-nav button small{font-size:9px}.bottom-nav button.active{background:#e8efe2;color:var(--primary-dark)}
+  .home-map-layout,.water-workspace,.weather-layout{grid-template-columns:1fr}.farm-map-card{position:static}.home-telemetry{grid-template-columns:1fr}.weather-aside{display:block}
+  .system-overview-grid{grid-template-columns:1fr}.system-version-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .finance-totals{grid-template-columns:repeat(2,minmax(0,1fr))}.finance-tools{align-items:stretch;flex-direction:column}.finance-tools .button{width:100%}
+  .records-tabs{width:100%}.records-tab{flex:1}.page-heading{margin-bottom:15px}
+}
+@media(max-width:520px){
+  .topbar{height:66px;padding:0 13px}.brand img{width:37px;height:37px}.brand b{font-size:15px}.brand small{font-size:8px}
+  .connection-pill{padding:6px 9px;font-size:10px}.page-heading .home-heading-tag{display:none}
+  .farm-map-card{padding:12px}.farm-map-footer{align-items:flex-start;flex-direction:column;gap:8px}
+  .home-status-list{gap:0 9px}.home-climate-value{padding:10px}.relay-panel,.schedule-panel{padding:14px}
+  .water-control-column .relay-list{grid-template-columns:1fr}.water-control-column .relay-list .relay-card{min-height:88px;flex-direction:row;align-items:center}
+  .forecast-days{grid-template-columns:repeat(3,minmax(0,1fr))}.system-version-grid{grid-template-columns:1fr}
+  .connection-hero{grid-template-columns:40px minmax(0,1fr);padding:13px}.connection-hero-icon{width:38px;height:38px}.connection-hero-state{grid-column:2;justify-self:start}
+  .finance-totals strong{font-size:15px}.finance-item{align-items:flex-start}.finance-item strong{font-size:12px}
+  .site-footer{padding-bottom:calc(14px + env(safe-area-inset-bottom))}
+}
+@media(max-width:380px){.page h1{font-size:24px}.bottom-nav button small{font-size:8px}.records-tab{padding-left:8px;padding-right:8px}.home-climate-grid{gap:7px}}
+@media(prefers-reduced-motion:reduce){.page,.card,.button,.farm-zone .zone-shape{animation:none!important;transition:none!important}}
+
+@media(min-width:760px) and (max-width:1079px){
+  .home-map-layout,.weather-layout,.system-overview-grid{grid-template-columns:minmax(0,1fr)}
+  .farm-map-card{position:static}
+}
+@media(min-width:1080px){
+  .home-map-layout{grid-template-columns:minmax(0,1.5fr) minmax(280px,.82fr)}
+  .weather-layout{grid-template-columns:minmax(0,1.35fr) minmax(230px,.65fr)}
+}
