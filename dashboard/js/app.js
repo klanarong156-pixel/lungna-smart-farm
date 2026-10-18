@@ -218,16 +218,55 @@
   document.querySelectorAll('#exportFinance,[data-export-finance]').forEach(button=>button.addEventListener('click',exportFinanceCsv));
   $('clearLocal').addEventListener('click',()=>{if(confirm('ลบข้อมูลการเงินทั้งหมดที่เก็บในเบราว์เซอร์นี้หรือไม่?')){localStorage.removeItem('sf.finance');paintFinance();toast('ล้างข้อมูลการเงินแล้ว');}}); paintFinance();
 
-  const weatherCodes={0:'ท้องฟ้าแจ่มใส',1:'ส่วนใหญ่แจ่มใส',2:'มีเมฆบางส่วน',3:'มีเมฆมาก',45:'หมอก',48:'หมอก',51:'ฝนปรอยเล็กน้อย',53:'ฝนปรอย',55:'ฝนปรอยหนัก',61:'ฝนเล็กน้อย',63:'ฝนปานกลาง',65:'ฝนหนัก',80:'ฝนซู่',81:'ฝนซู่ปานกลาง',82:'ฝนซู่หนัก',95:'พายุฝนฟ้าคะนอง'};
-  const weatherIcons={0:'☀',1:'☀',2:'⛅',3:'☁',45:'≋',48:'≋',51:'☂',53:'☂',55:'☂',61:'☂',63:'☂',65:'☂',80:'☂',81:'☂',82:'☂',95:'ϟ'};
+  const weatherCodes={0:'ท้องฟ้าแจ่มใส',1:'ส่วนใหญ่แจ่มใส',2:'มีเมฆบางส่วน',3:'มีเมฆมาก',45:'หมอก',48:'หมอก',51:'ฝนปรอยเล็กน้อย',53:'ฝนปรอย',55:'ฝนปรอยหนัก',61:'ฝนเล็กน้อย',63:'ฝนปานกลาง',65:'ฝนหนัก',80:'ฝนซู่',81:'ฝนซู่ปานกลาง',82:'ฝนซู่หนัก',95:'พายุฝนฟ้าคะนอง',96:'ฝนฟ้าคะนองและลูกเห็บ',99:'พายุฝนฟ้าคะนองรุนแรง'};
+  const weatherIcons={0:'☀',1:'☀',2:'⛅',3:'☁',45:'≋',48:'≋',51:'☂',53:'☂',55:'☂',61:'☂',63:'☂',65:'☂',80:'☂',81:'☂',82:'☂',95:'ϟ',96:'ϟ',99:'ϟ'};
+  const weatherMetrics={
+    cloud_cover:{label:'ปริมาณเมฆ',unit:'%',field:'cloud_cover'},
+    precipitation_probability:{label:'โอกาสฝน',unit:'%',field:'precipitation_probability'},
+    wind_speed_10m:{label:'ความเร็วลม',unit:' km/h',field:'wind_speed_10m'}
+  };
+  let hourlyWeatherRows=[];
+  let selectedWeatherMetric='precipitation_probability';
+  function paintHourlyWeather(){
+    const host=$('hourlyForecast'),metric=weatherMetrics[selectedWeatherMetric];
+    if(!hourlyWeatherRows.length){host.innerHTML='<p class="weather-hourly-empty">ข้อมูลรายชั่วโมงยังไม่พร้อมใช้งาน</p>';return;}
+    host.innerHTML=hourlyWeatherRows.map((hour,index)=>{
+      const code=Number(hour.weather_code),kind=code>=95?'storm':([51,53,55,61,63,65,80,81,82].includes(code)?'rain':([0,1].includes(code)?'clear':'cloud'));
+      const raw=hour[metric.field],value=Number.isFinite(raw)?`${Math.round(raw)}${metric.unit}`:'—';
+      const time=String(hour.time||'').slice(11,13),temperature=Number.isFinite(hour.temperature_2m)?`${Math.round(hour.temperature_2m)}°`:'—';
+      return `<div class="weather-hour-item" data-weather-kind="${kind}"><span class="weather-hour-time">${index===0?'ตอนนี้':time}</span><span class="weather-hour-icon" aria-hidden="true">${weatherIcons[code]||'☁'}</span><b class="weather-hour-value">${value}</b><strong class="weather-hour-temp">${temperature}</strong></div>`;
+    }).join('');
+  }
+  document.querySelectorAll('[data-weather-metric]').forEach(button=>button.addEventListener('click',()=>{
+    selectedWeatherMetric=button.dataset.weatherMetric;
+    document.querySelectorAll('[data-weather-metric]').forEach(item=>item.setAttribute('aria-pressed',String(item===button)));
+    paintHourlyWeather();
+  }));
+  function updateRainNotice(rows){
+    const alert=$('weatherAlert'),title=$('weatherAlertTitle'),text=$('weatherAlertText'),next=rows.slice(0,6);
+    const chances=next.map(row=>row.precipitation_probability).filter(Number.isFinite),rain=next.map(row=>row.precipitation).filter(Number.isFinite),total=rain.reduce((sum,value)=>sum+value,0);
+    if(!chances.length){alert.dataset.level='unknown';title.textContent='ยังไม่มีข้อมูลโอกาสฝน';text.textContent='ไม่สามารถประเมินแนวโน้มฝนรายชั่วโมงได้ในขณะนี้';return;}
+    const peak=Math.max(...chances);
+    $('weatherRain').textContent=`${peak}%`;
+    const rainSummary=total>0?` · คาดฝนสะสมประมาณ ${total.toFixed(1)} มม.`:'';
+    if(peak>=70||total>=10){alert.dataset.level='warning';title.textContent='เฝ้าระวังฝนในพื้นที่';text.textContent=`โอกาสฝนสูงสุด ${peak}% ใน 6 ชั่วโมงข้างหน้า${rainSummary}`;}
+    else if(peak>=40||total>=1){alert.dataset.level='watch';title.textContent='มีแนวโน้มฝนในพื้นที่';text.textContent=`โอกาสฝนสูงสุด ${peak}% ใน 6 ชั่วโมงข้างหน้า${rainSummary}`;}
+    else {alert.dataset.level='clear';title.textContent='ยังไม่พบสัญญาณฝนสูง';text.textContent='พยากรณ์ 6 ชั่วโมงข้างหน้าไม่พบโอกาสฝนสูงในพื้นที่อ้างอิง';}
+  }
   async function loadWeather() {
     const btn=$('weatherRefresh');btn.disabled=true;$('weatherError').textContent='';
     try {
-      const {latitude,longitude,timezone}=SmartFarmConfig.weather, url=`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=${encodeURIComponent(timezone)}&forecast_days=3`;
+      const {latitude,longitude,timezone}=SmartFarmConfig.weather;
+      const url=`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m&hourly=temperature_2m,precipitation_probability,precipitation,cloud_cover,wind_speed_10m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=${encodeURIComponent(timezone)}&forecast_days=3`;
       const res=await fetch(url,{signal:AbortSignal.timeout(12000)});if(!res.ok)throw Error(`Weather API HTTP ${res.status}`);const d=await res.json();if(typeof d.current?.temperature_2m!=='number')throw Error('ข้อมูลพยากรณ์ไม่สมบูรณ์');
-      $('forecastTemp').textContent=`${Math.round(d.current.temperature_2m)}°C`; $('forecastSummary').textContent=weatherCodes[d.current.weather_code]||'สภาพอากาศ'; $('weatherCurrentIcon').textContent=weatherIcons[d.current.weather_code]||'☼'; $('weatherHumidity').textContent=Number.isFinite(d.current.relative_humidity_2m)?`${d.current.relative_humidity_2m}%`:'ไม่มีข้อมูล'; $('weatherWind').textContent=Number.isFinite(d.current.wind_speed_10m)?`${d.current.wind_speed_10m} km/h`:'ไม่มีข้อมูล'; $('weatherRain').textContent=Number.isFinite(d.daily?.precipitation_probability_max?.[0])?`${d.daily.precipitation_probability_max[0]}%`:'ไม่มีข้อมูล';
-      $('forecastUpdated').textContent=`Open-Meteo · ${new Date(d.current.time).toLocaleString('th-TH')}`; $('forecastDays').innerHTML=d.daily.time.map((date,i)=>`<div class="forecast-day"><span class="forecast-date">${new Date(date+'T12:00:00').toLocaleDateString('th-TH',{weekday:'short',day:'numeric',month:'short'})}</span><span class="forecast-icon" aria-hidden="true">${weatherIcons[d.daily.weather_code[i]]||'☼'}</span><b>${Math.round(d.daily.temperature_2m_max[i])}° / ${Math.round(d.daily.temperature_2m_min[i])}°</b><span>${weatherCodes[d.daily.weather_code[i]]||'สภาพอากาศ'}</span><small>โอกาสฝน ${d.daily.precipitation_probability_max[i]??'—'}%</small></div>`).join('');
-    } catch(e) { $('weatherError').textContent=`โหลดพยากรณ์ไม่สำเร็จ: ${e.message}`; $('forecastSummary').textContent='Weather API ไม่พร้อมใช้งาน'; FarmState.addError('weather',e.message); }
+      const currentCode=Number(d.current.weather_code),currentLabel=weatherCodes[currentCode]||'สภาพอากาศ';
+      $('forecastTemp').textContent=`${Math.round(d.current.temperature_2m)}°C`; $('forecastSummary').textContent=currentLabel; $('weatherCurrentIcon').textContent=weatherIcons[currentCode]||'☼'; $('weatherHumidity').textContent=Number.isFinite(d.current.relative_humidity_2m)?`${d.current.relative_humidity_2m}%`:'ไม่มีข้อมูล'; $('weatherWind').textContent=Number.isFinite(d.current.wind_speed_10m)?`${Math.round(d.current.wind_speed_10m)} km/h`:'ไม่มีข้อมูล';
+      $('forecastUpdated').textContent=`Open-Meteo · ${new Date(d.current.time).toLocaleString('th-TH')}`;
+      const times=d.hourly?.time||[],currentHour=String(d.current.time||'').slice(0,13);let start=times.findIndex(time=>String(time).slice(0,13)>=currentHour);if(start<0)start=0;
+      hourlyWeatherRows=times.slice(start,start+24).map((time,index)=>({time,temperature_2m:d.hourly.temperature_2m?.[start+index],precipitation_probability:d.hourly.precipitation_probability?.[start+index],precipitation:d.hourly.precipitation?.[start+index],cloud_cover:d.hourly.cloud_cover?.[start+index],wind_speed_10m:d.hourly.wind_speed_10m?.[start+index],weather_code:d.hourly.weather_code?.[start+index]}));
+      paintHourlyWeather();updateRainNotice(hourlyWeatherRows);
+      const days=d.daily?.time||[];$('forecastDays').innerHTML=days.length?days.map((date,i)=>`<div class="forecast-day"><span class="forecast-date">${new Date(date+'T12:00:00').toLocaleDateString('th-TH',{weekday:'short',day:'numeric',month:'short'})}</span><span class="forecast-icon" aria-hidden="true">${weatherIcons[d.daily.weather_code[i]]||'☼'}</span><b>${Math.round(d.daily.temperature_2m_max[i])}° / ${Math.round(d.daily.temperature_2m_min[i])}°</b><span>${weatherCodes[d.daily.weather_code[i]]||'สภาพอากาศ'}</span><small>โอกาสฝน ${d.daily.precipitation_probability_max[i]??'—'}%</small></div>`).join(''):'<span class="muted">ไม่มีพยากรณ์รายวัน</span>';
+    } catch(e) { $('weatherError').textContent=`โหลดพยากรณ์ไม่สำเร็จ: ${e.message}`; $('forecastSummary').textContent='Weather API ไม่พร้อมใช้งาน'; $('weatherAlert').dataset.level='unknown';$('weatherAlertTitle').textContent='ไม่สามารถโหลดพยากรณ์ได้';$('weatherAlertText').textContent='โปรดลองโหลดข้อมูลอีกครั้งเมื่อเชื่อมต่ออินเทอร์เน็ต';$('hourlyForecast').innerHTML='<p class="weather-hourly-empty">ข้อมูลรายชั่วโมงยังไม่พร้อมใช้งาน</p>';FarmState.addError('weather',e.message); }
     finally { btn.disabled=false; }
   }
   $('weatherRefresh').addEventListener('click',loadWeather); loadWeather();

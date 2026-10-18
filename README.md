@@ -29,7 +29,7 @@ Firmware TLS: HiveMQ Cloud port 8883. Browser: secure WebSocket port 8884 `/mqtt
 3. Workflow `.github/workflows/pages.yml` uploads contents of `dashboard/` to Pages.
 4. Expected URL: https://klanarong156-pixel.github.io/lungna-smart-farm/ (available only after Pages has been enabled and Actions deploy succeeds).
 
-PWA needs HTTPS. Offline shell cache version is `lungna-shell-v11`; it caches static shell only, never relay state as current. Service Worker activation removes only older `lungna-shell-*` caches and preserves unrelated caches on the same origin.
+PWA needs HTTPS. Offline shell cache version is `lungna-shell-v12`; it caches static shell only, never relay state as current. Service Worker activation removes only older `lungna-shell-*` caches and preserves unrelated caches on the same origin.
 
 ## Firebase, weather, data
 

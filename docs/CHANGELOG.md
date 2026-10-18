@@ -1,5 +1,11 @@
 # Changelog
 
+## Hourly weather forecast redesign — 2026-10-18
+
+- Replaced the weather page's default three-day grid with a dark, horizontally scrollable 24-hour forecast inspired by the supplied reference, including cloud, rain-probability and wind metric toggles; kept the daily outlook available in a collapsed section.
+- Added a six-hour rain-trend notice based on regional Open-Meteo hourly probability/precipitation values. The notice identifies itself as model-based, not an official Thai Meteorological Department warning.
+- Preserved the current-condition summary and approximate regional location; bumped the Dashboard label to v1.6.2 and offline shell cache to `lungna-shell-v12`.
+
 ## Farm map and sage background refinement — 2026-10-18
 
 - Moved the Home map's ไฟบ้าน status marker over the illustrated house and ไฟศาลา over the pavilion; relay IDs and control behavior are unchanged.
