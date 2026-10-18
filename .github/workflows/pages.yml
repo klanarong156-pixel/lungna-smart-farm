@@ -21,15 +21,20 @@ jobs:
           test -f dashboard/index.html
           test -f dashboard/manifest.json
           test -f dashboard/sw.js
+          test -f dashboard/css/reference-layout.css
+          test -f dashboard/assets/illustrations/farm-aerial.webp
+          test -f dashboard/assets/illustrations/farm-landscape.webp
           python -m json.tool dashboard/manifest.json >/dev/null
           node --check dashboard/js/config.js
           node --check dashboard/js/state.js
           node --check dashboard/js/mqtt.js
           node --check dashboard/js/app.js
+          node --check dashboard/sw.js
           node tests/state-contract.test.cjs
           node tests/mqtt-contract.test.cjs
           node tests/paths.test.cjs
           node tests/dashboard-pages.test.cjs
+          node tests/service-worker-cache.test.cjs
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

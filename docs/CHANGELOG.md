@@ -1,19 +1,26 @@
 # Changelog
 
+## Approved-reference dashboard implementation — 2026-10-18
+
+- Replaced the previously published visual treatment with the user-approved reference direction across Home, Water, Devices, System, Weather and Records; aligned desktop sidebar/mobile navigation, condensed status cards, full-width relay and device rows, stepped system setup, and monthly finance summary.
+- Kept existing MQTT, relay/mode/schedule acknowledgements, safety behavior, weather source, session event history and browser-local finance storage; repaired duplicate RTC and device IP DOM surfaces.
+- Converted the two reference-led farm illustrations to WebP (without changing their aspect ratios) to reduce transferred image data; updated the PWA shell cache to `lungna-shell-v10` and the Dashboard label to v1.6.0.
+- Validated all repository Node regression tests, JavaScript syntax, JSON and static asset paths; physical ESP/MQTT behavior remains unverified without hardware.
+
 ## Compact field-journal dashboard — 2026-10-17
 
 - Applied the approved warm-ivory, forest-green and muted-terracotta visual direction across all six dashboard routes, with tighter spacing and a responsive desktop sidebar/mobile navigation.
 - Removed the duplicate global ESP badge, consolidated the regional-weather caveats, and split Events and Finance into tabs while preserving legacy `#events` and `#finance` links and local finance data.
 - Preserved existing relay, AUTO/MANUAL, schedule, telemetry and safety behavior; bumped the PWA shell cache to `lungna-shell-v9` and updated the app theme metadata.
 
-## Full Dashboard redesign — 2026-10-17 (pending review)
+## Initial full dashboard redesign — 2026-10-17 (superseded 2026-10-18)
 
 - Expanded the redesign from Home to every route and reduced primary navigation from seven entries to six real-use workspaces: Home, Water, Devices, System, Weather, Records.
 - Mapped the four user-marked device points as relative schematic markers; selecting a marker only opens the existing Water control and never sends a command from Home.
 - Merged MQTT connection and actual web-system tools into System; removed the unused static admin-info shortcut and the uninstalled Soil Sensor card. Preserved relay/schedule safety, credential handling, and firmware acknowledgement.
 - Consolidated session-only event history and browser-local finance records under Records, preserving finance entries, clear confirmation, and CSV export. Added legacy hash aliases.
 - Replaced visible exact farm-point weather labels with a coarse regional forecast reference; the forecast may differ from conditions at the parcel and remains separate from DHT11/control.
-- Bumped the PWA shell cache to `lungna-shell-v8`. This change is pending review and has not been merged or deployed.
+- The initial visual variant was superseded by the user-approved reference implementation above; cache v8 is historical only.
 
 ## Bright Farm dashboard refresh — 2026-10-16
 

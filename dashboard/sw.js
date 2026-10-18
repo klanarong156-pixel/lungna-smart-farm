@@ -1,10 +1,11 @@
-const CACHE = 'lungna-shell-v9';
+const CACHE = 'lungna-shell-v10';
 const OWNED_CACHE_PREFIX = 'lungna-shell-';
 const SHELL = [
-  './', './index.html', './css/app.css', './js/config.js', './js/state.js',
+  './', './index.html', './css/app.css', './css/reference-layout.css', './js/config.js', './js/state.js',
   './js/mqtt.js', './js/app.js', './manifest.json',
   './assets/icons/icon-192.png', './assets/icons/icon-512.png',
-  './assets/logo/logo-suanlungna-modern.png'
+  './assets/logo/logo-suanlungna-modern.png',
+  './assets/illustrations/farm-aerial.webp', './assets/illustrations/farm-landscape.webp'
 ];
 self.addEventListener('install', event => event.waitUntil(
   caches.open(CACHE).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting())

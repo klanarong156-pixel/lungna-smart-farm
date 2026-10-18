@@ -10,7 +10,7 @@ Browser GitHub Pages/PWA ↔ MQTT over WSS ↔ HiveMQ Cloud ↔ ESP8266 NodeMCU 
 
 Dashboard ใช้ shared shell 6 หน้า: หน้าหลัก, ระบบน้ำ, อุปกรณ์, ระบบ, อากาศ และบันทึก. Home แสดงผัง schematic แบบสัมพัทธ์จากภาพทำเครื่องหมาย โดยใช้เลือก relay/นำทางเท่านั้น ไม่แสดงพิกัดหรือขนาดพื้นที่จริงและไม่ส่งคำสั่งจากหน้า Home. DHT11/ESP แสดงเฉพาะ telemetry ที่ได้รับจริง. คำสั่ง relay/AUTO/MANUAL/schedule อยู่ที่หน้า “ระบบน้ำ”; Connection กับเครื่องมือดูแลเว็บรวมไว้ใน “ระบบ”. หน้าอุปกรณ์แสดงเฉพาะ controller/DHT11/RTC; ไม่มีการ์ดอุปกรณ์ที่ยังไม่ได้ติดตั้ง. Weather ใช้จุดพยากรณ์ระดับภูมิภาคแบบปัดละเอียดและไม่แสดงจุดฟาร์ม. หน้า “บันทึก” แยกเหตุการณ์ใน session ออกจากสมุดบัญชีใน localStorage ด้วยแท็บ โดยยังใช้ hash เดิมได้. เมนู desktop/mobile ใช้ชุด 6 รายการเดียวกัน.
 
-โลโก้ใหม่ใช้ตราสัญลักษณ์ใบอ่อนและร่องแปลง พร้อมชื่อภาษาไทยเป็นข้อความจริงในเว็บ; PWA icons อัปเดตตามแบรนด์.
+โลโก้ใหม่ใช้ตราสัญลักษณ์ใบอ่อนและร่องแปลง พร้อมชื่อภาษาไทยเป็นข้อความจริงในเว็บ; PWA icons อัปเดตตามแบรนด์. หน้าจอใช้ desktop sidebar/mobile bottom navigation, การ์ดและแถบข้อมูลกระชับตามแบบที่อนุมัติ; ภาพประกอบฟาร์มใช้ WebP เพื่อลดขนาดดาวน์โหลด.
 
 MQTT user/password ให้ผู้ดูแลป้อนที่หน้า “ระบบ”; โดยปริยายเก็บ credentials ใน session storage และเลือกบันทึก localStorage ได้. Weather page เรียก Open-Meteo ด้วยจุดอ้างอิงระดับภูมิภาคแบบประมาณ แยกจาก DHT11; integration ที่ไม่มีจริงจะไม่ถูกนำเสนอเป็นฟังก์ชัน.
 
@@ -29,7 +29,7 @@ Firmware TLS: HiveMQ Cloud port 8883. Browser: secure WebSocket port 8884 `/mqtt
 3. Workflow `.github/workflows/pages.yml` uploads contents of `dashboard/` to Pages.
 4. Expected URL: https://klanarong156-pixel.github.io/lungna-smart-farm/ (available only after Pages has been enabled and Actions deploy succeeds).
 
-PWA needs HTTPS. Offline shell cache version is `lungna-shell-v9`; it caches static shell only, never relay state as current. Service Worker activation removes only older `lungna-shell-*` caches and preserves unrelated caches on the same origin.
+PWA needs HTTPS. Offline shell cache version is `lungna-shell-v10`; it caches static shell only, never relay state as current. Service Worker activation removes only older `lungna-shell-*` caches and preserves unrelated caches on the same origin.
 
 ## Firebase, weather, data
 
