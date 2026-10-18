@@ -1,4 +1,4 @@
-const CACHE = 'lungna-shell-v10';
+const CACHE = 'lungna-shell-v11';
 const OWNED_CACHE_PREFIX = 'lungna-shell-';
 const SHELL = [
   './', './index.html', './css/app.css', './css/reference-layout.css', './js/config.js', './js/state.js',

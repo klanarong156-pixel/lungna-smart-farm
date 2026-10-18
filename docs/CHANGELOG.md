@@ -1,5 +1,11 @@
 # Changelog
 
+## Farm map and sage background refinement — 2026-10-18
+
+- Moved the Home map's ไฟบ้าน status marker over the illustrated house and ไฟศาลา over the pavilion; relay IDs and control behavior are unchanged.
+- Changed the main page background from warm ivory to a soft pale sage, preserving warm-white cards and readable contrast; matched the browser/PWA theme colors.
+- Bumped the Dashboard label to v1.6.1 and the offline shell cache to `lungna-shell-v11`.
+
 ## Approved-reference dashboard implementation — 2026-10-18
 
 - Replaced the previously published visual treatment with the user-approved reference direction across Home, Water, Devices, System, Weather and Records; aligned desktop sidebar/mobile navigation, condensed status cards, full-width relay and device rows, stepped system setup, and monthly finance summary.
