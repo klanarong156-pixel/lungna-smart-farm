@@ -705,3 +705,56 @@ body { background: linear-gradient(180deg, #f5f7f0 0%, var(--app-bg) 100%); }
   .finance-summary-card .export-summary { min-height: 44px; }
   .records-panel .export-summary { min-height: 44px; }
 }
+/* Mobile control refinement: larger touch targets and clearer spacing without changing MQTT behavior. */
+@media (max-width: 759px) {
+  #page-water { padding-bottom: calc(108px + env(safe-area-inset-bottom)); }
+  #page-water .page-heading { align-items: flex-start; }
+  #page-water .water-workspace { gap: 14px; }
+  #page-water .water-control-column { gap: 12px; }
+  #page-water .water-status { padding: 13px 14px; border-radius: 14px; }
+  #page-water .mode-control-card { padding: 15px; }
+  #page-water .mode-switch-bar { align-items: stretch; flex-direction: column; gap: 9px; padding: 12px; }
+  #page-water .mode-switch-bar .button-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  #page-water .mode-switch-bar .button { min-height: 44px; font-size: 12px; }
+  #page-water .mode-switch-bar #modeFeedback { position: static; min-height: 18px; margin: 0; }
+  #page-water .relay-panel, #page-water .schedule-panel { padding: 15px; border-radius: 16px; }
+  #page-water .relay-list .relay-card { min-height: 76px; grid-template-columns: 40px minmax(0, 1fr) 82px; gap: 10px; padding: 10px 2px; }
+  #page-water .relay-icon { width: 36px; height: 36px; font-size: 17px; }
+  #page-water .relay-name { font-size: 13px; font-weight: 600; }
+  #page-water .relay-state { margin-top: 4px; font-size: 11px; line-height: 1.35; }
+  #page-water .relay-switch { width: 78px; min-height: 44px; padding-right: 8px; padding-left: 34px; font-size: 11px; }
+  #page-water .relay-switch::before { top: 7px; left: 7px; width: 30px; height: 30px; }
+  #page-water .relay-switch[data-state="on"] { padding-right: 34px; padding-left: 8px; }
+  #page-water .relay-switch[data-state="on"]::before { transform: translateX(34px); }
+  #page-water .schedule-panel > p.muted { font-size: 11px; line-height: 1.65; }
+  #page-water .schedule-relay-label select,
+  #page-water .schedule-time-fields input { min-height: 44px; font-size: 14px; }
+  #page-water .schedule-toggle { min-height: 44px; }
+  #page-water .schedule-panel .schedule-save { min-height: 48px; font-size: 13px; }
+  #page-water #scheduleFeedback { min-height: 20px; line-height: 1.5; }
+}
+@media (max-width: 420px) {
+  #page-water .page-heading .muted { max-width: 30ch; }
+  #page-water .relay-panel, #page-water .schedule-panel { padding: 13px; }
+  #page-water .relay-list .relay-card { grid-template-columns: 38px minmax(0, 1fr) 76px; gap: 8px; }
+  #page-water .relay-switch { width: 74px; }
+  #page-water .relay-switch[data-state="on"]::before { transform: translateX(30px); }
+}
+.schedule-presets { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; grid-column: 1 / -1; margin: 2px 0 0; }
+.schedule-presets > span { width: 100%; color: var(--app-muted); font-size: 9px; }
+.schedule-presets button { min-height: 40px; padding: 7px 10px; border: 1px solid var(--app-line); border-radius: 9px; background: #f5f5ed; color: var(--app-forest); font: 600 10px 'IBM Plex Sans Thai', sans-serif; cursor: pointer; touch-action: manipulation; }
+.schedule-presets button:hover { border-color: #bdcfb5; background: #eef2e8; }
+.schedule-presets button:disabled { opacity: .55; cursor: not-allowed; }
+@media (max-width: 759px) {
+  #page-water .schedule-slot { grid-template-columns: 1fr; gap: 8px; padding: 13px 0; }
+  #page-water .schedule-slot legend { font-size: 11px; font-weight: 700; }
+  #page-water .schedule-toggle { min-height: 44px; padding: 0 2px; font-size: 11px; }
+  #page-water .schedule-toggle input { width: 20px; height: 20px; }
+  #page-water .schedule-time-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+  #page-water .schedule-time-fields label { gap: 5px; font-size: 10px; }
+  #page-water .schedule-presets { gap: 7px; margin-top: 1px; }
+  #page-water .schedule-presets button { flex: 1 1 135px; min-height: 44px; font-size: 11px; }
+}
+@media (max-width: 350px) {
+  #page-water .schedule-time-fields { grid-template-columns: 1fr; }
+}

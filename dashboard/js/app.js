@@ -92,7 +92,8 @@
     const editor = $('scheduleEditor');
     if (!Array.isArray(slots)) { editor.innerHTML = `<div class="schedule-empty">${s.espOnline === true ? 'กำลังรอ schedule/status จาก ESP สำหรับ' : 'เชื่อมต่อ MQTT และรอ ESP online เพื่ออ่านตารางของ'} ${esc(relay?.label || id)}</div>`; $('scheduleFeedback').textContent = scheduleFeedback; return; }
     const locked = pending || s.connection !== 'online' || s.espOnline !== true;
-    editor.innerHTML = `<form id="scheduleForm" data-schedule-id="${esc(id)}"><div class="schedule-slot-list">${slots.map((slot,index) => `<fieldset class="schedule-slot"><legend>ช่วงที่ ${index+1}</legend><label class="schedule-toggle"><input type="checkbox" data-slot-toggle="${index}" ${slot.enabled?'checked':''} ${locked?'disabled':''}><span>เปิดใช้งานช่วงนี้</span></label><div class="schedule-time-fields"><label>เริ่ม<input type="time" data-slot-time="${index}" data-field="on" value="${esc(slot.on)}" ${!slot.enabled||locked?'disabled':''} ${slot.enabled?'required':''}></label><label>สิ้นสุด<input type="time" data-slot-time="${index}" data-field="off" value="${esc(slot.off)}" ${!slot.enabled||locked?'disabled':''} ${slot.enabled?'required':''}></label></div></fieldset>`).join('')}</div><button class="button primary schedule-save" type="submit" ${locked?'disabled':''}>${pending?'กำลังรอ ESP ยืนยัน…':`บันทึกตาราง ${esc(relay?.label||id)}`}</button></form>`;
+    const timePreset = (hour,index) => { const start = hour * 60 + index * 30; const format = minute => `${String(Math.floor(minute / 60) % 24).padStart(2,'0')}:${String(minute % 60).padStart(2,'0')}`; return { on: format(start), off: format(start + 30) }; };
+    editor.innerHTML = `<form id="scheduleForm" data-schedule-id="${esc(id)}"><div class="schedule-slot-list">${slots.map((slot,index) => `<fieldset class="schedule-slot"><legend>ช่วงที่ ${index+1}</legend><label class="schedule-toggle"><input type="checkbox" data-slot-toggle="${index}" ${slot.enabled?'checked':''} ${locked?'disabled':''}><span>เปิดใช้งานช่วงนี้</span></label><div class="schedule-time-fields"><label>เริ่ม<input type="time" data-slot-time="${index}" data-field="on" value="${esc(slot.on)}" ${!slot.enabled||locked?'disabled':''} ${slot.enabled?'required':''}></label><label>สิ้นสุด<input type="time" data-slot-time="${index}" data-field="off" value="${esc(slot.off)}" ${!slot.enabled||locked?'disabled':''} ${slot.enabled?'required':''}></label></div><div class="schedule-presets" role="group" aria-label="เติมเวลาแนะนำ ช่วงที่ ${index+1}"><span>เติมเวลาเร็ว</span><button type="button" data-slot-preset="${index}" data-on="${timePreset(6,index).on}" data-off="${timePreset(6,index).off}" ${locked?'disabled':''}>เช้า ${timePreset(6,index).on}–${timePreset(6,index).off}</button><button type="button" data-slot-preset="${index}" data-on="${timePreset(17,index).on}" data-off="${timePreset(17,index).off}" ${locked?'disabled':''}>เย็น ${timePreset(17,index).on}–${timePreset(17,index).off}</button></div></fieldset>`).join('')}</div><button class="button primary schedule-save" type="submit" ${locked?'disabled':''}>${pending?'กำลังรอ ESP ยืนยัน…':`บันทึกตาราง ${esc(relay?.label||id)}`}</button></form>`;
     $('scheduleFeedback').textContent = pending ? 'ส่งตารางแล้ว · กำลังรอ schedule/status จาก ESP' : scheduleFeedback;
   }
   $('scheduleRelay').addEventListener('change', () => { scheduleFeedback = ''; renderScheduleEditor(FarmState.get()); });
@@ -100,6 +101,15 @@
     const checkbox = event.target.closest('[data-slot-toggle]'); if (!checkbox) return;
     const index = checkbox.dataset.slotToggle, enabled = checkbox.checked;
     document.querySelectorAll(`[data-slot-time="${index}"]`).forEach(input => { input.disabled = !enabled || schedulePending.has($('scheduleRelay').value); input.required = enabled; });
+  });
+  $('scheduleEditor').addEventListener('click', event => {
+    const preset = event.target.closest('[data-slot-preset]'); if (!preset || preset.disabled) return;
+    const index = preset.dataset.slotPreset, checkbox = $('scheduleEditor').querySelector(`[data-slot-toggle="${index}"]`);
+    if (!checkbox || checkbox.disabled) return;
+    checkbox.checked = true;
+    checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+    $('scheduleEditor').querySelector(`[data-slot-time="${index}"][data-field="on"]`).value = preset.dataset.on;
+    $('scheduleEditor').querySelector(`[data-slot-time="${index}"][data-field="off"]`).value = preset.dataset.off;
   });
   $('scheduleEditor').addEventListener('submit', async event => {
     if (event.target.id !== 'scheduleForm') return;
