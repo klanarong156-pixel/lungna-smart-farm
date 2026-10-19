@@ -20,6 +20,8 @@ for (const token of ['--primary:','--primary-dark:','--primary-light:','--backgr
 assert.match(html, /DHT11/);
 assert.doesNotMatch(html, /Soil Sensor|data-nav="settings"|data-nav="connection-page"|data-nav="events"/);
 assert.match(html, /lungna-shell-v13/);
+assert.match(html, /reference-layout\.css\?v=1\.6\.3/);
+assert.match(html, /app\.js\?v=1\.6\.3/);
 assert.match(html, /logo-suanlungna-modern\.png/);
 assert.match(html, /farm-aerial\.webp[\s\S]*data-farm-zone="pump"[\s\S]*data-farm-zone="zone1"[\s\S]*data-farm-zone="lighthome"[\s\S]*data-farm-zone="lightsala"/);
 assert.match(html, /data-farm-zone="lighthome"[^>]*transform="translate\(545 82\)"/);
