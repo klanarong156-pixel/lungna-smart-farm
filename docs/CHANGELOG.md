@@ -1,5 +1,10 @@
 # Changelog
 
+## Mobile weather refinement — 2026-10-19
+
+- Collapsed the secondary current-conditions metrics into a compact disclosure so the hourly forecast stays prominent on phones; added a swipe hint, horizontal snap behavior, shorter hour tiles and extra end-of-page clearance above the fixed bottom navigation.
+- Bumped Dashboard to v1.6.3 and offline shell cache to `lungna-shell-v13` with versioned CSS/JS URLs.
+
 ## Hourly weather forecast redesign — 2026-10-18
 
 - Replaced the weather page's default three-day grid with a dark, horizontally scrollable 24-hour forecast inspired by the supplied reference, including cloud, rain-probability and wind metric toggles; kept the daily outlook available in a collapsed section.

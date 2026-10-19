@@ -633,3 +633,49 @@ body { background: linear-gradient(180deg, #f5f7f0 0%, var(--app-bg) 100%); }
   .weather-hour-temp { font-size: 21px; }
   .weather-hourly-footer { font-size: 8px; }
 }
+
+
+/* Mobile refinement: keep hourly weather dominant and prevent fixed navigation from covering details. */
+.weather-hourly-scroll { scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch; }
+.weather-now-card { min-width: 0; overflow: hidden; padding: 0; }
+.weather-now-card > summary { min-height: 68px; display: flex; align-items: center; gap: 10px; padding: 11px 14px; cursor: pointer; list-style: none; }
+.weather-now-card > summary::-webkit-details-marker { display: none; }
+.weather-now-card .weather-current-icon { width: 42px; height: 42px; flex: none; font-size: 23px; }
+.weather-now-copy { min-width: 0; display: grid; gap: 2px; }
+.weather-now-copy .eyebrow { margin: 0; color: var(--app-muted); font-size: 7px; letter-spacing: .1em; }
+.weather-now-copy > strong { color: var(--app-ink); font-size: 11px; line-height: 1.25; }
+.weather-now-reading { display: flex; flex-wrap: wrap; align-items: baseline; gap: 3px 7px; }
+.weather-now-reading b,.weather-now-reading small { color: var(--app-muted); font-size: 9px; }
+.weather-now-card .weather-now-chevron { margin-left: auto; color: var(--app-forest); font-size: 18px; font-style: normal; transition: transform .16s ease; }
+.weather-now-card[open] .weather-now-chevron { transform: rotate(180deg); }
+.weather-now-card .weather-current-grid { margin: 0; padding: 0 12px 12px; }
+.weather-now-card:focus-within > summary { outline: 2px solid #72b987; outline-offset: -3px; border-radius: 12px; }
+@media (max-width: 759px) {
+  #page-weather { padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
+  .weather-hour-item { min-height: 154px; }
+  .weather-hourly-footer span { min-width: 0; }
+  .weather-hourly-footer span:first-child { max-width: 60%; overflow-wrap: anywhere; }
+  .weather-hourly-footer span:last-child { max-width: 40%; text-align: right; }
+  .weather-now-card > summary { min-height: 62px; padding: 9px 11px; }
+  .weather-now-card .weather-current-icon { width: 36px; height: 36px; font-size: 20px; }
+  .weather-now-card .weather-current-grid { padding: 0 9px 9px; }
+}
+@media (max-width: 420px) {
+  .weather-hour-item { min-height: 145px; }
+  .weather-support-grid { gap: 8px; }
+  .weather-hourly-footer { gap: 5px; font-size: 7px; }
+  .weather-now-card .weather-current-grid span { padding: 7px 5px; }
+}
+@media (max-width: 350px) {
+  .page-weather .page-heading { margin-bottom: 14px; }
+  .page-weather .page-heading > div > .muted { display: none; }
+  .weather-alert-card { gap: 8px; padding: 12px 11px; }
+  .weather-alert-card .eyebrow { margin-bottom: 2px; }
+  .weather-alert-card p:not(.eyebrow) { margin: 4px 0 5px; font-size: 10px; }
+  .weather-alert-card small { font-size: 8px; }
+  .weather-hourly-panel { padding: 13px 11px; }
+  .weather-hourly-heading { margin-bottom: 10px; }
+  .weather-hour-item { min-height: 135px; }
+  .weather-daily-more > summary { min-height: 50px; padding: 8px 12px; }
+  .weather-daily-more > summary small { display: none; }
+}
