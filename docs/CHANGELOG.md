@@ -1,5 +1,11 @@
 # Changelog
 
+## Mobile Records refinement — 2026-10-19
+
+- Converted the monthly finance summary in the Events tab to a disclosure: open by default on desktop, collapsed by default on phones, while preserving the monthly values and CSV action.
+- Reduced the empty event timeline's minimum height and enlarged Records tab/filter touch targets; bumped Dashboard to v1.6.4 and the offline shell cache to `lungna-shell-v14`.
+- Replaced umbrella symbols in rain forecasts with cloud-and-rain icons, and a cloud-and-lightning icon for thunderstorms.
+
 ## Mobile weather refinement — 2026-10-19
 
 - Collapsed the secondary current-conditions metrics into a compact disclosure so the hourly forecast stays prominent on phones; added a swipe hint, horizontal snap behavior, shorter hour tiles and extra end-of-page clearance above the fixed bottom navigation.

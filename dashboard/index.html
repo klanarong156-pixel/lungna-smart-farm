@@ -6,9 +6,9 @@
   <title>สวนลุงนะ · SMART FARM</title>
   <link rel="manifest" href="./manifest.json"><link rel="icon" href="./assets/icons/icon-192.png"><link rel="apple-touch-icon" href="./assets/icons/icon-192.png">
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./css/app.css"><link rel="stylesheet" href="./css/reference-layout.css?v=1.6.3">
+  <link rel="stylesheet" href="./css/app.css"><link rel="stylesheet" href="./css/reference-layout.css?v=1.6.4">
   <script defer src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
-  <script defer src="./js/config.js"></script><script defer src="./js/state.js"></script><script defer src="./js/mqtt.js"></script><script defer src="./js/app.js?v=1.6.3"></script>
+  <script defer src="./js/config.js"></script><script defer src="./js/state.js"></script><script defer src="./js/mqtt.js"></script><script defer src="./js/app.js?v=1.6.4"></script>
 </head>
 <body>
 <div class="app-shell">
@@ -131,7 +131,7 @@
           <div class="system-check-row"><span class="system-check-icon">▣</span><span>ESP8266 Controller</span><b id="connectionRssi">ยังไม่มีข้อมูล</b><small id="connectionFirmware">ยังไม่มีข้อมูล</small></div>
           <div class="system-check-row"><span class="system-check-icon">◷</span><span>Heartbeat age</span><b id="heartbeatAge">ยังไม่มีข้อมูล</b><small id="connectionDeviceIp">IP ยังไม่มีข้อมูล</small></div>
           <p id="systemCheckResult" class="muted" role="status" aria-live="polite"></p>
-          <div class="system-version-grid"><div><span>Dashboard</span><b id="dashboardVersion">v1.6.3</b></div><div><span>Firmware baseline</span><b id="firmwareVersion">ยังไม่มีข้อมูล</b></div><div><span>Shell cache</span><b>lungna-shell-v13</b></div></div>
+          <div class="system-version-grid"><div><span>Dashboard</span><b id="dashboardVersion">v1.6.4</b></div><div><span>Firmware baseline</span><b id="firmwareVersion">ยังไม่มีข้อมูล</b></div><div><span>Shell cache</span><b>lungna-shell-v14</b></div></div>
           <div class="button-row"><button class="button secondary" id="reloadDashboard">โหลด Dashboard ใหม่</button></div>
         </div></details>
       </div>
@@ -161,7 +161,7 @@
       <div class="weather-support-grid">
         <details class="card weather-now-card" aria-labelledby="weatherNowTitle">
           <summary class="weather-now-summary"><span id="weatherCurrentIcon" class="weather-current-icon" aria-hidden="true">☼</span><span class="weather-now-copy"><span class="eyebrow">CURRENT CONDITIONS</span><strong id="weatherNowTitle">สภาพอากาศขณะนี้</strong><span class="weather-now-reading"><b id="forecastSummary">ยังไม่ได้โหลดพยากรณ์</b><small id="forecastTemp">ยังไม่มีข้อมูล</small></span></span><i class="weather-now-chevron" aria-hidden="true">⌄</i></summary>
-          <div class="weather-current-grid"><span><i aria-hidden="true">◉</i><b>ความชื้นสัมพัทธ์</b><strong id="weatherHumidity">—</strong></span><span><i aria-hidden="true">≋</i><b>ลมขณะนี้</b><strong id="weatherWind">—</strong></span><span><i aria-hidden="true">☂</i><b>โอกาสฝน 6 ชม.</b><strong id="weatherRain">—</strong></span></div>
+          <div class="weather-current-grid"><span><i aria-hidden="true">◉</i><b>ความชื้นสัมพัทธ์</b><strong id="weatherHumidity">—</strong></span><span><i aria-hidden="true">≋</i><b>ลมขณะนี้</b><strong id="weatherWind">—</strong></span><span><i aria-hidden="true">🌧️</i><b>โอกาสฝน 6 ชม.</b><strong id="weatherRain">—</strong></span></div>
         </details>
         <details class="card weather-daily-more"><summary><span><b>พยากรณ์รายวัน</b><small>ดูภาพรวม 3 วันข้างหน้า</small></span><i aria-hidden="true">⌄</i></summary><div id="forecastDays" class="forecast-days"><span class="muted">ยังไม่มีข้อมูล</span></div></details>
       </div>
@@ -173,7 +173,7 @@
       <div class="records-tabs" role="tablist" aria-label="ประเภทบันทึก"><button id="recordsEventsTab" class="records-tab active" type="button" role="tab" aria-controls="recordsEventsPanel" aria-selected="true" data-records-view="events">เหตุการณ์</button><button id="recordsFinanceTab" class="records-tab" type="button" role="tab" aria-controls="recordsFinancePanel" aria-selected="false" data-records-view="finance">รายรับ–รายจ่าย</button></div>
       <section id="recordsEventsPanel" class="records-panel records-event-layout" role="tabpanel" aria-labelledby="recordsEventsTab">
         <section class="card event-timeline-card"><div class="section-title"><div><h2>เหตุการณ์ล่าสุด</h2><small id="eventDateLabel">บันทึกใน session นี้</small></div></div><div id="eventFilters" class="filter-pills" role="group" aria-label="กรองเหตุการณ์"><button class="active" data-filter="all">ทั้งหมด</button><button data-filter="relay">Relay</button><button data-filter="temperature">อุณหภูมิ</button><button data-filter="humidity">ความชื้น</button><button data-filter="esp">ESP</button><button data-filter="mqtt">MQTT</button></div><div id="eventList" class="event-list"><p class="muted">ยังไม่มีเหตุการณ์ใน session นี้</p></div></section>
-        <aside class="card finance-summary-card"><div class="section-title"><h2>สรุปการเงิน (เดือนนี้)</h2></div><div class="month-finance-list"><div><span class="finance-symbol income-symbol">↑</span><b>รายรับ</b><strong id="monthIncome">฿0.00</strong></div><div><span class="finance-symbol expense-symbol">↓</span><b>รายจ่าย</b><strong id="monthExpense">฿0.00</strong></div><div><span class="finance-symbol net-symbol">Σ</span><b>สุทธิ</b><strong id="monthNet">฿0.00</strong></div></div><button class="button primary export-summary" id="exportFinance">ส่งออก CSV</button><div class="finance-summary-note"><span class="leaf-mark" aria-hidden="true">❧</span><p>รายรับ–รายจ่ายช่วยให้เห็นภาพต้นทุนและผลตอบแทนของสวนได้ชัดเจน</p></div><small class="local-only-note">▣ เก็บในเบราว์เซอร์นี้เท่านั้น</small></aside>
+        <details id="monthlyFinanceSummary" class="card finance-summary-card" open><summary class="finance-summary-toggle"><span><b>สรุปการเงิน (เดือนนี้)</b><small>เลือกเพื่อดูหรือยุบรายละเอียด</small></span><i aria-hidden="true">⌄</i></summary><div class="month-finance-list"><div><span class="finance-symbol income-symbol">↑</span><b>รายรับ</b><strong id="monthIncome">฿0.00</strong></div><div><span class="finance-symbol expense-symbol">↓</span><b>รายจ่าย</b><strong id="monthExpense">฿0.00</strong></div><div><span class="finance-symbol net-symbol">Σ</span><b>สุทธิ</b><strong id="monthNet">฿0.00</strong></div></div><button class="button primary export-summary" id="exportFinance">ส่งออก CSV</button><div class="finance-summary-note"><span class="leaf-mark" aria-hidden="true">❧</span><p>รายรับ–รายจ่ายช่วยให้เห็นภาพต้นทุนและผลตอบแทนของสวนได้ชัดเจน</p></div><small class="local-only-note">▣ เก็บในเบราว์เซอร์นี้เท่านั้น</small></details>
       </section>
       <section id="recordsFinancePanel" class="records-panel" role="tabpanel" aria-labelledby="recordsFinanceTab" hidden>
         <section class="finance-workspace" id="financeDisclosure" aria-labelledby="financeTitle"><div class="section-title"><div><p class="eyebrow">LOCAL LEDGER</p><h2 id="financeTitle">สมุดบัญชีสวน</h2></div><button class="button secondary" data-export-finance>ส่งออก CSV</button></div>
@@ -184,7 +184,7 @@
       </section>
     </section>
   </main>
-  <footer class="site-footer"><span>สวนลุงนะ • Smart Farm</span><span>Firmware <b id="footerFirmware">ยังไม่มีข้อมูล</b> · Dashboard v1.6.3</span></footer>
+  <footer class="site-footer"><span>สวนลุงนะ • Smart Farm</span><span>Firmware <b id="footerFirmware">ยังไม่มีข้อมูล</b> · Dashboard v1.6.4</span></footer>
   <nav class="bottom-nav" aria-label="เมนูหลัก"><button data-nav="home" class="active"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg><small>หน้าหลัก</small></button><button data-nav="water"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c-2.8 4-7 8-7 12a7 7 0 0 0 14 0c0-4-4.2-8-7-12Z"/></svg><small>ระบบน้ำ</small></button><button data-nav="devices"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="2"/><path d="M9 1v4m6-4v4M9 19v4m6-4v4M1 9h4m-4 6h4m14-6h4m-4 6h4"/></svg><small>อุปกรณ์</small></button><button data-nav="weather"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18h10a4 4 0 0 0 .3-8 6 6 0 0 0-11.5 1.5A3.3 3.3 0 0 0 7 18Z"/></svg><small>อากาศ</small></button><button data-nav="records"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M14 3v5h5M8 12h8m-8 4h8"/></svg><small>บันทึก</small></button><button data-nav="system"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="2"/><circle cx="15" cy="17" r="2"/></svg><small>ระบบ</small></button></nav>
 </div><div id="toast" class="toast" role="status" aria-live="polite"></div>
 </body></html>

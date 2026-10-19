@@ -31,6 +31,11 @@
     $('recordsEventsTab').tabIndex = showFinance ? -1 : 0;
     $('recordsFinanceTab').tabIndex = showFinance ? 0 : -1;
   }
+  const monthlySummary = $('monthlyFinanceSummary');
+  const recordsMobileQuery = window.matchMedia('(max-width: 759px)');
+  const syncMonthlySummary = () => { if (monthlySummary) monthlySummary.open = !recordsMobileQuery.matches; };
+  syncMonthlySummary();
+  recordsMobileQuery.addEventListener('change', syncMonthlySummary);
   function navigate(page) {
     const openFinance = page === 'finance';
     const openEvents = page === 'events';
@@ -219,7 +224,7 @@
   $('clearLocal').addEventListener('click',()=>{if(confirm('ลบข้อมูลการเงินทั้งหมดที่เก็บในเบราว์เซอร์นี้หรือไม่?')){localStorage.removeItem('sf.finance');paintFinance();toast('ล้างข้อมูลการเงินแล้ว');}}); paintFinance();
 
   const weatherCodes={0:'ท้องฟ้าแจ่มใส',1:'ส่วนใหญ่แจ่มใส',2:'มีเมฆบางส่วน',3:'มีเมฆมาก',45:'หมอก',48:'หมอก',51:'ฝนปรอยเล็กน้อย',53:'ฝนปรอย',55:'ฝนปรอยหนัก',61:'ฝนเล็กน้อย',63:'ฝนปานกลาง',65:'ฝนหนัก',80:'ฝนซู่',81:'ฝนซู่ปานกลาง',82:'ฝนซู่หนัก',95:'พายุฝนฟ้าคะนอง',96:'ฝนฟ้าคะนองและลูกเห็บ',99:'พายุฝนฟ้าคะนองรุนแรง'};
-  const weatherIcons={0:'☀',1:'☀',2:'⛅',3:'☁',45:'≋',48:'≋',51:'☂',53:'☂',55:'☂',61:'☂',63:'☂',65:'☂',80:'☂',81:'☂',82:'☂',95:'ϟ',96:'ϟ',99:'ϟ'};
+  const weatherIcons={0:'☀',1:'☀',2:'⛅',3:'☁',45:'≋',48:'≋',51:'🌧️',53:'🌧️',55:'🌧️',61:'🌧️',63:'🌧️',65:'🌧️',80:'🌧️',81:'🌧️',82:'🌧️',95:'⛈️',96:'⛈️',99:'⛈️'};
   const weatherMetrics={
     cloud_cover:{label:'ปริมาณเมฆ',unit:'%',field:'cloud_cover'},
     precipitation_probability:{label:'โอกาสฝน',unit:'%',field:'precipitation_probability'},

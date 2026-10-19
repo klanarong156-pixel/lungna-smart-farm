@@ -679,3 +679,29 @@ body { background: linear-gradient(180deg, #f5f7f0 0%, var(--app-bg) 100%); }
   .weather-daily-more > summary { min-height: 50px; padding: 8px 12px; }
   .weather-daily-more > summary small { display: none; }
 }
+
+
+/* Mobile Records refinement: compact the event view and improve touch targets. */
+.finance-summary-toggle { min-height: 46px; display: flex; align-items: center; justify-content: space-between; gap: 12px; list-style: none; cursor: pointer; }
+.finance-summary-toggle::-webkit-details-marker { display: none; }
+.finance-summary-toggle > span { min-width: 0; display: block; }
+.finance-summary-toggle b { display: block; color: var(--app-forest); font-size: 13px; }
+.finance-summary-toggle small { display: block; margin-top: 2px; color: var(--app-muted); font-size: 8px; }
+.finance-summary-toggle > i { flex: none; color: var(--app-forest); font-size: 18px; font-style: normal; transition: transform .16s ease; }
+.finance-summary-card[open] .finance-summary-toggle > i { transform: rotate(180deg); }
+.finance-summary-toggle:focus-visible { outline: 2px solid #72b987; outline-offset: -3px; border-radius: 8px; }
+@media (max-width: 759px) {
+  .records-tabs { gap: 5px; padding: 5px; }
+  .records-tab { min-height: 44px; padding: 8px 11px; font-size: 11px; }
+  .filter-pills { row-gap: 6px; }
+  .filter-pills button { min-height: 40px; padding: 7px 11px; font-size: 9px; }
+  .event-list { min-height: 104px; }
+  .empty-state { padding: 12px 8px; }
+  .finance-summary-card { padding: 0; overflow: hidden; }
+  .finance-summary-toggle { min-height: 54px; padding: 9px 13px; }
+  .finance-summary-card[open] .finance-summary-toggle { border-bottom: 1px solid #efeee7; }
+  .finance-summary-card[open] > :not(summary) { margin-left: 13px; margin-right: 13px; }
+  .finance-summary-card[open] > .local-only-note { display: block; margin-bottom: 13px; }
+  .finance-summary-card .export-summary { min-height: 44px; }
+  .records-panel .export-summary { min-height: 44px; }
+}
