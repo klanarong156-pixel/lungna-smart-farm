@@ -38,8 +38,16 @@ jobs:
           python-version: '3.x'
       - name: Install PlatformIO
         run: pip install platformio
+      - name: Install firmware packages
+        working-directory: firmware/esp8266
+        run: pio pkg install -e nodemcuv2
+      - name: Apply upstream elf2bin warning fix
+        working-directory: firmware/esp8266
+        run: python -W error::SyntaxWarning scripts/patch_elf2bin_syntax_warning.py
       - name: Build firmware
         working-directory: firmware/esp8266
+        env:
+          PYTHONWARNINGS: error::SyntaxWarning
         run: pio run -e nodemcuv2
       - name: Create versioned release image and checksum
         run: |

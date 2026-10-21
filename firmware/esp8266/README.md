@@ -6,7 +6,13 @@ Firmware source lives in `src/main.cpp` and is based on the V7.2.0 OTA stable fi
 
 - PlatformIO environment `nodemcuv2` / ESP8266 NodeMCU.
 - Firmware version macro: `V7.2.0-OTA-STABLE`.
-- Build: from this directory, run `pio run -e nodemcuv2`.
+- Build from this directory:
+  ```sh
+  pio pkg install -e nodemcuv2
+  python -W error::SyntaxWarning scripts/patch_elf2bin_syntax_warning.py
+  PYTHONWARNINGS=error::SyntaxWarning pio run -e nodemcuv2
+  ```
+- The patch script changes only PlatformIO's local ESP8266 framework cache. It applies the upstream `elf2bin.py` raw-regex fix for Python's invalid-escape warning; it does not change firmware source or binary behavior. Run it again after reinstalling the framework package.
 - Output: `.pio/build/nodemcuv2/firmware.bin`.
 
 ## Hardware contract
