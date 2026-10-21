@@ -2,13 +2,13 @@
 <html lang="th">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#EDF2E8"><meta name="description" content="สวนลุงนะ SMART FARM — ระบบติดตามฟาร์มและสั่งงานผ่าน ESP8266/MQTT">
+  <meta name="theme-color" content="#1B6B43"><meta name="description" content="สวนลุงนะ SMART FARM — ระบบติดตามฟาร์มและสั่งงานผ่าน ESP8266/MQTT">
   <title>สวนลุงนะ · SMART FARM</title>
   <link rel="manifest" href="./manifest.json"><link rel="icon" href="./assets/icons/icon-192.png"><link rel="apple-touch-icon" href="./assets/icons/icon-192.png">
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./css/app.css"><link rel="stylesheet" href="./css/reference-layout.css?v=1.6.5">
+  <link rel="stylesheet" href="./css/app.css"><link rel="stylesheet" href="./css/reference-layout.css?v=1.6.6">
   <script defer src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
-  <script defer src="./js/config.js"></script><script defer src="./js/state.js"></script><script defer src="./js/mqtt.js"></script><script defer src="./js/app.js?v=1.6.5"></script>
+  <script defer src="./js/config.js"></script><script defer src="./js/state.js"></script><script defer src="./js/mqtt.js"></script><script defer src="./js/app.js?v=1.6.6"></script>
 </head>
 <body>
 <div class="app-shell">
@@ -36,6 +36,7 @@
   <main id="main">
     <section class="page active page-home" id="page-home" data-page="home">
       <div class="page-heading home-heading"><span class="heading-leaf" aria-hidden="true">❧</span><div><p class="eyebrow">สวนลุงนะ · SMART FARM</p><h1>ภาพรวมสวนวันนี้</h1><p class="muted">ควบคุม ดูแล และติดตามทุกอย่างในสวนได้จากที่เดียว</p></div><span class="reference-badge">ข้อมูลจากอุปกรณ์จริง</span></div>
+      <section id="homeAlert" class="home-alert-card" data-level="clear" role="status" aria-live="polite" hidden><span class="home-alert-icon" aria-hidden="true">!</span><div><b id="homeAlertTitle">ระบบปกติ</b><p id="homeAlertDetail">ยังไม่มีเหตุให้แจ้งเตือน</p></div><button class="home-alert-action" data-nav="system" type="button">ตรวจระบบ</button></section>
       <div class="home-map-layout">
         <section class="farm-map-card" aria-labelledby="farmMapTitle">
           <div class="farm-map-heading"><span class="map-pin-icon" aria-hidden="true">●</span><div><h2 id="farmMapTitle">แผนผังสวน</h2><p>คลิกที่อุปกรณ์เพื่อเปิดหน้าควบคุม</p></div><span class="farm-map-source">แผนผังภาพประกอบ</span></div>
@@ -80,6 +81,11 @@
           </section>
         </aside>
       </div>
+      <section class="home-insights-grid" aria-label="สรุปการทำงานของสวน">
+        <article class="card home-insight-card home-watering-card" aria-labelledby="homeWaterTitle"><div class="home-panel-heading"><span class="insight-icon insight-water" aria-hidden="true">◉</span><h2 id="homeWaterTitle">การให้น้ำ</h2><button class="home-insight-link" data-nav="water" type="button">เปิดระบบน้ำ</button></div><div class="watering-main-state" id="homePumpState" data-state="unknown">รอข้อมูลปั๊มน้ำ</div><div class="watering-details"><div><span>เวลาทำงานรอบนี้</span><b id="homePumpRuntime">ยังไม่มีข้อมูล</b></div><div><span>ตารางถัดไป</span><b id="homeNextSchedule">รอข้อมูลจาก ESP</b></div></div><p id="homeModeHint" class="home-mode-hint">รอสถานะ AUTO/MANUAL จาก ESP</p></article>
+        <article class="card home-insight-card home-trend-card" aria-labelledby="homeTrendTitle"><div class="home-panel-heading"><span class="insight-icon insight-trend" aria-hidden="true">⌁</span><h2 id="homeTrendTitle">แนวโน้ม 24 ชั่วโมง</h2></div><div id="homeTrendChart" class="home-trend-chart"><p class="empty-state">รอข้อมูลเซนเซอร์อย่างน้อย 2 จุด</p></div><p class="home-local-note">เก็บในเบราว์เซอร์นี้ขณะ Dashboard เปิดและเชื่อมต่อ · ไม่ใช่ข้อมูลจากฐานข้อมูลกลาง</p></article>
+        <article class="card home-insight-card home-today-card" aria-labelledby="homeTodayTitle"><div class="home-panel-heading"><span class="insight-icon insight-events" aria-hidden="true">▤</span><h2 id="homeTodayTitle">สรุปวันนี้</h2></div><div class="today-count-grid"><div><b id="todayRelayChanges">0</b><span>รายงานสถานะรีเลย์</span></div><div><b id="todayAlerts">0</b><span>เหตุการณ์ผิดปกติ</span></div></div><p id="todaySummaryNote" class="home-local-note">ไม่มีเหตุการณ์ที่บันทึกไว้วันนี้</p></article>
+      </section>
       <section class="home-quote-banner"><span class="quote-leaf" aria-hidden="true">❧</span><p>“สวนที่ดี ไม่ได้โตแค่พืชพรรณ แต่เติบโตพร้อมกับความสุข”</p><span class="quote-divider"></span><img src="./assets/illustrations/farm-landscape.webp" alt=""><small>เกษตรสมัยใหม่<br>เพื่อชีวิตที่สมดุล</small></section>
     </section>
 
@@ -131,7 +137,7 @@
           <div class="system-check-row"><span class="system-check-icon">▣</span><span>ESP8266 Controller</span><b id="connectionRssi">ยังไม่มีข้อมูล</b><small id="connectionFirmware">ยังไม่มีข้อมูล</small></div>
           <div class="system-check-row"><span class="system-check-icon">◷</span><span>Heartbeat age</span><b id="heartbeatAge">ยังไม่มีข้อมูล</b><small id="connectionDeviceIp">IP ยังไม่มีข้อมูล</small></div>
           <p id="systemCheckResult" class="muted" role="status" aria-live="polite"></p>
-          <div class="system-version-grid"><div><span>Dashboard</span><b id="dashboardVersion">v1.6.5</b></div><div><span>Firmware baseline</span><b id="firmwareVersion">ยังไม่มีข้อมูล</b></div><div><span>Shell cache</span><b>lungna-shell-v15</b></div></div>
+          <div class="system-version-grid"><div><span>Dashboard</span><b id="dashboardVersion">v1.6.6</b></div><div><span>Firmware baseline</span><b id="firmwareVersion">ยังไม่มีข้อมูล</b></div><div><span>Shell cache</span><b>lungna-shell-v16</b></div></div>
           <div class="button-row"><button class="button secondary" id="reloadDashboard">โหลด Dashboard ใหม่</button></div>
         </div></details>
       </div>
@@ -184,7 +190,7 @@
       </section>
     </section>
   </main>
-  <footer class="site-footer"><span>สวนลุงนะ • Smart Farm</span><span>Firmware <b id="footerFirmware">ยังไม่มีข้อมูล</b> · Dashboard v1.6.4</span></footer>
+  <footer class="site-footer"><span>สวนลุงนะ • Smart Farm</span><span>Firmware <b id="footerFirmware">ยังไม่มีข้อมูล</b> · Dashboard v1.6.6</span></footer>
   <nav class="bottom-nav" aria-label="เมนูหลัก"><button data-nav="home" class="active"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg><small>หน้าหลัก</small></button><button data-nav="water"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c-2.8 4-7 8-7 12a7 7 0 0 0 14 0c0-4-4.2-8-7-12Z"/></svg><small>ระบบน้ำ</small></button><button data-nav="devices"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="2"/><path d="M9 1v4m6-4v4M9 19v4m6-4v4M1 9h4m-4 6h4m14-6h4m-4 6h4"/></svg><small>อุปกรณ์</small></button><button data-nav="weather"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18h10a4 4 0 0 0 .3-8 6 6 0 0 0-11.5 1.5A3.3 3.3 0 0 0 7 18Z"/></svg><small>อากาศ</small></button><button data-nav="records"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M14 3v5h5M8 12h8m-8 4h8"/></svg><small>บันทึก</small></button><button data-nav="system"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="2"/><circle cx="15" cy="17" r="2"/></svg><small>ระบบ</small></button></nav>
 </div><div id="toast" class="toast" role="status" aria-live="polite"></div>
 </body></html>

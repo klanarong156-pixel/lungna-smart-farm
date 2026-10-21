@@ -8,11 +8,34 @@
   const relayPending = new Set(), schedulePending = new Set();
   let modePending = null, scheduleFeedback = '', toastTimer, activeFilter = 'all', selectedFarmRelay = null;
   let lastConnection = null, connectedSince = null, reconnectCount = 0, sensorUpdatedAt = null, lastHeartbeatSeen = 0;
+  const EVENT_STORAGE_KEY = 'sf.dashboard.events.v1', SENSOR_STORAGE_KEY = 'sf.dashboard.sensor-history.v1';
+  const HISTORY_WINDOW_MS = 24 * 60 * 60 * 1000, EVENT_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
   const events = [];
+  try {
+    const saved = JSON.parse(localStorage.getItem(EVENT_STORAGE_KEY) || '[]');
+    if (Array.isArray(saved)) events.push(...saved.filter(e => e && ['esp','mqtt','relay','system','error'].includes(e.type) && typeof e.title === 'string' && typeof e.detail === 'string' && Number.isFinite(e.at) && e.at <= Date.now() + 60000 && Date.now() - e.at < EVENT_WINDOW_MS).slice(0,150));
+  } catch (_) { /* Keep the dashboard usable when browser storage is unavailable. */ }
+  let sensorHistory = [];
+  try {
+    const saved = JSON.parse(localStorage.getItem(SENSOR_STORAGE_KEY) || '[]');
+    if (Array.isArray(saved)) sensorHistory = saved.filter(p => p && Number.isFinite(p.at) && p.at <= Date.now() + 60000 && Number.isFinite(p.temperature) && Number.isFinite(p.humidity) && Date.now() - p.at < HISTORY_WINDOW_MS).slice(-300);
+  } catch (_) { sensorHistory = []; }
+  function persistEvents() {
+    try { localStorage.setItem(EVENT_STORAGE_KEY, JSON.stringify(events.filter(e => ['esp','mqtt','relay','system','error'].includes(e.type)).slice(0,150))); } catch (_) { /* Local history is optional. */ }
+  }
+  function recordSensorHistory(state) {
+    if (!Number.isFinite(state.temperature) || !Number.isFinite(state.humidity)) return;
+    const at = Date.now(), last = sensorHistory[sensorHistory.length - 1];
+    if (last && at - last.at < 5 * 60 * 1000) return;
+    sensorHistory.push({ at, temperature: state.temperature, humidity: state.humidity });
+    sensorHistory = sensorHistory.filter(p => at - p.at < HISTORY_WINDOW_MS).slice(-300);
+    try { localStorage.setItem(SENSOR_STORAGE_KEY, JSON.stringify(sensorHistory)); } catch (_) { /* Trend history is optional. */ }
+  }
   function toast(message) { const t = $('toast'); t.textContent = message; t.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 3200); }
   function addEvent(type, title, detail, status = 'info', at = Date.now()) {
     events.unshift({ type, title, detail, status, at });
     if (events.length > 150) events.length = 150;
+    persistEvents();
     renderEvents();
   }
   function renderEvents() {
@@ -126,7 +149,9 @@
   function bindRelayButtons() {
     document.querySelectorAll('[data-relay-toggle]').forEach(btn => btn.addEventListener('click', async () => {
       const id = btn.dataset.relayToggle, s = FarmState.get(); if (s.relays[id] === null) { toast('ยังไม่มีข้อมูลสถานะ Relay จาก ESP8266'); return; }
-      const target = !s.relays[id]; relayPending.add(id); render(s);
+      const target = !s.relays[id], relayLabel = SmartFarmConfig.relays.find(r=>r.id===id)?.label || id;
+      if (!window.confirm(`ยืนยัน${target?'เปิด':'ปิด'}${relayLabel}หรือไม่?\nโหมดปัจจุบัน: ${s.mode || 'ยังไม่ทราบ'} · คำสั่งจะส่งไปยัง ESP8266`)) return;
+      relayPending.add(id); render(s);
       addEvent('relay','ส่งคำสั่ง Relay',`${SmartFarmConfig.relays.find(r=>r.id===id)?.label}: ${target?'ON':'OFF'}`,'pending');
       try { const ok = await FarmMqtt.commandRelay(id,target); if (ok) toast('ESP8266 ยืนยันสถานะแล้ว'); else toast('ไม่สามารถยืนยันสถานะได้'); }
       catch(e) { FarmState.addError('relay-command',e.message); toast(e.message); }
@@ -161,6 +186,69 @@
       row.setAttribute('aria-label', `${row.querySelector('span:not(.home-row-chevron)')?.textContent || row.dataset.homeRelay} · ${label} · เลือกเพื่อเปิดหน้าควบคุม`);
     });
   }
+  function renderHomeAlert(s) {
+    const card = $('homeAlert'); let level = '', title = '', detailText = '';
+    if (s.connection === 'error') { level = 'danger'; title = 'การเชื่อมต่อ MQTT มีปัญหา'; detailText = s.connectionReason || 'ตรวจสอบการเชื่อมต่อในหน้าระบบ'; }
+    else if (s.connection === 'reconnecting') { level = 'warning'; title = 'กำลังเชื่อมต่อระบบฟาร์มใหม่'; detailText = s.connectionReason || 'กำลังรอการเชื่อมต่อกลับมา'; }
+    else if (s.espOnline === false && (s.heartbeatAt > 0 || s.connection === 'online')) { level = 'danger'; title = 'ESP8266 ออฟไลน์'; detailText = 'ไม่ได้รับ heartbeat ล่าสุด · ตรวจสอบไฟและ Wi-Fi ของตัวควบคุม'; }
+    else if (s.connection === 'connecting') { level = 'warning'; title = 'กำลังเชื่อมต่อ MQTT'; detailText = 'รอการยืนยันสถานะจาก ESP8266'; }
+    card.dataset.level = level || 'clear'; card.hidden = !level;
+    $('homeAlertTitle').textContent = title; $('homeAlertDetail').textContent = detailText;
+  }
+  function formatRuntime(seconds) {
+    if (!Number.isFinite(seconds) || seconds < 0) return 'ยังไม่มีข้อมูล';
+    const whole = Math.floor(seconds), mins = Math.floor(whole / 60), secs = whole % 60;
+    return mins ? `${mins} นาที ${secs} วินาที` : `${secs} วินาที`;
+  }
+  function renderHomeSchedule(s) {
+    const d = s.device || {}, schedule = s.schedules?.pump?.slots;
+    const pump = s.relays?.pump;
+    const pumpState = $('homePumpState');
+    pumpState.dataset.state = pump === true ? 'on' : pump === false ? 'off' : 'unknown';
+    pumpState.textContent = pump === true ? 'ปั๊มน้ำกำลังทำงาน' : pump === false ? 'ปั๊มน้ำหยุดทำงาน' : 'รอสถานะปั๊มน้ำ';
+    $('homePumpRuntime').textContent = pump === true ? formatRuntime(d.pumpRuntimeSec) : pump === false ? '—' : 'รอข้อมูล';
+    $('homeModeHint').dataset.mode = s.mode || 'unknown';
+    $('homeModeHint').textContent = s.mode === 'AUTO' ? 'โหมด AUTO · ตารางควบคุมโดย ESP' : s.mode === 'MANUAL' ? 'โหมด MANUAL · ตารางไม่สั่งงานจนกว่าจะกลับ AUTO' : 'รอสถานะ AUTO/MANUAL จาก ESP';
+    const clock = typeof d.time === 'string' ? /T([01]\d|2[0-3]):([0-5]\d):[0-5]\d(?:[+-]\d\d:\d\d|Z)$/.exec(d.time) : null;
+    if (!Array.isArray(schedule)) { $('homeNextSchedule').textContent = 'รอตารางจาก ESP'; return; }
+    if (s.mode !== 'AUTO') { $('homeNextSchedule').textContent = s.mode === 'MANUAL' ? 'ไม่ทำงานในโหมด MANUAL' : 'รอสถานะโหมดจาก ESP'; return; }
+    if (!d.clockValid || !clock) { $('homeNextSchedule').textContent = 'รอเวลาที่ถูกต้องจาก ESP'; return; }
+    const nowMinute = Number(clock[1]) * 60 + Number(clock[2]);
+    const active = schedule.find(slot => {
+      if (!slot.enabled) return false;
+      const [sh, sm] = slot.on.split(':').map(Number), [eh, em] = slot.off.split(':').map(Number);
+      const start = sh * 60 + sm, end = eh * 60 + em;
+      return start < end ? nowMinute >= start && nowMinute < end : nowMinute >= start || nowMinute < end;
+    });
+    if (active) { $('homeNextSchedule').textContent = `อยู่ในช่วง ${active.on}–${active.off}`; return; }
+    const upcoming = schedule.filter(slot => slot.enabled).map(slot => ({ slot, delta: (Number(slot.on.slice(0,2)) * 60 + Number(slot.on.slice(3,5)) - nowMinute + 1440) % 1440 })).sort((a,b) => a.delta - b.delta)[0];
+    if (!upcoming) { $('homeNextSchedule').textContent = 'ยังไม่มีช่วงเวลาเปิดใช้งาน'; return; }
+    const wait = upcoming.delta, label = wait === 0 ? 'ถึงเวลาเริ่มตอนนี้' : wait < 60 ? `อีก ${wait} นาที` : `อีก ${Math.floor(wait / 60)} ชม. ${wait % 60} นาที`;
+    $('homeNextSchedule').textContent = `${upcoming.slot.on} · ${label}`;
+  }
+  function renderTrend() {
+    const root = $('homeTrendChart'), samples = sensorHistory.filter(p => Date.now() - p.at < HISTORY_WINDOW_MS);
+    if (samples.length < 2) { root.innerHTML = '<p class="empty-state">รอข้อมูลเซนเซอร์อย่างน้อย 2 จุด</p>'; return; }
+    const row = (key, label, unit, color) => {
+      const values = samples.map(p => p[key]), min = Math.min(...values), max = Math.max(...values), span = max - min || 1;
+      const firstAt = samples[0].at, elapsed = Math.max(1, samples[samples.length - 1].at - firstAt);
+      const points = values.map((value,i) => `${((samples[i].at - firstAt) * 300 / elapsed).toFixed(1)},${(44 - ((value - min) / span) * 36).toFixed(1)}`).join(' ');
+      const last = values[values.length - 1], firstTime = new Date(samples[0].at).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}), lastTime = new Date(samples[samples.length - 1].at).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+      return `<div class="trend-row"><div class="trend-row-heading"><span>${label}</span><b>${last.toFixed(1)}${unit}</b></div><svg viewBox="0 0 300 52" role="img" aria-label="แนวโน้ม${label} ${samples.length} จุด จาก ${firstTime} ถึง ${lastTime}"><line x1="0" y1="46" x2="300" y2="46"/><polyline points="${points}" stroke="${color}"/></svg><small>${firstTime}<span>${lastTime}</span></small></div>`;
+    };
+    root.innerHTML = row('temperature','อุณหภูมิ',' °C','#E67624') + row('humidity','ความชื้น',' %','#078AAD');
+  }
+  function renderTodaySummary() {
+    const today = new Date();
+    const todayEvents = events.filter(e => { const d = new Date(e.at); return d.getFullYear() === today.getFullYear() && d.getMonth() === today.getMonth() && d.getDate() === today.getDate(); });
+    const relays = todayEvents.filter(e => e.type === 'relay').length;
+    const alerts = todayEvents.filter(e => e.status === 'error' || (e.type === 'mqtt' && e.status === 'pending')).length;
+    $('todayRelayChanges').textContent = String(relays); $('todayAlerts').textContent = String(alerts);
+    $('todaySummaryNote').textContent = todayEvents.length ? `บันทึกในเบราว์เซอร์นี้ · ${todayEvents.length} เหตุการณ์` : 'ไม่มีเหตุการณ์ที่บันทึกไว้วันนี้';
+  }
+  function renderHomeInsights(s) {
+    renderHomeAlert(s); renderHomeSchedule(s); renderTrend(); renderTodaySummary();
+  }
   function render(s) {
     const conn = $('connection'); conn.dataset.state = s.connection; conn.querySelector('span').textContent = `MQTT · ${labels[s.connection] || s.connection}`;
     const connectionCopy = { offline: ['พร้อมเชื่อมต่อ', 'รอ credential สำหรับการเชื่อมต่อครั้งแรก', 'พร้อม'], connecting: ['กำลังเชื่อมต่อ MQTT', 'กำลังตรวจสอบ broker และสมัครรับข้อมูลจากฟาร์ม', 'กำลังเชื่อมต่อ'], online: ['เชื่อมต่อ MQTT แล้ว', 'กำลังรอ heartbeat และสถานะจริงจาก ESP8266', 'ออนไลน์'], reconnecting: ['กำลังเชื่อมต่อใหม่', s.connectionReason || 'ระบบจะลองเชื่อมต่อใหม่อัตโนมัติ', 'กำลังลองใหม่'], error: ['เชื่อมต่อไม่สำเร็จ', s.connectionReason || 'ตรวจสอบ credential และการเข้าถึง broker', 'ต้องตรวจสอบ'] }[s.connection] || ['สถานะ MQTT', s.connectionReason || 'ยังไม่มีข้อมูล', 'ตรวจสอบ'];
@@ -188,6 +276,7 @@
     $('connectedSince').textContent = connectedSince ? new Date(connectedSince).toLocaleString('th-TH') : 'ยังไม่มีข้อมูล'; $('reconnectCount').textContent = String(reconnectCount); $('connectionHeartbeat').textContent = s.heartbeatAt ? new Date(s.heartbeatAt).toLocaleString('th-TH') : 'ยังไม่มีข้อมูล'; $('heartbeatAge').textContent = s.heartbeatAt ? `${Math.max(0,Math.floor((Date.now()-s.heartbeatAt)/1000))} วินาที` : 'ยังไม่มีข้อมูล';
     $('lastError').textContent = s.errors?.length ? `${s.errors[0].kind}: ${s.errors[0].message}` : 'ยังไม่มีข้อมูล';
     if ($('scheduleRelay')) renderScheduleEditor(s);
+    renderHomeInsights(s);
   }
   document.querySelectorAll('[data-mode]').forEach(button => button.addEventListener('click', async () => { modePending = button.dataset.mode; render(FarmState.get()); try { const ok = await FarmMqtt.commandMode(modePending); if (ok) { addEvent('relay','ESP ยืนยันโหมด',button.dataset.mode,'ok'); toast(`ESP ยืนยันโหมด ${button.dataset.mode}`); } else toast('ไม่สามารถยืนยันโหมดจาก ESP ได้'); } catch(error) { FarmState.addError('mode-command',error.message); toast(error.message); } finally { modePending = null; render(FarmState.get()); } }));
   document.querySelectorAll('[data-filter]').forEach(button => button.addEventListener('click', () => { activeFilter = button.dataset.filter; document.querySelectorAll('[data-filter]').forEach(b=>b.classList.toggle('active',b===button)); renderEvents(); }));
@@ -202,11 +291,12 @@
       lastConnection = status;
     } else if (event === 'device:update' && snapshot.heartbeatAt > lastHeartbeatSeen) { lastHeartbeatSeen=snapshot.heartbeatAt; addEvent('esp','ESP Heartbeat',`${snapshot.device?.firmware||'Firmware ไม่รายงาน'}${Number.isFinite(snapshot.device?.rssi)?` · RSSI ${snapshot.device.rssi} dBm`:''}`,'ok',snapshot.heartbeatAt); }
     else if (event === 'esp:offline') addEvent('esp','ESP Offline',snapshot.connectionReason,'error');
-    else if (event === 'sensor:update') { sensorUpdatedAt=Date.now(); if(snapshot.temperature!==null)addEvent('temperature','DHT11 Temperature',`${snapshot.temperature} °C`,'ok'); if(snapshot.humidity!==null)addEvent('humidity','DHT11 Humidity',`${snapshot.humidity} %`,'ok'); }
+    else if (event === 'sensor:update') { sensorUpdatedAt=Date.now(); recordSensorHistory(snapshot); if(snapshot.temperature!==null)addEvent('temperature','DHT11 Temperature',`${snapshot.temperature} °C`,'ok'); if(snapshot.humidity!==null)addEvent('humidity','DHT11 Humidity',`${snapshot.humidity} %`,'ok'); }
     else if (event.startsWith('relay:')) { const id=event.slice(6),relay=SmartFarmConfig.relays.find(r=>r.id===id); addEvent('relay','Relay Status',`${relay?.label||id}: ${snapshot.relays[id]?'ON':'OFF'}`,'ok'); }
     else if (event === 'error') { const err=snapshot.errors[0]; if(err)addEvent('error',`Error · ${err.kind}`,err.message,'error',err.at); }
     render(snapshot);
   });
+  window.setInterval(() => renderHomeInsights(FarmState.get()), 60000);
   $('connectBtn').addEventListener('click', () => { const ok=FarmMqtt.connect($('mqttUser').value,$('mqttPass').value,$('rememberMqtt').checked); $('mqttFeedback').textContent=ok?'กำลังเริ่มเชื่อมต่อ broker…':'ตรวจสอบข้อมูลและการเชื่อมต่อ'; if(ok)$('mqttPass').value=''; });
   $('disconnectBtn').addEventListener('click', () => FarmMqtt.disconnect());
   $('clearCredentials').addEventListener('click', () => { try { for(const store of [localStorage,sessionStorage]) for(const key of ['sf.mqtt.user','sf.mqtt.pass'])store.removeItem(key); $('mqttUser').value=SmartFarmConfig.mqtt.defaultUsername; $('mqttPass').value=''; $('rememberMqtt').checked=false; $('mqttFeedback').textContent='ล้าง credentials ที่บันทึกในเบราว์เซอร์แล้ว'; toast('ล้าง credentials แล้ว'); } catch(error) { $('mqttFeedback').textContent=`ล้างข้อมูลไม่สำเร็จ: ${error.message}`; } });

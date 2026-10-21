@@ -1,8 +1,8 @@
-const CACHE = 'lungna-shell-v15';
+const CACHE = 'lungna-shell-v16';
 const OWNED_CACHE_PREFIX = 'lungna-shell-';
 const SHELL = [
-  './', './index.html', './css/app.css', './css/reference-layout.css?v=1.6.5', './js/config.js', './js/state.js',
-  './js/mqtt.js', './js/app.js?v=1.6.5', './manifest.json',
+  './', './index.html', './css/app.css', './css/reference-layout.css?v=1.6.6', './js/config.js', './js/state.js',
+  './js/mqtt.js', './js/app.js?v=1.6.6', './manifest.json',
   './assets/icons/icon-192.png', './assets/icons/icon-512.png',
   './assets/logo/logo-suanlungna-modern.png',
   './assets/illustrations/farm-aerial.webp', './assets/illustrations/farm-landscape.webp'
