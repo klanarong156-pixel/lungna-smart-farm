@@ -190,10 +190,22 @@
           const schedule = FarmState.normalizeSchedule(id, JSON.parse(value));
           FarmState.setSchedule(id, schedule);
           const pending = this.pendingSchedules.get(id);
-          if (pending && JSON.stringify(pending.target.slots) === JSON.stringify(schedule.slots)) {
-            clearTimeout(pending.timer);
-            this.pendingSchedules.delete(id);
-            pending.resolve(true);
+          if (pending) {
+            const matches = JSON.stringify(pending.target.slots) === JSON.stringify(schedule.slots);
+            if (matches) {
+              clearTimeout(pending.timer);
+              this.pendingSchedules.delete(id);
+              pending.resolve(true);
+            } else {
+              // Keep waiting for the exact schedule requested. Retained or stale
+              // status must never be mistaken for confirmation of a new command.
+              pending.lastReported = schedule;
+              pending.mismatchCount = (pending.mismatchCount || 0) + 1;
+              FarmState.addError(
+                'schedule-ack-mismatch',
+                `${id}: ESP รายงานตารางไม่ตรงกับที่ส่ง (ครั้งที่ ${pending.mismatchCount})`
+              );
+            }
           }
           return;
         }
@@ -269,12 +281,16 @@
       if (FarmState.get().espOnline !== true) return Promise.reject(Error('ESP ออฟไลน์หรือยังไม่มี heartbeat ล่าสุด'));
       if (this.pendingSchedules.has(id)) return Promise.reject(Error('กำลังรอ ESP ยืนยันตารางเวลานี้'));
 
-      const request = { target, resolve: null, timer: null };
+      const request = { target, resolve: null, reject: null, timer: null, lastReported: null, mismatchCount: 0 };
       const promise = new Promise((resolve, reject) => {
         request.resolve = resolve;
+        request.reject = reject;
         request.timer = setTimeout(() => {
           this.pendingSchedules.delete(id);
-          reject(Error('ยังไม่ได้รับ schedule/status ยืนยันจาก ESP ภายในเวลาที่กำหนด'));
+          const reported = request.lastReported
+            ? ' ESP รายงานตารางกลับมาแต่ไม่ตรงกับค่าที่ส่ง'
+            : ' ไม่ได้รับ schedule/status กลับจาก ESP';
+          reject(Error(`บันทึกไม่สำเร็จ:${reported} ตรวจสอบว่า ESP ใช้เฟิร์มแวร์ที่รองรับตาราง MQTT และดูสถานะอุปกรณ์`));
         }, cfg.scheduleCommandTimeoutMs || cfg.commandTimeoutMs);
       });
       this.pendingSchedules.set(id, request);
@@ -282,7 +298,7 @@
         if (!error) return;
         clearTimeout(request.timer);
         this.pendingSchedules.delete(id);
-        request.resolve(false);
+        request.reject(Error(`ส่งตารางผ่าน MQTT ไม่สำเร็จ: ${error.message || String(error)}`));
         FarmState.addError('mqtt-schedule-publish', error.message || String(error));
       });
       return promise;
