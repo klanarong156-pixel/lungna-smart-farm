@@ -1,0 +1,35 @@
+name: MQTT reconnect regression tests
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'dashboard/js/mqtt.js'
+      - 'dashboard/js/state.js'
+      - 'tests/**'
+      - '.github/workflows/mqtt-regression.yml'
+  push:
+    branches: ['fix/mqtt-transient-error-state']
+    paths:
+      - 'dashboard/js/mqtt.js'
+      - 'dashboard/js/state.js'
+      - 'tests/**'
+      - '.github/workflows/mqtt-regression.yml'
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Check JavaScript syntax
+        run: |
+          node --check dashboard/js/config.js
+          node --check dashboard/js/state.js
+          node --check dashboard/js/mqtt.js
+      - name: Run MQTT contract regression test
+        run: node tests/mqtt-contract.test.cjs
+      - name: Run state contract regression test
+        run: node tests/state-contract.test.cjs
