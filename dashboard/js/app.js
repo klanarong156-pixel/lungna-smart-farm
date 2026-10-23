@@ -116,7 +116,16 @@
     if (!Array.isArray(slots)) { editor.innerHTML = `<div class="schedule-empty">${s.espOnline === true ? 'กำลังรอ schedule/status จาก ESP สำหรับ' : 'เชื่อมต่อ MQTT และรอ ESP online เพื่ออ่านตารางของ'} ${esc(relay?.label || id)}</div>`; $('scheduleFeedback').textContent = scheduleFeedback; return; }
     const locked = pending || s.connection !== 'online' || s.espOnline !== true;
     const timePreset = (hour,index) => { const start = hour * 60 + index * 30; const format = minute => `${String(Math.floor(minute / 60) % 24).padStart(2,'0')}:${String(minute % 60).padStart(2,'0')}`; return { on: format(start), off: format(start + 30) }; };
-    editor.innerHTML = `<form id="scheduleForm" data-schedule-id="${esc(id)}"><div class="schedule-slot-list">${slots.map((slot,index) => `<fieldset class="schedule-slot"><legend>ช่วงที่ ${index+1}</legend><label class="schedule-toggle"><input type="checkbox" data-slot-toggle="${index}" ${slot.enabled?'checked':''} ${locked?'disabled':''}><span>เปิดใช้งานช่วงนี้</span></label><div class="schedule-time-fields"><label>เริ่ม<input type="time" data-slot-time="${index}" data-field="on" value="${esc(slot.on)}" ${!slot.enabled||locked?'disabled':''} ${slot.enabled?'required':''}></label><label>สิ้นสุด<input type="time" data-slot-time="${index}" data-field="off" value="${esc(slot.off)}" ${!slot.enabled||locked?'disabled':''} ${slot.enabled?'required':''}></label></div><div class="schedule-presets" role="group" aria-label="เติมเวลาแนะนำ ช่วงที่ ${index+1}"><span>เติมเวลาเร็ว</span><button type="button" data-slot-preset="${index}" data-on="${timePreset(6,index).on}" data-off="${timePreset(6,index).off}" ${locked?'disabled':''}>เช้า ${timePreset(6,index).on}–${timePreset(6,index).off}</button><button type="button" data-slot-preset="${index}" data-on="${timePreset(17,index).on}" data-off="${timePreset(17,index).off}" ${locked?'disabled':''}>เย็น ${timePreset(17,index).on}–${timePreset(17,index).off}</button></div></fieldset>`).join('')}</div><button class="button primary schedule-save" type="submit" ${locked?'disabled':''}>${pending?'กำลังรอ ESP ยืนยัน…':`บันทึกตาราง ${esc(relay?.label||id)}`}</button></form>`;
+    const enabledCount = slots.filter(slot => slot.enabled).length;
+    editor.innerHTML = `<form id="scheduleForm" data-schedule-id="${esc(id)}">
+      <div class="schedule-helper"><b>ตั้งเวลา 3 ขั้นตอน</b><span>เลือกช่วงเวลา → กดเพิ่มรอบหากต้องการ → บันทึกและรอ ESP ยืนยัน</span></div>
+      <div class="schedule-quick-actions" role="group" aria-label="ตั้งตารางด่วน">
+        <button type="button" data-add-schedule-slot ${locked||enabledCount>=slots.length?'disabled':''}>＋ เพิ่มรอบเวลา</button>
+        <button type="button" data-schedule-preset="morning" ${locked?'disabled':''}>☀ ตั้งรอบเช้า 06:00–06:20</button>
+        <button type="button" data-schedule-preset="evening" ${locked?'disabled':''}>☾ ตั้งรอบเย็น 17:00–17:20</button>
+      </div>
+      <p class="schedule-count">${enabledCount} / ${slots.length} รอบเปิดใช้งาน</p>
+      <div class="schedule-slot-list">${slots.map((slot,index) => `<fieldset class="schedule-slot" data-schedule-slot="${index}" ${!slot.enabled?'data-disabled-slot="true"':''}><legend>รอบที่ ${index+1} ${slot.enabled?'<span class="schedule-active-label">เปิดใช้งาน</span>':'<span class="schedule-inactive-label">ยังไม่ตั้ง</span>'}</legend><label class="schedule-toggle"><input type="checkbox" data-slot-toggle="${index}" ${slot.enabled?'checked':''} ${locked?'disabled':''}><span>${slot.enabled?'เปิดใช้งานรอบนี้':'แตะเพื่อเปิดรอบนี้'}</span></label><div class="schedule-time-fields"><label>เวลาเปิด<input type="time" data-slot-time="${index}" data-field="on" value="${esc(slot.on)}" ${!slot.enabled||locked?'disabled':''} ${slot.enabled?'required':''}></label><label>เวลาปิด<input type="time" data-slot-time="${index}" data-field="off" value="${esc(slot.off)}" ${!slot.enabled||locked?'disabled':''} ${slot.enabled?'required':''}></label></div><div class="schedule-presets" role="group" aria-label="เติมเวลาแนะนำ รอบที่ ${index+1}"><button type="button" data-slot-preset="${index}" data-on="${timePreset(6,index).on}" data-off="${timePreset(6,index).off}" ${locked?'disabled':''}>เช้า ${timePreset(6,index).on}–${timePreset(6,index).off}</button><button type="button" data-slot-preset="${index}" data-on="${timePreset(17,index).on}" data-off="${timePreset(17,index).off}" ${locked?'disabled':''}>เย็น ${timePreset(17,index).on}–${timePreset(17,index).off}</button><button type="button" class="schedule-remove-slot" data-remove-schedule-slot="${index}" ${locked||!slot.enabled?'disabled':''}>ปิดรอบนี้</button></div></fieldset>`).join('')}</div><button class="button primary schedule-save" type="submit" ${locked?'disabled':''}>${pending?'กำลังรอ ESP ยืนยัน…':`บันทึกตาราง ${esc(relay?.label||id)}`}</button></form>`;
     $('scheduleFeedback').textContent = pending ? 'ส่งตารางแล้ว · กำลังรอ schedule/status จาก ESP' : scheduleFeedback;
   }
   $('scheduleRelay').addEventListener('change', () => { scheduleFeedback = ''; renderScheduleEditor(FarmState.get()); });
@@ -126,6 +135,66 @@
     document.querySelectorAll(`[data-slot-time="${index}"]`).forEach(input => { input.disabled = !enabled || schedulePending.has($('scheduleRelay').value); input.required = enabled; });
   });
   $('scheduleEditor').addEventListener('click', event => {
+    const refreshDraftUI = () => {
+      const slots = [...$('scheduleEditor').querySelectorAll('[data-slot-toggle]')];
+      const count = slots.filter(input => input.checked).length;
+      const countLabel = $('scheduleEditor').querySelector('.schedule-count');
+      if (countLabel) countLabel.textContent = `${count} / ${slots.length} รอบเปิดใช้งาน`;
+      slots.forEach(input => {
+        const index = input.dataset.slotToggle, enabled = input.checked;
+        const fieldset = input.closest('.schedule-slot');
+        const legend = fieldset?.querySelector('legend');
+        if (legend) legend.innerHTML = `รอบที่ ${Number(index)+1} ${enabled?'<span class="schedule-active-label">เปิดใช้งาน</span>':'<span class="schedule-inactive-label">ยังไม่ตั้ง</span>'}`;
+        const toggleText = input.parentElement?.querySelector('span');
+        if (toggleText) toggleText.textContent = enabled ? 'เปิดใช้งานรอบนี้' : 'แตะเพื่อเปิดรอบนี้';
+        fieldset?.querySelectorAll('[data-slot-time]').forEach(time => { time.disabled = !enabled; time.required = enabled; });
+        const remove = fieldset?.querySelector('[data-remove-schedule-slot]');
+        if (remove) remove.disabled = !enabled;
+      });
+    };
+    const add = event.target.closest('[data-add-schedule-slot]');
+    if (add && !add.disabled) {
+      const first = [...$('scheduleEditor').querySelectorAll('[data-slot-toggle]')].find(input => !input.checked);
+      if (first) {
+        first.checked = true;
+        first.dispatchEvent(new Event('change', { bubbles: true }));
+        const index = first.dataset.slotToggle;
+        const on = $('scheduleEditor').querySelector(`[data-slot-time="${index}"][data-field="on"]`);
+        const off = $('scheduleEditor').querySelector(`[data-slot-time="${index}"][data-field="off"]`);
+        on.value = index === '0' ? '06:00' : index === '1' ? '12:00' : index === '2' ? '17:00' : '20:00';
+        off.value = index === '0' ? '06:20' : index === '1' ? '12:20' : index === '2' ? '17:20' : '20:20';
+        scheduleFeedback = 'เพิ่มรอบแล้ว · ตรวจเวลาแล้วกดบันทึกตาราง';
+        refreshDraftUI();
+      }
+      return;
+    }
+    const bulk = event.target.closest('[data-schedule-preset]');
+    if (bulk && !bulk.disabled) {
+      const morning = bulk.dataset.schedulePreset === 'morning';
+      const starts = morning ? ['06:00','06:30','07:00','07:30'] : ['17:00','17:30','18:00','18:30'];
+      const ends = morning ? ['06:20','06:50','07:20','07:50'] : ['17:20','17:50','18:20','18:50'];
+      const inputs = $('scheduleEditor').querySelectorAll('[data-slot-toggle]');
+      inputs.forEach((input,index) => {
+        input.checked = index === 0;
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+        const on = $('scheduleEditor').querySelector(`[data-slot-time="${index}"][data-field="on"]`);
+        const off = $('scheduleEditor').querySelector(`[data-slot-time="${index}"][data-field="off"]`);
+        on.value = starts[index]; off.value = ends[index];
+      });
+      scheduleFeedback = `ตั้งรอบ${morning?'เช้า':'เย็น'}แล้ว · ตรวจสอบก่อนบันทึก`;
+      refreshDraftUI();
+      return;
+    }
+    const remove = event.target.closest('[data-remove-schedule-slot]');
+    if (remove && !remove.disabled) {
+      const index = remove.dataset.removeScheduleSlot;
+      const checkbox = $('scheduleEditor').querySelector(`[data-slot-toggle="${index}"]`);
+      checkbox.checked = false;
+      checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+      scheduleFeedback = 'ปิดรอบที่เลือกแล้ว · กดบันทึกเพื่อส่งการเปลี่ยนแปลงไปยัง ESP';
+      renderScheduleEditor(FarmState.get());
+      return;
+    }
     const preset = event.target.closest('[data-slot-preset]'); if (!preset || preset.disabled) return;
     const index = preset.dataset.slotPreset, checkbox = $('scheduleEditor').querySelector(`[data-slot-toggle="${index}"]`);
     if (!checkbox || checkbox.disabled) return;
