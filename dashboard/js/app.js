@@ -6,7 +6,7 @@
   const labels = { offline: 'ออฟไลน์', connecting: 'กำลังเชื่อมต่อ', online: 'ออนไลน์', reconnecting: 'กำลังเชื่อมต่อใหม่', error: 'ผิดพลาด' };
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
   const relayPending = new Set(), schedulePending = new Set();
-  let modePending = null, scheduleFeedback = '', toastTimer, activeFilter = 'all', selectedFarmRelay = null, scheduleDraftActive = false;
+  let modePending = null, scheduleFeedback = '', toastTimer, activeFilter = 'all', selectedFarmRelay = null, scheduleDraftActive = false, scheduleDraft = null;
   let lastConnection = null, connectedSince = null, reconnectCount = 0, sensorUpdatedAt = null, lastHeartbeatSeen = 0;
   const EVENT_STORAGE_KEY = 'sf.dashboard.events.v1', SENSOR_STORAGE_KEY = 'sf.dashboard.sensor-history.v1';
   const HISTORY_WINDOW_MS = 24 * 60 * 60 * 1000, EVENT_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
@@ -109,8 +109,11 @@
     const action = val === true ? 'ปิด' : 'เปิด';
     return `<article class="card relay-card" data-relay="${esc(r.id)}" tabindex="-1"><div class="relay-top"><span class="relay-icon">${esc(r.icon)}</span></div><div class="relay-control"><div><div class="relay-name">${esc(r.label)}</div><div class="relay-state ${val === true ? 'on' : val === false ? 'off' : ''}">${pending ? 'กำลังรอ ESP ยืนยัน…' : state}</div></div><button class="relay-switch" data-state="${dataState}" data-relay-toggle="${esc(r.id)}" aria-pressed="${pressed}" aria-label="${esc(r.label)} · ${esc(state)} · ${pending ? 'กำลังรอ ESP ยืนยัน' : `กดเพื่อ${action}`}" ${pending || s.connection !== 'online' || s.espOnline !== true || val === null ? 'disabled' : ''}>${pending ? 'รอ ESP' : val === true ? 'เปิด' : 'ปิด'}</button></div></article>`;
   }
-  function renderScheduleEditor(s) {
-    const id = $('scheduleRelay').value, relay = SmartFarmConfig.relays.find(item => item.id === id), slots = s.schedules?.[id]?.slots, pending = schedulePending.has(id);
+  function renderScheduleEditor(s, force = false) {
+    const id = $('scheduleRelay').value, relay = SmartFarmConfig.relays.find(item => item.id === id), pending = schedulePending.has(id);
+    if (scheduleDraft?.id !== id) scheduleDraft = null;
+    if (scheduleDraftActive && !force && scheduleDraft?.id === id) { $('scheduleFeedback').textContent = scheduleFeedback; return; }
+    const slots = scheduleDraft?.id === id ? scheduleDraft.slots : s.schedules?.[id]?.slots;
     $('scheduleModeHint').textContent = s.mode === 'AUTO' ? 'โหมด AUTO · ตารางที่บันทึกจะถูกใช้โดย ESP ตามเวลาของอุปกรณ์' : s.mode === 'MANUAL' ? 'โหมด MANUAL · ตารางจะทำงานเมื่อเปลี่ยน ESP กลับเป็น AUTO' : 'รอสถานะ AUTO/MANUAL จาก ESP';
     const editor = $('scheduleEditor');
     if (!Array.isArray(slots)) { editor.innerHTML = `<div class="schedule-empty">${s.espOnline === true ? 'กำลังรอ schedule/status จาก ESP สำหรับ' : 'เชื่อมต่อ MQTT และรอ ESP online เพื่ออ่านตารางของ'} ${esc(relay?.label || id)}</div>`; $('scheduleFeedback').textContent = scheduleFeedback; return; }
@@ -128,11 +131,26 @@
       <div class="schedule-slot-list">${slots.map((slot,index) => `<fieldset class="schedule-slot" data-schedule-slot="${index}" ${!slot.enabled?'data-disabled-slot="true"':''}><legend>รอบที่ ${index+1} ${slot.enabled?'<span class="schedule-active-label">เปิดใช้งาน</span>':'<span class="schedule-inactive-label">ยังไม่ตั้ง</span>'}</legend><label class="schedule-toggle"><input type="checkbox" data-slot-toggle="${index}" ${slot.enabled?'checked':''} ${locked?'disabled':''}><span>${slot.enabled?'เปิดใช้งานรอบนี้':'แตะเพื่อเปิดรอบนี้'}</span></label><div class="schedule-time-fields"><label>เวลาเปิด<input type="time" data-slot-time="${index}" data-field="on" value="${esc(slot.on)}" ${!slot.enabled||locked?'disabled':''} ${slot.enabled?'required':''}></label><label>เวลาปิด<input type="time" data-slot-time="${index}" data-field="off" value="${esc(slot.off)}" ${!slot.enabled||locked?'disabled':''} ${slot.enabled?'required':''}></label></div><div class="schedule-presets" role="group" aria-label="เติมเวลาแนะนำ รอบที่ ${index+1}"><button type="button" data-slot-preset="${index}" data-on="${timePreset(6,index).on}" data-off="${timePreset(6,index).off}" ${locked?'disabled':''}>เช้า ${timePreset(6,index).on}–${timePreset(6,index).off}</button><button type="button" data-slot-preset="${index}" data-on="${timePreset(17,index).on}" data-off="${timePreset(17,index).off}" ${locked?'disabled':''}>เย็น ${timePreset(17,index).on}–${timePreset(17,index).off}</button><button type="button" class="schedule-remove-slot" data-remove-schedule-slot="${index}" ${locked||!slot.enabled?'disabled':''}>ปิดรอบนี้</button></div></fieldset>`).join('')}</div><button class="button primary schedule-save" type="submit" ${locked?'disabled':''}>${pending?'กำลังรอ ESP ยืนยัน…':`บันทึกตาราง ${esc(relay?.label||id)}`}</button></form>`;
     $('scheduleFeedback').textContent = pending ? 'ส่งตารางแล้ว · กำลังรอ schedule/status จาก ESP' : scheduleFeedback;
   }
-  $('scheduleEditor').addEventListener('pointerdown', event => { if (event.target.matches('[data-slot-toggle], [data-slot-time]')) scheduleDraftActive = true; });
-  $('scheduleEditor').addEventListener('focusin', event => { if (event.target.matches('[data-slot-toggle], [data-slot-time]')) scheduleDraftActive = true; });
-  $('scheduleEditor').addEventListener('input', event => { if (event.target.matches('[data-slot-toggle], [data-slot-time]')) scheduleDraftActive = true; });
-  $('scheduleEditor').addEventListener('change', event => { if (event.target.matches('[data-slot-toggle], [data-slot-time]')) scheduleDraftActive = true; });
-  $('scheduleRelay').addEventListener('change', () => { scheduleDraftActive = false; scheduleFeedback = ''; renderScheduleEditor(FarmState.get()); });
+  function beginScheduleDraft() {
+    const id = $('scheduleRelay').value;
+    if (scheduleDraft?.id === id) return;
+    const slots = FarmState.get().schedules?.[id]?.slots;
+    if (Array.isArray(slots)) scheduleDraft = { id, slots: slots.map(slot => ({ ...slot })) };
+  }
+  function captureScheduleDraft() {
+    const form = $('scheduleEditor').querySelector('#scheduleForm'); if (!form) return;
+    const id = form.dataset.scheduleId;
+    scheduleDraft = { id, slots: Array.from({ length: SmartFarmConfig.scheduleSlotCount }, (_, index) => ({
+      enabled: Boolean(form.querySelector(`[data-slot-toggle="${index}"]`)?.checked),
+      on: form.querySelector(`[data-slot-time="${index}"][data-field="on"]`)?.value || '00:00',
+      off: form.querySelector(`[data-slot-time="${index}"][data-field="off"]`)?.value || '00:00'
+    })) };
+  }
+  $('scheduleEditor').addEventListener('pointerdown', event => { if (event.target.matches('[data-slot-toggle], [data-slot-time]')) { beginScheduleDraft(); scheduleDraftActive = true; } });
+  $('scheduleEditor').addEventListener('focusin', event => { if (event.target.matches('[data-slot-toggle], [data-slot-time]')) { beginScheduleDraft(); scheduleDraftActive = true; } });
+  $('scheduleEditor').addEventListener('input', event => { if (event.target.matches('[data-slot-toggle], [data-slot-time]')) { beginScheduleDraft(); scheduleDraftActive = true; captureScheduleDraft(); } });
+  $('scheduleEditor').addEventListener('change', event => { if (event.target.matches('[data-slot-toggle], [data-slot-time]')) { beginScheduleDraft(); scheduleDraftActive = true; captureScheduleDraft(); } });
+  $('scheduleRelay').addEventListener('change', () => { scheduleDraftActive = false; scheduleDraft = null; scheduleFeedback = ''; renderScheduleEditor(FarmState.get()); });
   $('scheduleEditor').addEventListener('change', event => {
     const checkbox = event.target.closest('[data-slot-toggle]'); if (!checkbox) return;
     const index = checkbox.dataset.slotToggle, enabled = checkbox.checked;
@@ -168,7 +186,7 @@
         on.value = index === '0' ? '06:00' : index === '1' ? '12:00' : index === '2' ? '17:00' : '20:00';
         off.value = index === '0' ? '06:20' : index === '1' ? '12:20' : index === '2' ? '17:20' : '20:20';
         scheduleFeedback = 'เพิ่มรอบแล้ว · ตรวจเวลาแล้วกดบันทึกตาราง';
-        refreshDraftUI();
+        refreshDraftUI(); captureScheduleDraft();
       }
       return;
     }
@@ -186,7 +204,7 @@
         on.value = starts[index]; off.value = ends[index];
       });
       scheduleFeedback = `ตั้งรอบ${morning?'เช้า':'เย็น'}แล้ว · ตรวจสอบก่อนบันทึก`;
-      refreshDraftUI();
+      refreshDraftUI(); captureScheduleDraft();
       return;
     }
     const remove = event.target.closest('[data-remove-schedule-slot]');
@@ -196,7 +214,8 @@
       checkbox.checked = false;
       checkbox.dispatchEvent(new Event('change', { bubbles: true }));
       scheduleFeedback = 'ปิดรอบที่เลือกแล้ว · กดบันทึกเพื่อส่งการเปลี่ยนแปลงไปยัง ESP';
-      renderScheduleEditor(FarmState.get());
+      captureScheduleDraft(); scheduleDraftActive = true;
+      renderScheduleEditor(FarmState.get(), true);
       return;
     }
     const preset = event.target.closest('[data-slot-preset]'); if (!preset || preset.disabled) return;
@@ -206,18 +225,22 @@
     checkbox.dispatchEvent(new Event('change', { bubbles: true }));
     $('scheduleEditor').querySelector(`[data-slot-time="${index}"][data-field="on"]`).value = preset.dataset.on;
     $('scheduleEditor').querySelector(`[data-slot-time="${index}"][data-field="off"]`).value = preset.dataset.off;
+    captureScheduleDraft(); scheduleDraftActive = true;
   });
   $('scheduleEditor').addEventListener('submit', async event => {
     if (event.target.id !== 'scheduleForm') return;
     event.preventDefault(); const id = event.target.dataset.scheduleId, state = FarmState.get();
     if (state.connection !== 'online' || state.espOnline !== true) { scheduleFeedback = 'ต้องเชื่อมต่อ MQTT และ ESP ก่อนบันทึก'; renderScheduleEditor(state); return; }
     if (!state.schedules[id]) { scheduleFeedback = 'ยังไม่ได้รับ schedule/status จาก ESP'; renderScheduleEditor(state); return; }
-    const slots = Array.from({length: SmartFarmConfig.scheduleSlotCount}, (_,index) => { const enabled = event.target.querySelector(`[data-slot-toggle="${index}"]`).checked; return { enabled, on: event.target.querySelector(`[data-slot-time="${index}"][data-field="on"]`).value || '00:00', off: event.target.querySelector(`[data-slot-time="${index}"][data-field="off"]`).value || '00:00' }; });
+    captureScheduleDraft();
+    const slots = scheduleDraft.slots;
     let normalized; try { normalized = FarmState.normalizeSchedule(id,{slots}); } catch(error) { scheduleFeedback = error.message; toast(error.message); renderScheduleEditor(state); return; }
-    schedulePending.add(id); scheduleFeedback = 'กำลังส่งตารางไปยัง ESP…'; renderScheduleEditor(FarmState.get());
-    try { const confirmed = await FarmMqtt.commandSchedule(id,normalized); if (!confirmed) throw Error('ESP ยังไม่ยืนยันตารางเวลานี้'); scheduleFeedback = 'ESP ยืนยันและรายงานตารางใหม่แล้ว'; addEvent('system','ESP ยืนยันตารางเวลา',SmartFarmConfig.relays.find(x=>x.id===id)?.label || id,'ok'); toast('บันทึกตารางเวลาเรียบร้อย'); }
+    scheduleDraft = { id, slots: normalized.slots.map(slot => ({ ...slot })) };
+    schedulePending.add(id); scheduleFeedback = 'กำลังส่งตารางไปยัง ESP…'; renderScheduleEditor(FarmState.get(), true);
+    let confirmed = false;
+    try { confirmed = await FarmMqtt.commandSchedule(id,normalized); if (!confirmed) throw Error('ESP ยังไม่ยืนยันตารางเวลานี้'); scheduleFeedback = 'ESP ยืนยันและรายงานตารางใหม่แล้ว'; addEvent('system','ESP ยืนยันตารางเวลา',SmartFarmConfig.relays.find(x=>x.id===id)?.label || id,'ok'); toast('บันทึกตารางเวลาเรียบร้อย'); }
     catch(error) { scheduleFeedback = `บันทึกไม่สำเร็จ: ${error.message}`; FarmState.addError('schedule-command',error.message); toast(error.message); }
-    finally { schedulePending.delete(id); scheduleDraftActive = false; renderScheduleEditor(FarmState.get()); }
+    finally { schedulePending.delete(id); if (confirmed) { scheduleDraftActive = false; scheduleDraft = null; } else scheduleDraftActive = true; renderScheduleEditor(FarmState.get(), true); }
   });
   function bindRelayButtons() {
     document.querySelectorAll('[data-relay-toggle]').forEach(btn => btn.addEventListener('click', async () => {

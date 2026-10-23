@@ -31,6 +31,7 @@ jobs:
           node --check dashboard/js/app.js
           node --check dashboard/sw.js
           node tests/state-contract.test.cjs
+          node tests/schedule-editor-regression.test.cjs
           node tests/mqtt-contract.test.cjs
           node tests/paths.test.cjs
           node tests/dashboard-pages.test.cjs
