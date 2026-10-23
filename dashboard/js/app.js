@@ -6,7 +6,7 @@
   const labels = { offline: 'ออฟไลน์', connecting: 'กำลังเชื่อมต่อ', online: 'ออนไลน์', reconnecting: 'กำลังเชื่อมต่อใหม่', error: 'ผิดพลาด' };
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
   const relayPending = new Set(), schedulePending = new Set();
-  let modePending = null, scheduleFeedback = '', toastTimer, activeFilter = 'all', selectedFarmRelay = null;
+  let modePending = null, scheduleFeedback = '', toastTimer, activeFilter = 'all', selectedFarmRelay = null, scheduleDraftActive = false;
   let lastConnection = null, connectedSince = null, reconnectCount = 0, sensorUpdatedAt = null, lastHeartbeatSeen = 0;
   const EVENT_STORAGE_KEY = 'sf.dashboard.events.v1', SENSOR_STORAGE_KEY = 'sf.dashboard.sensor-history.v1';
   const HISTORY_WINDOW_MS = 24 * 60 * 60 * 1000, EVENT_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
@@ -128,7 +128,11 @@
       <div class="schedule-slot-list">${slots.map((slot,index) => `<fieldset class="schedule-slot" data-schedule-slot="${index}" ${!slot.enabled?'data-disabled-slot="true"':''}><legend>รอบที่ ${index+1} ${slot.enabled?'<span class="schedule-active-label">เปิดใช้งาน</span>':'<span class="schedule-inactive-label">ยังไม่ตั้ง</span>'}</legend><label class="schedule-toggle"><input type="checkbox" data-slot-toggle="${index}" ${slot.enabled?'checked':''} ${locked?'disabled':''}><span>${slot.enabled?'เปิดใช้งานรอบนี้':'แตะเพื่อเปิดรอบนี้'}</span></label><div class="schedule-time-fields"><label>เวลาเปิด<input type="time" data-slot-time="${index}" data-field="on" value="${esc(slot.on)}" ${!slot.enabled||locked?'disabled':''} ${slot.enabled?'required':''}></label><label>เวลาปิด<input type="time" data-slot-time="${index}" data-field="off" value="${esc(slot.off)}" ${!slot.enabled||locked?'disabled':''} ${slot.enabled?'required':''}></label></div><div class="schedule-presets" role="group" aria-label="เติมเวลาแนะนำ รอบที่ ${index+1}"><button type="button" data-slot-preset="${index}" data-on="${timePreset(6,index).on}" data-off="${timePreset(6,index).off}" ${locked?'disabled':''}>เช้า ${timePreset(6,index).on}–${timePreset(6,index).off}</button><button type="button" data-slot-preset="${index}" data-on="${timePreset(17,index).on}" data-off="${timePreset(17,index).off}" ${locked?'disabled':''}>เย็น ${timePreset(17,index).on}–${timePreset(17,index).off}</button><button type="button" class="schedule-remove-slot" data-remove-schedule-slot="${index}" ${locked||!slot.enabled?'disabled':''}>ปิดรอบนี้</button></div></fieldset>`).join('')}</div><button class="button primary schedule-save" type="submit" ${locked?'disabled':''}>${pending?'กำลังรอ ESP ยืนยัน…':`บันทึกตาราง ${esc(relay?.label||id)}`}</button></form>`;
     $('scheduleFeedback').textContent = pending ? 'ส่งตารางแล้ว · กำลังรอ schedule/status จาก ESP' : scheduleFeedback;
   }
-  $('scheduleRelay').addEventListener('change', () => { scheduleFeedback = ''; renderScheduleEditor(FarmState.get()); });
+  $('scheduleEditor').addEventListener('pointerdown', event => { if (event.target.matches('[data-slot-toggle], [data-slot-time]')) scheduleDraftActive = true; });
+  $('scheduleEditor').addEventListener('focusin', event => { if (event.target.matches('[data-slot-toggle], [data-slot-time]')) scheduleDraftActive = true; });
+  $('scheduleEditor').addEventListener('input', event => { if (event.target.matches('[data-slot-toggle], [data-slot-time]')) scheduleDraftActive = true; });
+  $('scheduleEditor').addEventListener('change', event => { if (event.target.matches('[data-slot-toggle], [data-slot-time]')) scheduleDraftActive = true; });
+  $('scheduleRelay').addEventListener('change', () => { scheduleDraftActive = false; scheduleFeedback = ''; renderScheduleEditor(FarmState.get()); });
   $('scheduleEditor').addEventListener('change', event => {
     const checkbox = event.target.closest('[data-slot-toggle]'); if (!checkbox) return;
     const index = checkbox.dataset.slotToggle, enabled = checkbox.checked;
@@ -213,7 +217,7 @@
     schedulePending.add(id); scheduleFeedback = 'กำลังส่งตารางไปยัง ESP…'; renderScheduleEditor(FarmState.get());
     try { const confirmed = await FarmMqtt.commandSchedule(id,normalized); if (!confirmed) throw Error('ESP ยังไม่ยืนยันตารางเวลานี้'); scheduleFeedback = 'ESP ยืนยันและรายงานตารางใหม่แล้ว'; addEvent('system','ESP ยืนยันตารางเวลา',SmartFarmConfig.relays.find(x=>x.id===id)?.label || id,'ok'); toast('บันทึกตารางเวลาเรียบร้อย'); }
     catch(error) { scheduleFeedback = `บันทึกไม่สำเร็จ: ${error.message}`; FarmState.addError('schedule-command',error.message); toast(error.message); }
-    finally { schedulePending.delete(id); renderScheduleEditor(FarmState.get()); }
+    finally { schedulePending.delete(id); scheduleDraftActive = false; renderScheduleEditor(FarmState.get()); }
   });
   function bindRelayButtons() {
     document.querySelectorAll('[data-relay-toggle]').forEach(btn => btn.addEventListener('click', async () => {
@@ -344,7 +348,7 @@
 
     $('connectedSince').textContent = connectedSince ? new Date(connectedSince).toLocaleString('th-TH') : 'ยังไม่มีข้อมูล'; $('reconnectCount').textContent = String(reconnectCount); $('connectionHeartbeat').textContent = s.heartbeatAt ? new Date(s.heartbeatAt).toLocaleString('th-TH') : 'ยังไม่มีข้อมูล'; $('heartbeatAge').textContent = s.heartbeatAt ? `${Math.max(0,Math.floor((Date.now()-s.heartbeatAt)/1000))} วินาที` : 'ยังไม่มีข้อมูล';
     $('lastError').textContent = s.errors?.length ? `${s.errors[0].kind}: ${s.errors[0].message}` : 'ยังไม่มีข้อมูล';
-    if ($('scheduleRelay')) renderScheduleEditor(s);
+    if ($('scheduleRelay') && !scheduleDraftActive) renderScheduleEditor(s);
     renderHomeInsights(s);
   }
   document.querySelectorAll('[data-mode]').forEach(button => button.addEventListener('click', async () => { modePending = button.dataset.mode; render(FarmState.get()); try { const ok = await FarmMqtt.commandMode(modePending); if (ok) { addEvent('relay','ESP ยืนยันโหมด',button.dataset.mode,'ok'); toast(`ESP ยืนยันโหมด ${button.dataset.mode}`); } else toast('ไม่สามารถยืนยันโหมดจาก ESP ได้'); } catch(error) { FarmState.addError('mode-command',error.message); toast(error.message); } finally { modePending = null; render(FarmState.get()); } }));
