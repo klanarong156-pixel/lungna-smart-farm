@@ -135,6 +135,23 @@
     document.querySelectorAll(`[data-slot-time="${index}"]`).forEach(input => { input.disabled = !enabled || schedulePending.has($('scheduleRelay').value); input.required = enabled; });
   });
   $('scheduleEditor').addEventListener('click', event => {
+    const refreshDraftUI = () => {
+      const slots = [...$('scheduleEditor').querySelectorAll('[data-slot-toggle]')];
+      const count = slots.filter(input => input.checked).length;
+      const countLabel = $('scheduleEditor').querySelector('.schedule-count');
+      if (countLabel) countLabel.textContent = `${count} / ${slots.length} รอบเปิดใช้งาน`;
+      slots.forEach(input => {
+        const index = input.dataset.slotToggle, enabled = input.checked;
+        const fieldset = input.closest('.schedule-slot');
+        const legend = fieldset?.querySelector('legend');
+        if (legend) legend.innerHTML = `รอบที่ ${Number(index)+1} ${enabled?'<span class="schedule-active-label">เปิดใช้งาน</span>':'<span class="schedule-inactive-label">ยังไม่ตั้ง</span>'}`;
+        const toggleText = input.parentElement?.querySelector('span');
+        if (toggleText) toggleText.textContent = enabled ? 'เปิดใช้งานรอบนี้' : 'แตะเพื่อเปิดรอบนี้';
+        fieldset?.querySelectorAll('[data-slot-time]').forEach(time => { time.disabled = !enabled; time.required = enabled; });
+        const remove = fieldset?.querySelector('[data-remove-schedule-slot]');
+        if (remove) remove.disabled = !enabled;
+      });
+    };
     const add = event.target.closest('[data-add-schedule-slot]');
     if (add && !add.disabled) {
       const first = [...$('scheduleEditor').querySelectorAll('[data-slot-toggle]')].find(input => !input.checked);
@@ -147,7 +164,7 @@
         on.value = index === '0' ? '06:00' : index === '1' ? '12:00' : index === '2' ? '17:00' : '20:00';
         off.value = index === '0' ? '06:20' : index === '1' ? '12:20' : index === '2' ? '17:20' : '20:20';
         scheduleFeedback = 'เพิ่มรอบแล้ว · ตรวจเวลาแล้วกดบันทึกตาราง';
-        renderScheduleEditor(FarmState.get());
+        refreshDraftUI();
       }
       return;
     }
@@ -165,7 +182,7 @@
         on.value = starts[index]; off.value = ends[index];
       });
       scheduleFeedback = `ตั้งรอบ${morning?'เช้า':'เย็น'}แล้ว · ตรวจสอบก่อนบันทึก`;
-      renderScheduleEditor(FarmState.get());
+      refreshDraftUI();
       return;
     }
     const remove = event.target.closest('[data-remove-schedule-slot]');
