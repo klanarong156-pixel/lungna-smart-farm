@@ -117,7 +117,7 @@
           client.end(true);
           FarmState.setConnection('error', 'broker ปฏิเสธ credentials');
           this.resolveAll('MQTT authentication failed');
-        } else FarmState.setConnection('error', message);
+        }
       });
       client.on('message', (topic, payload, packet) => this.message(topic, payload.toString(), Boolean(packet?.retain)));
       return true;
