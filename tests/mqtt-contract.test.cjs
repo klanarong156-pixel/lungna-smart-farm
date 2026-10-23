@@ -62,6 +62,13 @@ manager.client = {
   assert.equal(await relayPromise, true);
   assert.equal(state.get().relays.pump, true);
 
+  // A transient broker reconnect must not erase last-known device state.
+  state.setConnection('reconnecting', 'socket closed');
+  assert.equal(state.get().relays.pump, true, 'reconnecting preserves last-known relay state');
+  assert.equal(state.get().espOnline, true, 'reconnecting does not falsely mark ESP offline');
+  state.setConnection('error', 'transient network error');
+  assert.equal(state.get().relays.pump, true, 'transient error preserves last-known relay state');
+
   const schedule = { slots: [
     { enabled: true, on: '06:00', off: '06:15' },
     { enabled: false, on: '00:00', off: '00:00' },
