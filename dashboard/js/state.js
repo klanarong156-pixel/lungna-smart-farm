@@ -78,7 +78,7 @@
     // Broker connection state and last-known device telemetry are separate.
     // Preserve relay/schedule/mode/ESP values during transient reconnects;
     // explicit ESP offline signals and heartbeat timeout clear device state.
-    if (status === 'offline' && /user|ผู้ใช้|ตัดการเชื่อมต่อแล้ว/i.test(reason)) {
+    if (status === 'offline') {
       state.espOnline = false;
       state.mode = null;
       Object.keys(state.relays).forEach(id => { state.relays[id] = null; });
