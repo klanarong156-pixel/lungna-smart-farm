@@ -884,3 +884,8 @@ body { background: linear-gradient(180deg, #f5f7f0 0%, var(--app-bg) 100%); }
   #page-water .schedule-time-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
   #page-water .schedule-time-fields input[type="time"] { min-height: 56px; font-size: 18px; }
 }
+
+/* Preserve comfortable single-column time inputs on very narrow iPhones. */
+@media (max-width: 350px) {
+  #page-water .schedule-time-fields { grid-template-columns: minmax(0, 1fr); }
+}
