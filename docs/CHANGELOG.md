@@ -1,5 +1,12 @@
 # Changelog
 
+## Security and CI hardening — 2026-10-28
+
+- Replaced insecure Telegram TLS with CA trust-anchor and clock validation.
+- Added Dashboard emergency-stop and firmware-error visibility from MQTT status topics.
+- Added Pull Request dashboard validation and firmware source contract checks.
+- Disabled HTTP OTA by default and normalized compiler date/time for reproducible firmware builds.
+
 ## Mobile Records refinement — 2026-10-19
 
 - Converted the monthly finance summary in the Events tab to a disclosure: open by default on desktop, collapsed by default on phones, while preserving the monthly values and CSV action.

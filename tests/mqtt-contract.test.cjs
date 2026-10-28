@@ -8,7 +8,7 @@ const config = {
     scheduleCommandTimeoutMs: 100,
     topics: {
       online: 'smartfarm/status/online', device: 'smartfarm/status/device', dht11: 'smartfarm/sensor/dht11',
-      modeStatus: 'smartfarm/mode/status', modeSet: 'smartfarm/mode/set',
+      modeStatus: 'smartfarm/mode/status', modeSet: 'smartfarm/mode/set', emergencyStatus: 'smartfarm/emergency/status', systemError: 'smartfarm/system/error',
       relayStatus: id => `smartfarm/relay/${id}/status`, relaySet: id => `smartfarm/relay/${id}/set`,
       scheduleStatus: id => `smartfarm/schedule/${id}/status`, scheduleSet: id => `smartfarm/schedule/${id}/set`
     }, subscriptions: []
@@ -101,5 +101,9 @@ manager.client = {
   await assert.rejects(manager.commandSchedule('pump', schedule), /ESP ออฟไลน์/);
   assert.equal(state.get().schedules.pump, null);
   assert.equal(state.get().mode, null);
+  manager.message('smartfarm/emergency/status', JSON.stringify({ active: true, source: 'mqtt' }), true);
+  assert.equal(state.get().emergency.active, true);
+  manager.message('smartfarm/system/error', JSON.stringify({ code: 'RELAY_BLOCKED', message: 'Emergency Stop active' }), false);
+  assert.equal(state.get().systemError.code, 'RELAY_BLOCKED');
   console.log('PASS MQTT contract: relay/mode/schedule commands, schedule ESP ACK, invalid payload and offline reset');
 })().catch(error => { console.error(error); process.exitCode = 1; });

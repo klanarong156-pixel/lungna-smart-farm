@@ -13,8 +13,8 @@
 | `smartfarm/mode/set` | Dashboard → ESP | `AUTO` / `MANUAL` | no | QoS 1; UI รอ mode/status ยืนยัน |
 | `smartfarm/schedule/{id}/set` | Dashboard → ESP | `{"slots":[{"enabled":true,"on":"06:00","off":"06:15"}, ...]}` หรือ `DELETE` | no | QoS 1; dashboard ส่ง 4 slots แล้วรอ status ที่ตรงกันจาก ESP |
 | `smartfarm/schedule/{id}/status` | ESP → clients | `{"slots":[{"enabled":true,"on":"06:00","off":"06:15"}, ...]}` | yes | มี 4 slots; ส่งเมื่อ MQTT reconnect และหลังบันทึก schedule |
-| `smartfarm/emergency/status` | ESP → clients | emergency JSON | yes | safety lock เป็นของ firmware; dashboard รุ่นนี้ยังไม่ subscribe topic นี้ |
-| `smartfarm/system/error` | ESP → clients | diagnostic JSON | no | dashboard รุ่นนี้ยังไม่ subscribe topic นี้ |
+| `smartfarm/emergency/status` | ESP → clients | emergency JSON | yes | safety lock เป็นของ firmware; dashboard แสดงเป็น critical alert |
+| `smartfarm/system/error` | ESP → clients | diagnostic JSON | no | dashboard แสดงใน system alert และ event timeline |
 
 Schedule/relay IDs: `pump`, `zone1`, `lighthome`, `lightsala`. แต่ละรีเลย์มี 4 slots ต่อวัน; ใช้เวลา `HH:MM` ใน timezone ที่ ESP ตั้งจาก RTC/NTP. Slots ที่เปิดใช้งานห้ามทับซ้อน; ข้ามเที่ยงคืนได้. ตารางทำงานเมื่อ ESP อยู่ AUTO. Dashboard validate ก่อน publish และจะแจ้งสำเร็จเมื่อได้รับ `schedule/status` ตรงกับค่าที่ส่งเท่านั้น; timeout ไม่ถือว่าเป็นการบันทึกสำเร็จ.
 

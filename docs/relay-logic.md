@@ -7,7 +7,7 @@
 | ไฟบ้าน | `lighthome` | D7 / GPIO13 | LOW | HIGH | `smartfarm/relay/lighthome/status` |
 | ไฟศาลา | `lightsala` | D8 / GPIO15 | LOW | HIGH | `smartfarm/relay/lightsala/status` |
 
-หลักฐาน: `firmware/esp8266/src/main.cpp` definitions `RELAY_PUMP` … `RELAY_LIGHT_SALA`, `RELAY_ON LOW`, `RELAY_OFF HIGH`; `relayOn`, `relaySetRaw`, `publishRelayStatus`.
+หลักฐาน: `firmware/esp8266/src/main.ino` definitions `RELAY_PUMP` … `RELAY_LIGHT_SALA`, `RELAY_ON LOW`, `RELAY_OFF HIGH`; `relayOn`, `relaySetRaw`, `publishRelayStatus`.
 
 ## Dashboard contract
 

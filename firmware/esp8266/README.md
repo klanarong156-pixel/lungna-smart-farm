@@ -1,6 +1,6 @@
 # ESP8266 Firmware V7.2.0
 
-Firmware source lives in `src/main.cpp` and is based on the V7.2.0 OTA stable firmware inspected in the read-only reference repository. It retains the original relay, safety, MQTT and provisioning implementation rather than inventing hardware mapping.
+Firmware source lives in `src/main.ino` and is based on the V7.2.0 OTA stable firmware inspected in the read-only reference repository. It retains the original relay, safety, MQTT and provisioning implementation rather than inventing hardware mapping.
 
 ## Board and dependencies
 
@@ -23,6 +23,6 @@ Firmware source lives in `src/main.cpp` and is based on the V7.2.0 OTA stable fi
 
 ## Provisioning and safety
 
-Configure Wi-Fi, MQTT username/password and OTA password using the firmware's WiFiManager setup portal/device procedure. Never commit these secrets. MQTT uses TLS with CA validation and valid system clock; setInsecure must not be used for MQTT. HTTP OTA is intended for trusted farm LAN only; never expose its port publicly. ArduinoOTA uses port 8266 and device-provisioned password. OTA is not declared successful until device reports the actual result.
+Configure Wi-Fi, MQTT username/password and OTA password using the firmware's WiFiManager setup portal/device procedure. Never commit these secrets. MQTT and Telegram use TLS with CA validation and a valid system clock; `setInsecure` must not be used. HTTP OTA is disabled by default; if explicitly enabled for a controlled lab build, keep it on a trusted farm LAN and never expose its port publicly. ArduinoOTA uses port 8266 and a device-provisioned password. OTA is not declared successful until the device reports the actual result.
 
 The static source build must be compiled and verified before claiming a binary release. Physical OTA, TLS broker auth and relay output still require the target device/network for integration verification.

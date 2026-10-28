@@ -8,7 +8,7 @@ on:
       - 'tests/**'
       - '.github/workflows/mqtt-regression.yml'
   push:
-    branches: ['fix/mqtt-transient-error-state']
+    branches: ['**']
     paths:
       - 'dashboard/js/mqtt.js'
       - 'dashboard/js/state.js'

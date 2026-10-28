@@ -284,7 +284,9 @@
   }
   function renderHomeAlert(s) {
     const card = $('homeAlert'); let level = '', title = '', detailText = '';
-    if (s.connection === 'error') { level = 'danger'; title = 'การเชื่อมต่อ MQTT มีปัญหา'; detailText = s.connectionReason || 'ตรวจสอบการเชื่อมต่อในหน้าระบบ'; }
+    if (s.emergency?.active) { level = 'danger'; title = 'Emergency Stop ทำงานอยู่'; detailText = `Firmware ล็อกรีเลย์ทั้งหมด${s.emergency.source ? ` · แหล่งที่มา: ${s.emergency.source}` : ''}`; }
+    else if (s.systemError) { level = 'danger'; title = `Firmware แจ้งเตือน: ${s.systemError.code}`; detailText = s.systemError.message; }
+    else if (s.connection === 'error') { level = 'danger'; title = 'การเชื่อมต่อ MQTT มีปัญหา'; detailText = s.connectionReason || 'ตรวจสอบการเชื่อมต่อในหน้าระบบ'; }
     else if (s.connection === 'reconnecting') { level = 'warning'; title = 'กำลังเชื่อมต่อระบบฟาร์มใหม่'; detailText = s.connectionReason || 'กำลังรอการเชื่อมต่อกลับมา'; }
     else if (s.espOnline === false && (s.heartbeatAt > 0 || s.connection === 'online')) { level = 'danger'; title = 'ESP8266 ออฟไลน์'; detailText = 'ไม่ได้รับ heartbeat ล่าสุด · ตรวจสอบไฟและ Wi-Fi ของตัวควบคุม'; }
     else if (s.connection === 'connecting') { level = 'warning'; title = 'กำลังเชื่อมต่อ MQTT'; detailText = 'รอการยืนยันสถานะจาก ESP8266'; }
@@ -370,6 +372,7 @@
     $('deviceIp').textContent = txt(d.ip); $('connectionDeviceIp').textContent = `IP ${txt(d.ip)}`; $('connectionRssi').textContent = detail(Number.isFinite(d.rssi)?d.rssi:null,' dBm'); $('rtcState').textContent = typeof d.rtc === 'boolean' ? (d.rtc?'พร้อม':'ไม่พร้อม') : 'ยังไม่มีข้อมูล'; $('espClock').textContent = txt(d.time); $('espDate').textContent = txt(d.date); $('sensorStatus').textContent = s.temperature !== null || s.humidity !== null ? 'ได้รับข้อมูล' : 'รอ DHT11'; $('deviceTemp').textContent = temp; $('deviceHumidity').textContent = humid; $('sensorUpdated').textContent = sensorUpdatedAt ? new Date(sensorUpdatedAt).toLocaleString('th-TH') : 'ยังไม่มีข้อมูล';
 
     $('connectedSince').textContent = connectedSince ? new Date(connectedSince).toLocaleString('th-TH') : 'ยังไม่มีข้อมูล'; $('reconnectCount').textContent = String(reconnectCount); $('connectionHeartbeat').textContent = s.heartbeatAt ? new Date(s.heartbeatAt).toLocaleString('th-TH') : 'ยังไม่มีข้อมูล'; $('heartbeatAge').textContent = s.heartbeatAt ? `${Math.max(0,Math.floor((Date.now()-s.heartbeatAt)/1000))} วินาที` : 'ยังไม่มีข้อมูล';
+    $('systemEmergency').textContent = s.emergency ? (s.emergency.active ? 'ทำงานอยู่' : 'ปกติ') : 'ยังไม่มีข้อมูล'; $('systemEmergencySource').textContent = s.emergency?.source ? `แหล่งที่มา: ${s.emergency.source}` : 'รอสถานะจาก ESP8266'; $('systemFirmwareError').textContent = s.systemError?.code || 'ยังไม่มีข้อมูล'; $('systemFirmwareErrorDetail').textContent = s.systemError?.message || 'ยังไม่มีข้อมูล';
     $('lastError').textContent = s.errors?.length ? `${s.errors[0].kind}: ${s.errors[0].message}` : 'ยังไม่มีข้อมูล';
     if ($('scheduleRelay') && !scheduleDraftActive) renderScheduleEditor(s);
     renderHomeInsights(s);
@@ -388,6 +391,7 @@
     } else if (event === 'device:update' && snapshot.heartbeatAt > lastHeartbeatSeen) { lastHeartbeatSeen=snapshot.heartbeatAt; addEvent('esp','ESP Heartbeat',`${snapshot.device?.firmware||'Firmware ไม่รายงาน'}${Number.isFinite(snapshot.device?.rssi)?` · RSSI ${snapshot.device.rssi} dBm`:''}`,'ok',snapshot.heartbeatAt); }
     else if (event === 'esp:offline') addEvent('esp','ESP Offline',snapshot.connectionReason,'error');
     else if (event === 'sensor:update') { sensorUpdatedAt=Date.now(); recordSensorHistory(snapshot); if(snapshot.temperature!==null)addEvent('temperature','DHT11 Temperature',`${snapshot.temperature} °C`,'ok'); if(snapshot.humidity!==null)addEvent('humidity','DHT11 Humidity',`${snapshot.humidity} %`,'ok'); }
+    else if (event === 'emergency:update') addEvent('error', snapshot.emergency?.active ? 'Emergency Stop Active' : 'Emergency Stop Reset', snapshot.emergency?.source || 'ESP8266', snapshot.emergency?.active ? 'error' : 'ok');
     else if (event.startsWith('relay:')) { const id=event.slice(6),relay=SmartFarmConfig.relays.find(r=>r.id===id); addEvent('relay','Relay Status',`${relay?.label||id}: ${snapshot.relays[id]?'ON':'OFF'}`,'ok'); }
     else if (event === 'error') { const err=snapshot.errors[0]; if(err)addEvent('error',`Error · ${err.kind}`,err.message,'error',err.at); }
     render(snapshot);

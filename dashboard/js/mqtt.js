@@ -184,6 +184,8 @@
           }
           return;
         }
+        if (topic === topics.emergencyStatus) { FarmState.setEmergency(JSON.parse(value)); return; }
+        if (topic === topics.systemError) { FarmState.setSystemError(JSON.parse(value)); return; }
         const scheduleTopic = /^smartfarm\/schedule\/([^/]+)\/status$/.exec(topic);
         if (scheduleTopic) {
           const id = scheduleTopic[1];

@@ -6,7 +6,7 @@
   const state = {
     connection: 'offline', connectionReason: 'ยังไม่ได้เชื่อมต่อ',
     espOnline: null, heartbeatAt: 0, device: null, mode: null,
-    temperature: null, humidity: null, relays, schedules, errors: []
+    temperature: null, humidity: null, relays, schedules, emergency: null, systemError: null, errors: []
   };
   const listeners = new Set();
 
@@ -138,6 +138,23 @@
     emit('mode:update');
   }
 
+  function setEmergency(obj) {
+    if (!obj || typeof obj !== 'object' || Array.isArray(obj) || typeof obj.active !== 'boolean') {
+      throw Error('emergency status payload invalid');
+    }
+    state.emergency = { active: obj.active, source: typeof obj.source === 'string' ? obj.source : '', at: Number.isFinite(obj.at) ? obj.at : null };
+    emit('emergency:update');
+  }
+
+  function setSystemError(obj) {
+    if (!obj || typeof obj !== 'object' || Array.isArray(obj) || typeof obj.code !== 'string' || typeof obj.message !== 'string') {
+      throw Error('system error payload invalid');
+    }
+    state.systemError = { code: obj.code, message: obj.message, at: Number.isFinite(obj.at) ? obj.at : Date.now() };
+    addError(`firmware:${obj.code}`, obj.message);
+    emit('system-error');
+  }
+
   function addError(kind, message) {
     const item = { kind: String(kind), message: String(message), at: Date.now() };
     state.errors = [item, ...state.errors].slice(0, 20);
@@ -153,6 +170,6 @@
 
   window.FarmState = Object.freeze({
     get: () => structuredClone(state), subscribe, setConnection, setEspOffline,
-    setDevice, setSensor, setRelay, setSchedule, setMode, normalizeSchedule, addError
+    setDevice, setSensor, setRelay, setSchedule, setMode, setEmergency, setSystemError, normalizeSchedule, addError
   });
 })();

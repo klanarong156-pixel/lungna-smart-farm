@@ -29,7 +29,7 @@ Firmware TLS: HiveMQ Cloud port 8883. Browser: secure WebSocket port 8884 `/mqtt
 3. Workflow `.github/workflows/pages.yml` uploads contents of `dashboard/` to Pages.
 4. Expected URL: https://klanarong156-pixel.github.io/lungna-smart-farm/ (available only after Pages has been enabled and Actions deploy succeeds).
 
-PWA needs HTTPS. Offline shell cache version is `lungna-shell-v14`; it caches static shell only, never relay state as current. Service Worker activation removes only older `lungna-shell-*` caches and preserves unrelated caches on the same origin.
+PWA needs HTTPS. Offline shell cache version is `lungna-shell-v17`; it caches static shell only, never relay state as current. Service Worker activation removes only older `lungna-shell-*` caches and preserves unrelated caches on the same origin. HTTP OTA is disabled by default; use password-protected ArduinoOTA on the trusted LAN.
 
 ## Firebase, weather, data
 
@@ -37,7 +37,7 @@ Firebase is intentionally not connected in this static-only baseline. `config/fi
 
 ## Tests and known limits
 
-Static/regression tests validate JS/JSON, MQTT state/relay/mode/schedule acknowledgement, six routes, shared navigation, unique control surfaces and Service Worker cache isolation. Browser visual checks are run at desktop and mobile widths; they do not substitute for actual hardware. Physical MQTT/ESP integration, relay/pump safety tests and OTA require actual hardware/broker access. Schedule editing uses the existing firmware contract; firmware rejection cases without status response surface as timeouts. Finance persistence is local to a browser; ไม่มี backend authentication. See [`docs/relay-test-matrix.md`](docs/relay-test-matrix.md) and [`docs/compatibility-report.md`](docs/compatibility-report.md).
+Static/regression tests validate JS/JSON, MQTT state/relay/mode/schedule acknowledgement, six routes, shared navigation, unique control surfaces and Service Worker cache isolation. Run `./scripts/pre-deploy-check.sh` before every deployment; it checks JavaScript syntax/manifest, runs all unit/regression tests, and runs the firmware contract test. GitHub Pages and firmware workflows call the same script before creating deployment artifacts. Browser visual checks are run at desktop and mobile widths; they do not substitute for actual hardware. Physical MQTT/ESP integration, relay/pump safety tests and OTA require actual hardware/broker access. Schedule editing uses the existing firmware contract; firmware rejection cases without status response surface as timeouts. Finance persistence is local to a browser; ไม่มี backend authentication. See [`docs/relay-test-matrix.md`](docs/relay-test-matrix.md) and [`docs/compatibility-report.md`](docs/compatibility-report.md).
 
 ## Version
 

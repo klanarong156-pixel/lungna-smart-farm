@@ -69,7 +69,7 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
 // HTTP OTA is intended for the trusted local farm LAN only.
 // Do NOT expose port 80 to the public Internet. ArduinoOTA remains available
 // on UDP 8266 and is password protected.
-#define ENABLE_HTTP_OTA 1
+#define ENABLE_HTTP_OTA 0
 #define OTA_ARDUINO_PORT 8266
 #define OTA_HTTP_PORT 80
 
@@ -184,6 +184,7 @@ bool prepareTlsValidationTime() {
   }
 
   tls.setX509Time((time_t)epoch);
+  telegramTls.setX509Time((time_t)epoch);
   return true;
 }
 
@@ -275,7 +276,11 @@ bool telegramNotifyNow(const String &message) {
       !telegramChatId[0])
     return false;
 
-  telegramTls.setInsecure();
+  if (!mqttTrustAnchor) {
+    Serial.println(F("Telegram: TLS trust anchor unavailable"));
+    return false;
+  }
+  telegramTls.setTrustAnchors(mqttTrustAnchor);
   telegramTls.setBufferSizes(4096, 512);
   // Keep Telegram notifications bounded so they cannot starve MQTT keep-alives.
   telegramTls.setTimeout(5000);

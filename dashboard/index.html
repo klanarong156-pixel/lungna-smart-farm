@@ -6,9 +6,9 @@
   <title>สวนลุงนะ · SMART FARM</title>
   <link rel="manifest" href="./manifest.json"><link rel="icon" href="./assets/icons/icon-192.png"><link rel="apple-touch-icon" href="./assets/icons/icon-192.png">
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./css/app.css"><link rel="stylesheet" href="./css/reference-layout.css?v=1.6.6">
+  <link rel="stylesheet" href="./css/app.css"><link rel="stylesheet" href="./css/reference-layout.css?v=1.6.7">
   <script defer src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
-  <script defer src="./js/config.js"></script><script defer src="./js/state.js"></script><script defer src="./js/mqtt.js"></script><script defer src="./js/app.js?v=1.6.6"></script>
+  <script defer src="./js/config.js"></script><script defer src="./js/state.js"></script><script defer src="./js/mqtt.js"></script><script defer src="./js/app.js?v=1.6.7"></script>
 </head>
 <body>
 <div class="app-shell">
@@ -136,8 +136,10 @@
           <div class="system-check-row"><span class="system-check-icon">◎</span><span>MQTT</span><b id="systemEsp">ยังไม่มีข้อมูล</b><small id="connectionHeartbeat">ยังไม่มีข้อมูล</small></div>
           <div class="system-check-row"><span class="system-check-icon">▣</span><span>ESP8266 Controller</span><b id="connectionRssi">ยังไม่มีข้อมูล</b><small id="connectionFirmware">ยังไม่มีข้อมูล</small></div>
           <div class="system-check-row"><span class="system-check-icon">◷</span><span>Heartbeat age</span><b id="heartbeatAge">ยังไม่มีข้อมูล</b><small id="connectionDeviceIp">IP ยังไม่มีข้อมูล</small></div>
+          <div class="system-check-row"><span class="system-check-icon">!</span><span>Emergency Stop</span><b id="systemEmergency">ยังไม่มีข้อมูล</b><small id="systemEmergencySource">รอสถานะจาก ESP8266</small></div>
+          <div class="system-check-row"><span class="system-check-icon">⚠</span><span>Firmware error</span><b id="systemFirmwareError">ยังไม่มีข้อมูล</b><small id="systemFirmwareErrorDetail">ยังไม่มีข้อมูล</small></div>
           <p id="systemCheckResult" class="muted" role="status" aria-live="polite"></p>
-          <div class="system-version-grid"><div><span>Dashboard</span><b id="dashboardVersion">v1.6.6</b></div><div><span>Firmware baseline</span><b id="firmwareVersion">ยังไม่มีข้อมูล</b></div><div><span>Shell cache</span><b>lungna-shell-v16</b></div></div>
+          <div class="system-version-grid"><div><span>Dashboard</span><b id="dashboardVersion">v1.6.7</b></div><div><span>Firmware baseline</span><b id="firmwareVersion">ยังไม่มีข้อมูล</b></div><div><span>Shell cache</span><b>lungna-shell-v17</b></div></div>
           <div class="button-row"><button class="button secondary" id="reloadDashboard">โหลด Dashboard ใหม่</button></div>
         </div></details>
       </div>
@@ -190,7 +192,7 @@
       </section>
     </section>
   </main>
-  <footer class="site-footer"><span>สวนลุงนะ • Smart Farm</span><span>Firmware <b id="footerFirmware">ยังไม่มีข้อมูล</b> · Dashboard v1.6.6</span></footer>
+  <footer class="site-footer"><span>สวนลุงนะ • Smart Farm</span><span>Firmware <b id="footerFirmware">ยังไม่มีข้อมูล</b> · Dashboard v1.6.7</span></footer>
   <nav class="bottom-nav" aria-label="เมนูหลัก"><button data-nav="home" class="active"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg><small>หน้าหลัก</small></button><button data-nav="water"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c-2.8 4-7 8-7 12a7 7 0 0 0 14 0c0-4-4.2-8-7-12Z"/></svg><small>ระบบน้ำ</small></button><button data-nav="devices"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="2"/><path d="M9 1v4m6-4v4M9 19v4m6-4v4M1 9h4m-4 6h4m14-6h4m-4 6h4"/></svg><small>อุปกรณ์</small></button><button data-nav="weather"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18h10a4 4 0 0 0 .3-8 6 6 0 0 0-11.5 1.5A3.3 3.3 0 0 0 7 18Z"/></svg><small>อากาศ</small></button><button data-nav="records"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M14 3v5h5M8 12h8m-8 4h8"/></svg><small>บันทึก</small></button><button data-nav="system"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="2"/><circle cx="15" cy="17" r="2"/></svg><small>ระบบ</small></button></nav>
 </div><div id="toast" class="toast" role="status" aria-live="polite"></div>
 </body></html>

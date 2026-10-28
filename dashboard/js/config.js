@@ -13,6 +13,8 @@ window.SmartFarmConfig = Object.freeze({
       relaySet: id => `smartfarm/relay/${id}/set`,
       modeStatus: 'smartfarm/mode/status',
       modeSet: 'smartfarm/mode/set',
+      emergencyStatus: 'smartfarm/emergency/status',
+      systemError: 'smartfarm/system/error',
       scheduleStatus: id => `smartfarm/schedule/${id}/status`,
       scheduleSet: id => `smartfarm/schedule/${id}/set`
     },
@@ -22,6 +24,8 @@ window.SmartFarmConfig = Object.freeze({
       'smartfarm/sensor/dht11',
       'smartfarm/relay/+/status',
       'smartfarm/mode/status',
+      'smartfarm/emergency/status',
+      'smartfarm/system/error',
       'smartfarm/schedule/+/status'
     ]
   },
