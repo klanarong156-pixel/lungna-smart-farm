@@ -27,4 +27,12 @@ done < <(find tests -maxdepth 1 -type f -name '*.cjs' -print0 | sort -z)
 log 'Running firmware contract test'
 node --test tests/firmware-contract.test.cjs
 
+if [[ "${MQTT_HEALTHCHECK:-0}" == "1" ]]; then
+  log 'Running hardware-safe MQTT read-only health check'
+  [[ -d node_modules/mqtt ]] || fail 'MQTT health check requires npm ci first'
+  node scripts/mqtt-health-check.cjs
+else
+  log 'Skipping MQTT hardware check (set MQTT_HEALTHCHECK=1 to enable; no commands are published)'
+fi
+
 log 'All pre-deploy checks passed'

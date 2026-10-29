@@ -1,0 +1,11 @@
+{
+  "name": "lungna-smart-farm-checks",
+  "private": true,
+  "scripts": {
+    "predeploy": "./scripts/pre-deploy-check.sh",
+    "mqtt-health": "MQTT_HEALTHCHECK=1 node scripts/mqtt-health-check.cjs"
+  },
+  "dependencies": {
+    "mqtt": "5.14.1"
+  }
+}
