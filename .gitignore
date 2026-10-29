@@ -1,12 +1,65 @@
-.pio/
-.vscode/
+# Operating system and editor files
 .DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment files and local secrets
 .env
 .env.*
 !.env.example
-node_modules/
-config/mqtt.local.js
-config/firebase.local.js
+config/*.local.*
+config/*.secret.*
 *.pem
 *.key
+*.crt
+*.csr
+*.p12
+*.pfx
 *.secret
+*.secrets
+
+# Node.js dependencies and generated reports
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.npm/
+coverage/
+.nyc_output/
+.vitest/
+
+# PlatformIO / embedded build output
+.pio/
+firmware/**/.pio/
+*.elf
+*.hex
+*.map
+*.o
+
+# Generic build and cache output
+build/
+dist/
+.cache/
+.pytest_cache/
+__pycache__/
+*.py[cod]
+*.log
+.tmp/
+tmp/
+
+# Generated firmware binaries are ignored unless intentionally released
+*.bin
+!releases/firmware/*.bin
+*.bin.sha256
+!releases/firmware/*.bin.sha256
+
+# Keep repository-specific examples and tracked release artifacts explicit
+!config/*.example.*
+!releases/
+!releases/firmware/
+!reports/

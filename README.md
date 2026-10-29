@@ -1,6 +1,6 @@
 # สวนลุงนะ SMART FARM
 
-Production baseline สำหรับ dashboard และ ESP8266 Smart Farm โดยแยก live control, records, weather และเครื่องมือระบบอย่างชัดเจน. **ESP8266 คือ controller ของ pump/relay/AUTO/MANUAL/schedule/safety**; dashboard อ่าน status และส่ง command ผ่าน MQTT เท่านั้น. Cloud/Firebase ไม่ได้ควบคุม Relay.
+Production baseline สำหรับ dashboard และ ESP8266 Smart Farm โดยแยก live control, records, weather และเครื่องมือระบบอย่างชัดเจน. **ESP8266 คือ controller ของ pump/relay/AUTO/MANUAL/schedule/safety**; dashboard อ่าน status และส่ง command ผ่าน MQTT เท่านั้น. Cloud/Firebase ไม่ได้ควบคุม Relay. โครงสร้างโฟลเดอร์และกติกาการวางไฟล์อยู่ใน [`docs/repository-structure.md`](docs/repository-structure.md).
 
 ## Architecture
 
