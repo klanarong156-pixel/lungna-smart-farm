@@ -6,9 +6,9 @@
   <title>สวนลุงนะ · SMART FARM</title>
   <link rel="manifest" href="./manifest.json"><link rel="icon" href="./assets/icons/icon-192.png"><link rel="apple-touch-icon" href="./assets/icons/icon-192.png">
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./css/app.css"><link rel="stylesheet" href="./css/reference-layout.css?v=1.6.7">
+  <link rel="stylesheet" href="./css/app.css"><link rel="stylesheet" href="./css/reference-layout.css?v=1.6.8">
   <script defer src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
-  <script defer src="./js/config.js"></script><script defer src="./js/state.js"></script><script defer src="./js/mqtt.js"></script><script defer src="./js/app.js?v=1.6.7"></script>
+  <script defer src="./js/config.js"></script><script defer src="./js/state.js"></script><script defer src="./js/mqtt.js"></script><script defer src="./js/sensor-alerts.js?v=1.6.8"></script><script defer src="./js/app.js?v=1.6.8"></script>
 </head>
 <body>
 <div class="app-shell">
@@ -83,7 +83,7 @@
       </div>
       <section class="home-insights-grid" aria-label="สรุปการทำงานของสวน">
         <article class="card home-insight-card home-watering-card" aria-labelledby="homeWaterTitle"><div class="home-panel-heading"><span class="insight-icon insight-water" aria-hidden="true">◉</span><h2 id="homeWaterTitle">การให้น้ำ</h2><button class="home-insight-link" data-nav="water" type="button">เปิดระบบน้ำ</button></div><div class="watering-main-state" id="homePumpState" data-state="unknown">รอข้อมูลปั๊มน้ำ</div><div class="watering-details"><div><span>เวลาทำงานรอบนี้</span><b id="homePumpRuntime">ยังไม่มีข้อมูล</b></div><div><span>ตารางถัดไป</span><b id="homeNextSchedule">รอข้อมูลจาก ESP</b></div></div><p id="homeModeHint" class="home-mode-hint">รอสถานะ AUTO/MANUAL จาก ESP</p></article>
-        <article class="card home-insight-card home-trend-card" aria-labelledby="homeTrendTitle"><div class="home-panel-heading"><span class="insight-icon insight-trend" aria-hidden="true">⌁</span><h2 id="homeTrendTitle">แนวโน้ม 24 ชั่วโมง</h2></div><div id="homeTrendChart" class="home-trend-chart"><p class="empty-state">รอข้อมูลเซนเซอร์อย่างน้อย 2 จุด</p></div><p class="home-local-note">เก็บในเบราว์เซอร์นี้ขณะ Dashboard เปิดและเชื่อมต่อ · ไม่ใช่ข้อมูลจากฐานข้อมูลกลาง</p></article>
+        <article class="card home-insight-card home-trend-card" aria-labelledby="homeTrendTitle"><div class="home-panel-heading"><span class="insight-icon insight-trend" aria-hidden="true">⌁</span><h2 id="homeTrendTitle">แนวโน้ม 24 ชั่วโมง</h2></div><div id="homeTrendChart" class="home-trend-chart"><p class="empty-state">รอข้อมูลเซนเซอร์อย่างน้อย 2 จุด</p></div><p class="home-local-note">เก็บในเบราว์เซอร์นี้ขณะ Dashboard เปิดและเชื่อมต่อ · เส้นประแสดงเกณฑ์แจ้งเตือนจากหน้าระบบ</p></article>
         <article class="card home-insight-card home-today-card" aria-labelledby="homeTodayTitle"><div class="home-panel-heading"><span class="insight-icon insight-events" aria-hidden="true">▤</span><h2 id="homeTodayTitle">สรุปวันนี้</h2></div><div class="today-count-grid"><div><b id="todayRelayChanges">0</b><span>รายงานสถานะรีเลย์</span></div><div><b id="todayAlerts">0</b><span>เหตุการณ์ผิดปกติ</span></div></div><p id="todaySummaryNote" class="home-local-note">ไม่มีเหตุการณ์ที่บันทึกไว้วันนี้</p></article>
       </section>
       <section class="home-quote-banner"><span class="quote-leaf" aria-hidden="true">❧</span><p>“สวนที่ดี ไม่ได้โตแค่พืชพรรณ แต่เติบโตพร้อมกับความสุข”</p><span class="quote-divider"></span><img src="./assets/illustrations/farm-landscape.webp" alt=""><small>เกษตรสมัยใหม่<br>เพื่อชีวิตที่สมดุล</small></section>
@@ -131,7 +131,16 @@
           <details class="system-advanced"><summary>รายละเอียด Broker</summary><div class="config-detail"><span>WSS / Path</span><b>8884 · /mqtt</b><span>เชื่อมต่อตั้งแต่</span><b id="connectedSince">ยังไม่มีข้อมูล</b><span>จำนวน reconnect</span><b id="reconnectCount">0</b><span>ข้อผิดพลาดล่าสุด</span><b id="lastError">ยังไม่มีข้อมูล</b><span>รายละเอียด</span><b id="mqttReason">ยังไม่ได้เชื่อมต่อ</b></div></details>
         </div></details>
         <details class="system-step" open><summary><span class="step-number">2</span><span class="step-title"><b>การเชื่อมต่ออัตโนมัติ</b><small>ให้ระบบเชื่อมต่อ MQTT เมื่อเปิดใช้งาน</small></span><span class="step-arrow" aria-hidden="true">⌄</span></summary><div class="system-step-body auto-connect-row"><div><b>เชื่อมต่ออัตโนมัติในเบราว์เซอร์นี้</b><p>เปิด “จำ credential” เพื่อเก็บข้อมูลนี้ใน localStorage และเชื่อมต่อครั้งถัดไป</p></div><label class="switch-setting"><input id="rememberMqtt" type="checkbox"><span class="switch-track"></span><span class="visually-hidden">จำ credential และเชื่อมต่ออัตโนมัติ</span></label></div></details>
-        <details class="system-step" open><summary><span class="step-number">3</span><span class="step-title"><b>ตรวจสอบระบบ</b><small>ตรวจสอบสถานะการให้บริการและไฟล์สำคัญของระบบ</small></span><span class="step-arrow" aria-hidden="true">⌄</span></summary><div class="system-step-body">
+        <details class="system-step" open><summary><span class="step-number">3</span><span class="step-title"><b>เกณฑ์แจ้งเตือนเซนเซอร์</b><small>กำหนดค่าอุณหภูมิและความชื้นสูงสุด</small></span><span class="step-arrow" aria-hidden="true">⌄</span></summary><div class="system-step-body">
+          <p class="sensor-alert-settings-note">ค่าเริ่มต้นตัวอย่าง 35 °C และ 80% RH · ปรับให้เหมาะกับพืชและการใช้งาน การเตือนใช้เฉพาะข้อมูล DHT11 ล่าสุดภายใน 90 วินาที และเก็บค่าไว้ในเบราว์เซอร์นี้</p>
+          <form id="sensorAlertForm" class="sensor-alert-settings-form" novalidate>
+            <label>เตือนเมื่ออุณหภูมิสูงกว่า<span class="sensor-threshold-input"><input id="sensorTempThreshold" name="temperature" type="number" min="0" max="60" step="0.5" value="35" inputmode="decimal" required><b>°C</b></span></label>
+            <label>เตือนเมื่อความชื้นสูงกว่า<span class="sensor-threshold-input"><input id="sensorHumidityThreshold" name="humidity" type="number" min="0" max="100" step="1" value="80" inputmode="numeric" required><b>% RH</b></span></label>
+            <div class="sensor-alert-actions"><button class="button primary" type="submit">บันทึกเกณฑ์แจ้งเตือน</button><button class="button secondary" type="button" id="resetSensorAlertThresholds">คืนค่าเริ่มต้น</button></div>
+            <p id="sensorAlertFeedback" class="sensor-alert-feedback" role="status" aria-live="polite">กำลังใช้ค่าเริ่มต้นตัวอย่าง</p>
+          </form>
+        </div></details>
+        <details class="system-step" open><summary><span class="step-number">4</span><span class="step-title"><b>ตรวจสอบระบบ</b><small>ตรวจสอบสถานะการให้บริการและไฟล์สำคัญของระบบ</small></span><span class="step-arrow" aria-hidden="true">⌄</span></summary><div class="system-step-body">
           <button class="button secondary system-check-inline" type="button" id="systemCheck">ตรวจอีกครั้ง</button>
           <div class="system-check-row"><span class="system-check-icon">◎</span><span>MQTT</span><b id="systemEsp">ยังไม่มีข้อมูล</b><small id="connectionHeartbeat">ยังไม่มีข้อมูล</small></div>
           <div class="system-check-row"><span class="system-check-icon">▣</span><span>ESP8266 Controller</span><b id="connectionRssi">ยังไม่มีข้อมูล</b><small id="connectionFirmware">ยังไม่มีข้อมูล</small></div>
@@ -139,7 +148,7 @@
           <div class="system-check-row"><span class="system-check-icon">!</span><span>Emergency Stop</span><b id="systemEmergency">ยังไม่มีข้อมูล</b><small id="systemEmergencySource">รอสถานะจาก ESP8266</small></div>
           <div class="system-check-row"><span class="system-check-icon">⚠</span><span>Firmware error</span><b id="systemFirmwareError">ยังไม่มีข้อมูล</b><small id="systemFirmwareErrorDetail">ยังไม่มีข้อมูล</small></div>
           <p id="systemCheckResult" class="muted" role="status" aria-live="polite"></p>
-          <div class="system-version-grid"><div><span>Dashboard</span><b id="dashboardVersion">v1.6.7</b></div><div><span>Firmware baseline</span><b id="firmwareVersion">ยังไม่มีข้อมูล</b></div><div><span>Shell cache</span><b>lungna-shell-v17</b></div></div>
+          <div class="system-version-grid"><div><span>Dashboard</span><b id="dashboardVersion">v1.6.8</b></div><div><span>Firmware baseline</span><b id="firmwareVersion">ยังไม่มีข้อมูล</b></div><div><span>Shell cache</span><b>lungna-shell-v18</b></div></div>
           <div class="button-row"><button class="button secondary" id="reloadDashboard">โหลด Dashboard ใหม่</button></div>
         </div></details>
       </div>
@@ -192,7 +201,7 @@
       </section>
     </section>
   </main>
-  <footer class="site-footer"><span>สวนลุงนะ • Smart Farm</span><span>Firmware <b id="footerFirmware">ยังไม่มีข้อมูล</b> · Dashboard v1.6.7</span></footer>
+  <footer class="site-footer"><span>สวนลุงนะ • Smart Farm</span><span>Firmware <b id="footerFirmware">ยังไม่มีข้อมูล</b> · Dashboard v1.6.8</span></footer>
   <nav class="bottom-nav" aria-label="เมนูหลัก"><button data-nav="home" class="active"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg><small>หน้าหลัก</small></button><button data-nav="water"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c-2.8 4-7 8-7 12a7 7 0 0 0 14 0c0-4-4.2-8-7-12Z"/></svg><small>ระบบน้ำ</small></button><button data-nav="devices"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="2"/><path d="M9 1v4m6-4v4M9 19v4m6-4v4M1 9h4m-4 6h4m14-6h4m-4 6h4"/></svg><small>อุปกรณ์</small></button><button data-nav="weather"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18h10a4 4 0 0 0 .3-8 6 6 0 0 0-11.5 1.5A3.3 3.3 0 0 0 7 18Z"/></svg><small>อากาศ</small></button><button data-nav="records"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M14 3v5h5M8 12h8m-8 4h8"/></svg><small>บันทึก</small></button><button data-nav="system"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="2"/><circle cx="15" cy="17" r="2"/></svg><small>ระบบ</small></button></nav>
 </div><div id="toast" class="toast" role="status" aria-live="polite"></div>
 </body></html>

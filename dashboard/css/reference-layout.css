@@ -889,3 +889,23 @@ body { background: linear-gradient(180deg, #f5f7f0 0%, var(--app-bg) 100%); }
 @media (max-width: 350px) {
   #page-water .schedule-time-fields { grid-template-columns: minmax(0, 1fr); }
 }
+
+
+/* Sensor alert thresholds live in System settings and remain browser-local. */
+.sensor-alert-settings-note { margin: 0 0 13px; padding: 11px 12px; border: 1px solid #e7e4da; border-radius: 11px; background: #f7f6ef; color: var(--app-muted); font-size: 11px; line-height: 1.65; }
+.sensor-alert-settings-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.sensor-alert-settings-form > label { display: grid; gap: 7px; min-width: 0; color: var(--app-ink); font-size: 11px; font-weight: 600; }
+.sensor-threshold-input { display: flex; align-items: center; gap: 8px; }
+.sensor-threshold-input input { width: 100%; min-width: 0; min-height: 44px; padding: 9px 11px; border: 1px solid var(--app-line); border-radius: 10px; background: var(--app-surface); color: var(--app-ink); font: 600 15px 'IBM Plex Sans Thai', sans-serif; }
+.sensor-threshold-input b { flex: none; color: var(--app-muted); font-size: 11px; }
+.sensor-alert-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; grid-column: 1 / -1; }
+.sensor-alert-feedback { min-height: 18px; margin: 0; color: var(--app-muted); font-size: 10px; line-height: 1.5; grid-column: 1 / -1; }
+.sensor-alert-feedback[data-state="saved"] { color: #345b40; }
+.sensor-alert-feedback[data-state="session"] { color: #8a5a00; }
+.sensor-alert-feedback[data-state="error"] { color: #a33a32; }
+.trend-row svg .trend-threshold { stroke: #c58a28; stroke-width: 1.6; stroke-dasharray: 5 4; opacity: .9; }
+@media(max-width:759px) {
+  .sensor-alert-settings-form { grid-template-columns: 1fr; gap: 11px; }
+  .sensor-alert-actions { display: grid; grid-template-columns: 1fr 1fr; }
+  .sensor-alert-actions .button { min-height: 44px; padding-inline: 8px; }
+}

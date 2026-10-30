@@ -5,7 +5,7 @@ const vm = require('node:vm');
 (async () => {
   const source = fs.readFileSync('dashboard/sw.js', 'utf8');
   const handlers = {};
-  const existing = ['lungna-shell-v3','lungna-shell-v4','lungna-shell-v5','lungna-shell-v6','lungna-shell-v7','lungna-shell-v8','lungna-shell-v9','lungna-shell-v10','lungna-shell-v11','lungna-shell-v12','lungna-shell-v13','lungna-shell-v14','lungna-shell-v15','lungna-shell-v16','unrelated-workbox-cache','another-app-cache'];
+  const existing = ['lungna-shell-v3','lungna-shell-v4','lungna-shell-v5','lungna-shell-v6','lungna-shell-v7','lungna-shell-v8','lungna-shell-v9','lungna-shell-v10','lungna-shell-v11','lungna-shell-v12','lungna-shell-v13','lungna-shell-v14','lungna-shell-v15','lungna-shell-v16','lungna-shell-v17','unrelated-workbox-cache','another-app-cache'];
   const deleted = [];
   const self = {
     addEventListener: (name, handler) => { handlers[name] = handler; },
@@ -22,14 +22,15 @@ const vm = require('node:vm');
   let activation;
   handlers.activate({ waitUntil: promise => { activation = promise; } });
   await activation;
-  assert.deepEqual(JSON.parse(JSON.stringify(deleted.sort())), ['lungna-shell-v10','lungna-shell-v11','lungna-shell-v12','lungna-shell-v13','lungna-shell-v14','lungna-shell-v15','lungna-shell-v16','lungna-shell-v3','lungna-shell-v4','lungna-shell-v5','lungna-shell-v6','lungna-shell-v7','lungna-shell-v8','lungna-shell-v9']);
-  assert.match(source, /const CACHE = 'lungna-shell-v17'/);
+  assert.deepEqual(JSON.parse(JSON.stringify(deleted.sort())), ['lungna-shell-v10','lungna-shell-v11','lungna-shell-v12','lungna-shell-v13','lungna-shell-v14','lungna-shell-v15','lungna-shell-v16','lungna-shell-v17','lungna-shell-v3','lungna-shell-v4','lungna-shell-v5','lungna-shell-v6','lungna-shell-v7','lungna-shell-v8','lungna-shell-v9']);
+  assert.match(source, /const CACHE = 'lungna-shell-v18'/);
   assert.match(source, /key\.startsWith\(OWNED_CACHE_PREFIX\)/);
   assert.match(source, /assets\/logo\/logo-suanlungna-modern\.png/);
   assert.match(source, /css\/reference-layout\.css/);
-  assert.match(source, /css\/reference-layout\.css\?v=1\.6\.7/);
-  assert.match(source, /js\/app\.js\?v=1\.6\.7/);
+  assert.match(source, /css\/reference-layout\.css\?v=1\.6\.8/);
+  assert.match(source, /js\/sensor-alerts\.js\?v=1\.6\.8/);
+  assert.match(source, /js\/app\.js\?v=1\.6\.8/);
   assert.match(source, /assets\/illustrations\/farm-aerial\.webp/);
   assert.match(source, /assets\/illustrations\/farm-landscape\.webp/);
-  console.log('PASS service worker cache: v17, new shell assets, older dashboard caches only, unrelated namespaces preserved');
+  console.log('PASS service worker cache: v18, new shell assets, older dashboard caches only, unrelated namespaces preserved');
 })().catch(error => { console.error(error); process.exitCode = 1; });
