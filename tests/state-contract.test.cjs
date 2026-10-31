@@ -12,7 +12,17 @@ assert.throws(()=>s.normalizeSchedule('pump',{slots:[{enabled:true,on:'23:30',of
 assert.throws(()=>s.normalizeSchedule('pump',{slots:[{enabled:true,on:'06:00',off:'06:00'},{enabled:false,on:'00:00',off:'00:00'},{enabled:false,on:'00:00',off:'00:00'},{enabled:false,on:'00:00',off:'00:00'}]}),/ต่างกัน/);
 assert.throws(()=>s.normalizeSchedule('pump',{slots:[{enabled:true,on:'24:00',off:'06:00'},{enabled:false,on:'00:00',off:'00:00'},{enabled:false,on:'00:00',off:'00:00'},{enabled:false,on:'00:00',off:'00:00'}]}),/HH:MM/);
 s.setEspOffline('heartbeat timeout');for(const value of Object.values(s.get().relays))assert.equal(value,null,'ESP offline resets live relay state to unknown');for(const value of Object.values(s.get().schedules))assert.equal(value,null,'ESP offline resets schedules to unknown');
-s.setSensor({temperature:29.5,humidity:71});assert.equal(s.get().temperature,29.5);assert.throws(()=>s.setSensor({temperature:'30'}),/invalid sensor field/);assert.equal(s.get().temperature,29.5);
+let sensorUpdates = 0;
+const unsubscribeSensor = s.subscribe((snapshot,event) => { if (event === 'sensor:update') sensorUpdates++; });
+s.setSensor({temperature:29.5,humidity:71});
+assert.equal(s.get().temperature,29.5);assert.equal(s.get().humidity,71);
+for (const payload of [{temperature:30},{humidity:80},{temperature:null,humidity:80},{temperature:30,humidity:null},{temperature:'30',humidity:80}]) {
+  assert.throws(()=>s.setSensor(payload),/invalid sensor field/);
+  assert.equal(s.get().temperature,29.5,'invalid payload preserves the last valid temperature');
+  assert.equal(s.get().humidity,71,'invalid payload preserves the last valid humidity');
+  assert.equal(sensorUpdates,1,'invalid payload does not emit sensor:update');
+}
+unsubscribeSensor();
 assert.throws(()=>s.setEmergency({active:'yes'}),/emergency status payload invalid/);s.setEmergency({active:true,source:'mqtt',at:123});assert.equal(s.get().emergency.active,true);assert.equal(s.get().emergency.source,'mqtt');s.setEmergency({active:false});assert.equal(s.get().emergency.active,false);
 assert.throws(()=>s.setSystemError({code:'BAD'}),/system error payload invalid/);s.setSystemError({code:'RELAY_BLOCKED',message:'Emergency Stop active',at:456});assert.equal(s.get().systemError.code,'RELAY_BLOCKED');assert.equal(s.get().errors[0].kind,'firmware:RELAY_BLOCKED');
 assert.throws(()=>s.setMode('SCHEDULE'),/unsupported firmware mode/);s.setMode('AUTO');assert.equal(s.get().mode,'AUTO');

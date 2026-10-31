@@ -6,7 +6,7 @@
 |---|---|---|---:|---|
 | `smartfarm/status/online` | ESP → clients | `true` / `false` | yes | `false` เป็น LWT; retained `true` ไม่ยืนยันว่า ESP live อยู่ |
 | `smartfarm/status/device` | ESP → clients | device JSON | yes | heartbeat มี firmware/device id/uptime/network/OTA/safety diagnostics; ใช้ non-retained heartbeat สำหรับ liveness |
-| `smartfarm/sensor/dht11` | ESP → clients | JSON ตัวเลข `temperature`, `humidity` | no | ไม่เติมค่า default 0 |
+| `smartfarm/sensor/dht11` | ESP → clients | JSON ตัวเลข finite `temperature` และ `humidity` (ต้องมีทั้งคู่) | no | ไม่เติมค่า default 0; payload ที่ขาด/มีค่า null จะถูกปฏิเสธทั้งชุดและคงค่าดีล่าสุดไว้ |
 | `smartfarm/relay/{pump,zone1,lighthome,lightsala}/status` | ESP → clients | `ON` / `OFF` | yes | เป็น source of truth ของ relay |
 | `smartfarm/relay/{id}/set` | Dashboard → ESP | `ON` / `OFF` | no | QoS 1; UI รอ status topic กลับมา |
 | `smartfarm/mode/status` | ESP → clients | `AUTO` / `MANUAL` | yes | ค่า `SCHEDULE` ไม่ใช่ firmware mode ที่ตรวจพบ |
