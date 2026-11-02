@@ -52,6 +52,18 @@ manager.client = {
   assert.equal(state.get().mode, 'AUTO');
   await assert.rejects(manager.commandMode('SCHEDULE'), /firmware/);
 
+  state.setSensor({ temperature: 40, humidity: 85 });
+  let sensorUpdateCount = 0;
+  const unsubscribeSensor = state.subscribe((snapshot, event) => { if (event === 'sensor:update') sensorUpdateCount++; });
+  for (const partial of [{ temperature: 20 }, { humidity: 20 }]) {
+    manager.message('smartfarm/sensor/dht11', JSON.stringify(partial), false);
+    assert.equal(state.get().temperature, 40, 'partial payload cannot clear the last valid temperature alert reading');
+    assert.equal(state.get().humidity, 85, 'partial payload cannot clear the last valid humidity alert reading');
+    assert.equal(sensorUpdateCount, 0, 'partial payload does not emit a sensor update');
+  }
+  assert.equal(state.get().errors[0].kind, 'invalid-payload', 'malformed sensor payload is surfaced as an MQTT error');
+  unsubscribeSensor();
+
   state.setConnection('online', 'test');
   state.setDevice({ online: true, mqtt: true }, false);
   const relayPromise = manager.commandRelay('pump', true);

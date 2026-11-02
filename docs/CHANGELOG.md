@@ -1,3 +1,10 @@
+## Dashboard sensor threshold alerts — 2026-10-30
+- Added editable DHT11 temperature and relative-humidity alert thresholds under the existing System settings page; browser-local sample defaults are 35 °C and 80% RH.
+- Home shows an in-app warning only for a recent real sensor reading (90-second freshness limit); alert transitions are added to the local event timeline without logging every sample.
+- Added dashed threshold guides to the 24-hour sensor trend chart, input validation, browser-storage fallback, regression tests, and Service Worker shell/cache-busting updates.
+- Dashboard now rejects incomplete or null DHT11 payloads atomically, preserving the last valid readings and preventing an active threshold alert from being cleared by a missing field.
+- Firmware, MQTT topics/payloads, relay behavior, and safety controls are unchanged. No operating-system push notification is implemented.
+
 # Changelog
 
 ## Security and CI hardening — 2026-10-28

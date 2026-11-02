@@ -9,6 +9,9 @@
   let modePending = null, scheduleFeedback = '', toastTimer, activeFilter = 'all', selectedFarmRelay = null, scheduleDraftActive = false, scheduleDraft = null;
   let lastConnection = null, connectedSince = null, reconnectCount = 0, sensorUpdatedAt = null, lastHeartbeatSeen = 0;
   const EVENT_STORAGE_KEY = 'sf.dashboard.events.v1', SENSOR_STORAGE_KEY = 'sf.dashboard.sensor-history.v1';
+  const SENSOR_ALERT_MAX_AGE_MS = 90 * 1000, sensorAlertConfig = window.SensorAlertConfig;
+  let sensorAlertThresholds = sensorAlertConfig.load();
+  const activeSensorAlerts = new Set();
   const HISTORY_WINDOW_MS = 24 * 60 * 60 * 1000, EVENT_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
   const events = [];
   try {
@@ -20,6 +23,26 @@
     const saved = JSON.parse(localStorage.getItem(SENSOR_STORAGE_KEY) || '[]');
     if (Array.isArray(saved)) sensorHistory = saved.filter(p => p && Number.isFinite(p.at) && p.at <= Date.now() + 60000 && Number.isFinite(p.temperature) && Number.isFinite(p.humidity) && Date.now() - p.at < HISTORY_WINDOW_MS).slice(-300);
   } catch (_) { sensorHistory = []; }
+  function currentSensorAlerts(state) {
+    if (!sensorUpdatedAt || Date.now() - sensorUpdatedAt > SENSOR_ALERT_MAX_AGE_MS) return [];
+    return sensorAlertConfig.evaluate(state, sensorAlertThresholds);
+  }
+  function recordSensorAlertTransitions(state) {
+    const alerts = sensorAlertConfig.evaluate(state, sensorAlertThresholds);
+    const next = new Set(alerts.map(alert => alert.key));
+    for (const alert of alerts) {
+      if (!activeSensorAlerts.has(alert.key)) addEvent('system', `${alert.label} เกินเกณฑ์แจ้งเตือน`, `${alert.value.toFixed(1)} ${alert.unit} · เกณฑ์ >${alert.threshold} ${alert.unit}`, 'warning');
+    }
+    for (const key of activeSensorAlerts) {
+      if (next.has(key)) continue;
+      if (!Number.isFinite(state[key])) { next.add(key); continue; }
+      const label = key === 'temperature' ? 'อุณหภูมิ' : 'ความชื้น';
+      const unit = key === 'temperature' ? '°C' : '% RH';
+      addEvent('system', `${label} กลับเข้าเกณฑ์`, `ค่าล่าสุด ${state[key].toFixed(1)} ${unit}`, 'ok');
+    }
+    activeSensorAlerts.clear();
+    next.forEach(key => activeSensorAlerts.add(key));
+  }
   function persistEvents() {
     try { localStorage.setItem(EVENT_STORAGE_KEY, JSON.stringify(events.filter(e => ['esp','mqtt','relay','system','error'].includes(e.type)).slice(0,150))); } catch (_) { /* Local history is optional. */ }
   }
@@ -41,7 +64,7 @@
   function renderEvents() {
     const root = $('eventList'); if (!root) return;
     const rows = events.filter(e => activeFilter === 'all' || e.type === activeFilter);
-    root.innerHTML = rows.length ? rows.map(e => `<article class="event-item"><span class="event-mark event-${esc(e.type)}">${({relay:'◉',temperature:'🌡',humidity:'💧',esp:'⌁',mqtt:'⌁',error:'!',system:'▣'})[e.type] || '•'}</span><div class="event-copy"><b>${esc(e.title)}</b><small>${esc(e.detail)}</small></div><div class="event-meta"><time>${new Date(e.at).toLocaleString('th-TH',{dateStyle:'short',timeStyle:'medium'})}</time><span class="event-status ${esc(e.status)}">${esc(e.status==='ok'?'รับข้อมูล':e.status==='error'?'ผิดพลาด':e.status==='pending'?'รอยืนยัน':'ข้อมูล')}</span></div></article>`).join('') : '<p class="empty-state">ยังไม่มีเหตุการณ์ในหมวดนี้ · จะแสดงเมื่อ Dashboard ได้รับข้อมูลจริง</p>';
+    root.innerHTML = rows.length ? rows.map(e => `<article class="event-item"><span class="event-mark event-${esc(e.type)}">${({relay:'◉',temperature:'🌡',humidity:'💧',esp:'⌁',mqtt:'⌁',error:'!',system:'▣'})[e.type] || '•'}</span><div class="event-copy"><b>${esc(e.title)}</b><small>${esc(e.detail)}</small></div><div class="event-meta"><time>${new Date(e.at).toLocaleString('th-TH',{dateStyle:'short',timeStyle:'medium'})}</time><span class="event-status ${esc(e.status)}">${esc(e.status==='ok'?'รับข้อมูล':e.status==='error'?'ผิดพลาด':e.status==='warning'?'เตือน':e.status==='pending'?'รอยืนยัน':'ข้อมูล')}</span></div></article>`).join('') : '<p class="empty-state">ยังไม่มีเหตุการณ์ในหมวดนี้ · จะแสดงเมื่อ Dashboard ได้รับข้อมูลจริง</p>';
   }
   function setRecordsView(view) {
     const showFinance = view === 'finance';
@@ -282,14 +305,41 @@
       row.setAttribute('aria-label', `${row.querySelector('span:not(.home-row-chevron)')?.textContent || row.dataset.homeRelay} · ${label} · เลือกเพื่อเปิดหน้าควบคุม`);
     });
   }
+  function bindSensorAlertSettings() {
+    const temperatureInput = $('sensorTempThreshold'), humidityInput = $('sensorHumidityThreshold'), feedback = $('sensorAlertFeedback');
+    temperatureInput.value = String(sensorAlertThresholds.temperature); humidityInput.value = String(sensorAlertThresholds.humidity);
+    $('sensorAlertForm').addEventListener('submit', event => {
+      event.preventDefault();
+      try {
+        const result = sensorAlertConfig.save({ temperature: temperatureInput.value === '' ? NaN : Number(temperatureInput.value), humidity: humidityInput.value === '' ? NaN : Number(humidityInput.value) });
+        sensorAlertThresholds = result.settings;
+        feedback.dataset.state = result.persisted ? 'saved' : 'session';
+        feedback.textContent = result.persisted ? `บันทึกแล้ว · อุณหภูมิ >${sensorAlertThresholds.temperature} °C · ความชื้น >${sensorAlertThresholds.humidity}% RH · เก็บในเบราว์เซอร์นี้` : 'นำเกณฑ์ไปใช้แล้ว แต่เบราว์เซอร์ไม่อนุญาตให้บันทึกข้าม session';
+        const state = FarmState.get();
+        if (sensorUpdatedAt && Date.now() - sensorUpdatedAt <= SENSOR_ALERT_MAX_AGE_MS) recordSensorAlertTransitions(state);
+        render(state); toast('บันทึกเกณฑ์แจ้งเตือนแล้ว');
+      } catch (error) { feedback.dataset.state = 'error'; feedback.textContent = error.message; }
+    });
+    $('resetSensorAlertThresholds').addEventListener('click', () => {
+      temperatureInput.value = String(sensorAlertConfig.defaults.temperature); humidityInput.value = String(sensorAlertConfig.defaults.humidity);
+      const result = sensorAlertConfig.save(sensorAlertConfig.defaults); sensorAlertThresholds = result.settings;
+      feedback.dataset.state = result.persisted ? 'saved' : 'session';
+      feedback.textContent = result.persisted ? 'คืนค่าเริ่มต้นตัวอย่างแล้ว · เก็บในเบราว์เซอร์นี้' : 'คืนค่าเริ่มต้นแล้ว · ใช้ใน session นี้เท่านั้น';
+      const state = FarmState.get();
+      if (sensorUpdatedAt && Date.now() - sensorUpdatedAt <= SENSOR_ALERT_MAX_AGE_MS) recordSensorAlertTransitions(state);
+      render(state);
+    });
+  }
   function renderHomeAlert(s) {
     const card = $('homeAlert'); let level = '', title = '', detailText = '';
+    const sensorAlerts = currentSensorAlerts(s);
     if (s.emergency?.active) { level = 'danger'; title = 'Emergency Stop ทำงานอยู่'; detailText = `Firmware ล็อกรีเลย์ทั้งหมด${s.emergency.source ? ` · แหล่งที่มา: ${s.emergency.source}` : ''}`; }
     else if (s.systemError) { level = 'danger'; title = `Firmware แจ้งเตือน: ${s.systemError.code}`; detailText = s.systemError.message; }
     else if (s.connection === 'error') { level = 'danger'; title = 'การเชื่อมต่อ MQTT มีปัญหา'; detailText = s.connectionReason || 'ตรวจสอบการเชื่อมต่อในหน้าระบบ'; }
     else if (s.connection === 'reconnecting') { level = 'warning'; title = 'กำลังเชื่อมต่อระบบฟาร์มใหม่'; detailText = s.connectionReason || 'กำลังรอการเชื่อมต่อกลับมา'; }
     else if (s.espOnline === false && (s.heartbeatAt > 0 || s.connection === 'online')) { level = 'danger'; title = 'ESP8266 ออฟไลน์'; detailText = 'ไม่ได้รับ heartbeat ล่าสุด · ตรวจสอบไฟและ Wi-Fi ของตัวควบคุม'; }
     else if (s.connection === 'connecting') { level = 'warning'; title = 'กำลังเชื่อมต่อ MQTT'; detailText = 'รอการยืนยันสถานะจาก ESP8266'; }
+    else if (sensorAlerts.length) { level = 'warning'; title = 'ค่าเซนเซอร์เกินเกณฑ์แจ้งเตือน'; detailText = sensorAlerts.map(alert => `${alert.label} ${alert.value.toFixed(1)} ${alert.unit} · เกณฑ์ >${alert.threshold} ${alert.unit}`).join(' · '); }
     card.dataset.level = level || 'clear'; card.hidden = !level;
     $('homeAlertTitle').textContent = title; $('homeAlertDetail').textContent = detailText;
   }
@@ -328,11 +378,12 @@
     const root = $('homeTrendChart'), samples = sensorHistory.filter(p => Date.now() - p.at < HISTORY_WINDOW_MS);
     if (samples.length < 2) { root.innerHTML = '<p class="empty-state">รอข้อมูลเซนเซอร์อย่างน้อย 2 จุด</p>'; return; }
     const row = (key, label, unit, color) => {
-      const values = samples.map(p => p[key]), min = Math.min(...values), max = Math.max(...values), span = max - min || 1;
+      const threshold = sensorAlertThresholds[key], values = samples.map(p => p[key]), min = Math.min(...values, threshold), max = Math.max(...values, threshold), span = max - min || 1;
       const firstAt = samples[0].at, elapsed = Math.max(1, samples[samples.length - 1].at - firstAt);
       const points = values.map((value,i) => `${((samples[i].at - firstAt) * 300 / elapsed).toFixed(1)},${(44 - ((value - min) / span) * 36).toFixed(1)}`).join(' ');
-      const last = values[values.length - 1], firstTime = new Date(samples[0].at).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}), lastTime = new Date(samples[samples.length - 1].at).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
-      return `<div class="trend-row"><div class="trend-row-heading"><span>${label}</span><b>${last.toFixed(1)}${unit}</b></div><svg viewBox="0 0 300 52" role="img" aria-label="แนวโน้ม${label} ${samples.length} จุด จาก ${firstTime} ถึง ${lastTime}"><line x1="0" y1="46" x2="300" y2="46"/><polyline points="${points}" stroke="${color}"/></svg><small>${firstTime}<span>${lastTime}</span></small></div>`;
+      const thresholdY = (44 - ((threshold - min) / span) * 36).toFixed(1);
+      const firstTime = new Date(samples[0].at).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}), lastTime = new Date(samples[samples.length - 1].at).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+      return `<div class="trend-row"><div class="trend-row-heading"><span>${label}</span><b>${values[values.length - 1].toFixed(1)}${unit}</b></div><svg viewBox="0 0 300 52" role="img" aria-label="แนวโน้ม${label} ${samples.length} จุด จาก ${firstTime} ถึง ${lastTime} · เส้นประคือเกณฑ์แจ้งเตือน ${threshold}${unit}"><line x1="0" y1="46" x2="300" y2="46"/><line class="trend-threshold" x1="0" y1="${thresholdY}" x2="300" y2="${thresholdY}"/><polyline points="${points}" stroke="${color}"/></svg><small>${firstTime}<span>${lastTime}</span></small></div>`;
     };
     root.innerHTML = row('temperature','อุณหภูมิ',' °C','#E67624') + row('humidity','ความชื้น',' %','#078AAD');
   }
@@ -340,7 +391,7 @@
     const today = new Date();
     const todayEvents = events.filter(e => { const d = new Date(e.at); return d.getFullYear() === today.getFullYear() && d.getMonth() === today.getMonth() && d.getDate() === today.getDate(); });
     const relays = todayEvents.filter(e => e.type === 'relay').length;
-    const alerts = todayEvents.filter(e => e.status === 'error' || (e.type === 'mqtt' && e.status === 'pending')).length;
+    const alerts = todayEvents.filter(e => e.status === 'error' || e.status === 'warning' || (e.type === 'mqtt' && e.status === 'pending')).length;
     $('todayRelayChanges').textContent = String(relays); $('todayAlerts').textContent = String(alerts);
     $('todaySummaryNote').textContent = todayEvents.length ? `บันทึกในเบราว์เซอร์นี้ · ${todayEvents.length} เหตุการณ์` : 'ไม่มีเหตุการณ์ที่บันทึกไว้วันนี้';
   }
@@ -377,6 +428,7 @@
     if ($('scheduleRelay') && !scheduleDraftActive) renderScheduleEditor(s);
     renderHomeInsights(s);
   }
+  bindSensorAlertSettings();
   document.querySelectorAll('[data-mode]').forEach(button => button.addEventListener('click', async () => { modePending = button.dataset.mode; render(FarmState.get()); try { const ok = await FarmMqtt.commandMode(modePending); if (ok) { addEvent('relay','ESP ยืนยันโหมด',button.dataset.mode,'ok'); toast(`ESP ยืนยันโหมด ${button.dataset.mode}`); } else toast('ไม่สามารถยืนยันโหมดจาก ESP ได้'); } catch(error) { FarmState.addError('mode-command',error.message); toast(error.message); } finally { modePending = null; render(FarmState.get()); } }));
   document.querySelectorAll('[data-filter]').forEach(button => button.addEventListener('click', () => { activeFilter = button.dataset.filter; document.querySelectorAll('[data-filter]').forEach(b=>b.classList.toggle('active',b===button)); renderEvents(); }));
   FarmState.subscribe((snapshot,event) => {
@@ -390,7 +442,7 @@
       lastConnection = status;
     } else if (event === 'device:update' && snapshot.heartbeatAt > lastHeartbeatSeen) { lastHeartbeatSeen=snapshot.heartbeatAt; addEvent('esp','ESP Heartbeat',`${snapshot.device?.firmware||'Firmware ไม่รายงาน'}${Number.isFinite(snapshot.device?.rssi)?` · RSSI ${snapshot.device.rssi} dBm`:''}`,'ok',snapshot.heartbeatAt); }
     else if (event === 'esp:offline') addEvent('esp','ESP Offline',snapshot.connectionReason,'error');
-    else if (event === 'sensor:update') { sensorUpdatedAt=Date.now(); recordSensorHistory(snapshot); if(snapshot.temperature!==null)addEvent('temperature','DHT11 Temperature',`${snapshot.temperature} °C`,'ok'); if(snapshot.humidity!==null)addEvent('humidity','DHT11 Humidity',`${snapshot.humidity} %`,'ok'); }
+    else if (event === 'sensor:update') { sensorUpdatedAt=Date.now(); recordSensorHistory(snapshot); recordSensorAlertTransitions(snapshot); if(snapshot.temperature!==null)addEvent('temperature','DHT11 Temperature',`${snapshot.temperature} °C`,'ok'); if(snapshot.humidity!==null)addEvent('humidity','DHT11 Humidity',`${snapshot.humidity} %`,'ok'); }
     else if (event === 'emergency:update') addEvent('error', snapshot.emergency?.active ? 'Emergency Stop Active' : 'Emergency Stop Reset', snapshot.emergency?.source || 'ESP8266', snapshot.emergency?.active ? 'error' : 'ok');
     else if (event.startsWith('relay:')) { const id=event.slice(6),relay=SmartFarmConfig.relays.find(r=>r.id===id); addEvent('relay','Relay Status',`${relay?.label||id}: ${snapshot.relays[id]?'ON':'OFF'}`,'ok'); }
     else if (event === 'error') { const err=snapshot.errors[0]; if(err)addEvent('error',`Error · ${err.kind}`,err.message,'error',err.at); }

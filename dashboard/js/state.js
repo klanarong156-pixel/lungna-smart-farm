@@ -111,12 +111,14 @@
   function setSensor(obj) {
     if (!obj || typeof obj !== 'object' || Array.isArray(obj)) throw Error('DHT11 payload must be object');
     for (const key of ['temperature', 'humidity']) {
-      if (obj[key] !== undefined && obj[key] !== null && (typeof obj[key] !== 'number' || !Number.isFinite(obj[key]))) {
+      if (!Object.hasOwn(obj, key) || typeof obj[key] !== 'number' || !Number.isFinite(obj[key])) {
         throw Error(`invalid sensor field ${key}`);
       }
     }
-    state.temperature = typeof obj.temperature === 'number' ? obj.temperature : null;
-    state.humidity = typeof obj.humidity === 'number' ? obj.humidity : null;
+    // Firmware publishes both readings atomically; reject partial payloads before
+    // mutating state so a missing field cannot clear a valid value or its alert.
+    state.temperature = obj.temperature;
+    state.humidity = obj.humidity;
     emit('sensor:update');
   }
 
