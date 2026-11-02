@@ -5,6 +5,12 @@
 - Dashboard now rejects incomplete or null DHT11 payloads atomically, preserving the last valid readings and preventing an active threshold alert from being cleared by a missing field.
 - Firmware, MQTT topics/payloads, relay behavior, and safety controls are unchanged. No operating-system push notification is implemented.
 
+## WiFiManager portal security — 2026-11-03
+- Generate a unique WPA2 password once per board, save it in `/setup_ap_password.txt`, reuse it after reboot, and print it to local USB Serial when the setup portal opens.
+- Add an admin-only per-Chip-ID MQTT `SHOW` request with a non-retained password reply and a 30-second response cooldown; expose the non-secret Chip ID in device status and require broker ACL to deny replies to ordinary dashboard identities.
+- Mask and blank saved secret fields in the captive portal; blank submissions retain existing credentials.
+- Note: ESP8266 LittleFS still stores configured secrets and the AP password unencrypted at rest, and the captive portal does not provide end-to-end TLS.
+
 # Changelog
 
 ## Security and CI hardening — 2026-10-28

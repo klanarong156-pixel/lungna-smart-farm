@@ -23,6 +23,12 @@ Firmware source lives in `src/main.ino` and is based on the V7.2.0 OTA stable fi
 
 ## Provisioning and safety
 
-Configure Wi-Fi, MQTT username/password and OTA password using the firmware's WiFiManager setup portal/device procedure. Never commit these secrets. MQTT and Telegram use TLS with CA validation and a valid system clock; `setInsecure` must not be used. HTTP OTA is disabled by default; if explicitly enabled for a controlled lab build, keep it on a trusted farm LAN and never expose its port publicly. ArduinoOTA uses port 8266 and a device-provisioned password. OTA is not declared successful until the device reports the actual result.
+On first boot, the device creates a unique 128-bit WPA2 password and saves it in `/setup_ap_password.txt` in LittleFS. It reuses that password after reboot, so each board keeps its own AP password. When `SmartFarm_Setup` opens, the password is printed to the local USB Serial Monitor at 115200 baud; connect to the AP and finish setup within 180 seconds. Use the serial command `OPEN_AP` or the documented Wi-Fi reset procedure to reopen setup. Keep physical/serial access restricted and record the password for that board.
+
+The portal masks MQTT, OTA and Telegram token inputs and does not prefill saved secrets. Leave a secret field blank to keep its current value; enter a replacement to rotate it. The setup portal still uses HTTP rather than end-to-end TLS: WPA2 protects the local Wi-Fi link, but ESP8266 LittleFS secrets and the AP password file remain unencrypted at rest. Never commit these secrets or expose the portal/OTA to an untrusted network.
+
+To retrieve one board's current AP password remotely, use an admin-only MQTT identity: read its six-digit hex `chip_id` from `smartfarm/status/device`, subscribe to `smartfarm/admin/setup-ap-password/<CHIP_ID>/response`, then publish `SHOW` to `smartfarm/admin/setup-ap-password/<CHIP_ID>/request`. Only the matching board responds; the reply is non-retained and rate-limited. Apply the per-device ACL in `docs/mqtt-topics.md` before enabling this feature; the standard Dashboard must not be allowed to read any response topic.
+
+MQTT and Telegram use TLS with CA validation and a valid system clock; `setInsecure` must not be used. ArduinoOTA uses port 8266 and is enabled only when an OTA password is configured. HTTP browser upload OTA is disabled by default; if explicitly enabled for a controlled lab build, keep it on a trusted farm LAN and never expose its port publicly. OTA is not declared successful until the device reports the actual result.
 
 The static source build must be compiled and verified before claiming a binary release. Physical OTA, TLS broker auth and relay output still require the target device/network for integration verification.

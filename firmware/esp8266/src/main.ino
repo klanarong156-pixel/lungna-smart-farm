@@ -90,6 +90,8 @@ const uint32_t WIFI_RESET_HOLD_MS = 5000UL;
 // password in ESP8266 flash so later boots reconnect to the saved network.
 // Close the portal after three minutes when no setup is completed.
 const uint16_t WIFI_PORTAL_TIMEOUT_SECONDS = 180;
+const char WIFI_SETUP_AP_SSID[] = "SmartFarm_Setup";
+const char SETUP_AP_PASSWORD_FILE[] = "/setup_ap_password.txt";
 const uint32_t MQTT_RECONNECT_MS = 5000UL;
 const uint32_t MQTT_RECONNECT_MAX_MS = 60000UL;
 const uint32_t SENSOR_INTERVAL_MS = 30000UL;
@@ -222,16 +224,23 @@ bool configureMqttTls() {
 char mqttUser[64] = "";
 char mqttPass[96] = "";
 char otaPass[64] = "";
+char setupApPassword[33] = "";
+char setupApPasswordRequestTopic[96] = "";
+char setupApPasswordResponseTopic[96] = "";
 char telegramBotToken[80] = "";
 char telegramChatId[32] = "";
 char deviceName[32] = "SmartFarm-ESP8266";
 WiFiManagerParameter pUser("mqtt_user", "MQTT username", mqttUser,
                            sizeof(mqttUser));
-WiFiManagerParameter pPass("mqtt_pass", "MQTT password", mqttPass,
-                           sizeof(mqttPass));
-WiFiManagerParameter pOta("ota_pass", "OTA password", otaPass, sizeof(otaPass));
-WiFiManagerParameter pTelegramToken("telegram_bot_token", "Telegram bot token",
-                                    telegramBotToken, sizeof(telegramBotToken));
+WiFiManagerParameter pPass("mqtt_pass", "MQTT password (blank keeps current)",
+                           "", sizeof(mqttPass),
+                           "type='password' autocomplete='new-password'");
+WiFiManagerParameter pOta("ota_pass", "OTA password (blank keeps current)",
+                          "", sizeof(otaPass),
+                          "type='password' autocomplete='new-password'");
+WiFiManagerParameter pTelegramToken(
+    "telegram_bot_token", "Telegram token (blank keeps current)", "",
+    sizeof(telegramBotToken), "type='password' autocomplete='new-password'");
 WiFiManagerParameter pTelegramChat("telegram_chat_id", "Telegram chat ID",
                                    telegramChatId, sizeof(telegramChatId));
 WiFiManagerParameter pName("device_name", "Device name", deviceName,
@@ -250,6 +259,13 @@ void buildMqttClientId(char *out, size_t outSize) {
   snprintf(out, outSize, "%.40s-%06X", name.c_str(), ESP.getChipId());
 }
 
+void configureSetupApPasswordTopics() {
+  const uint32_t chipId = ESP.getChipId();
+  snprintf(setupApPasswordRequestTopic, sizeof(setupApPasswordRequestTopic),
+           MQTT_BASE "/admin/setup-ap-password/%06X/request", chipId);
+  snprintf(setupApPasswordResponseTopic, sizeof(setupApPasswordResponseTopic),
+           MQTT_BASE "/admin/setup-ap-password/%06X/response", chipId);
+}
 
 String urlEncode(const String &value) {
   String out;
@@ -727,6 +743,89 @@ bool saveSecrets() {
   f.close();
   return bytes > 0;
 }
+
+void clearSecretPortalFields() {
+  // Never render saved secrets into the plaintext captive-portal page.
+  pPass.setValue("", sizeof(mqttPass));
+  pOta.setValue("", sizeof(otaPass));
+  pTelegramToken.setValue("", sizeof(telegramBotToken));
+}
+
+void updateSecretIfProvided(char *stored, size_t storedSize,
+                            const char *submitted) {
+  // Blank password fields mean "keep the existing secret"; users can rotate
+  // a secret by entering a replacement without exposing the old value.
+  if (submitted && submitted[0]) strlcpy(stored, submitted, storedSize);
+}
+
+void generateSetupApPassword() {
+  // Generate a 128-bit key as 32 hexadecimal characters.
+  const uint32_t words[4] = {ESP.random(), ESP.random(), ESP.random(), ESP.random()};
+  snprintf(setupApPassword, sizeof(setupApPassword), "%08lX%08lX%08lX%08lX",
+           (unsigned long)words[0], (unsigned long)words[1],
+           (unsigned long)words[2], (unsigned long)words[3]);
+}
+
+bool isValidSetupApPassword(const char *password) {
+  if (!password || strlen(password) != 32) return false;
+  for (const char *c = password; *c; ++c) {
+    if (!((*c >= '0' && *c <= '9') || (*c >= 'A' && *c <= 'F'))) return false;
+  }
+  return true;
+}
+
+bool loadOrCreateSetupApPassword() {
+  if (fsReady && LittleFS.exists(SETUP_AP_PASSWORD_FILE)) {
+    File f = LittleFS.open(SETUP_AP_PASSWORD_FILE, "r");
+    if (f) {
+      const size_t fileSize = f.size();
+      if (fileSize == 32) {
+        const size_t bytesRead = f.readBytes(setupApPassword, 32);
+        f.close();
+        setupApPassword[bytesRead] = '\0';
+        if (bytesRead == 32 && isValidSetupApPassword(setupApPassword)) {
+          Serial.println(F("WiFiManager: loaded this board's saved AP password"));
+          return true;
+        }
+      } else {
+        f.close();
+      }
+      Serial.println(F("WiFiManager: saved AP password invalid; creating a new one"));
+    }
+  }
+
+  generateSetupApPassword();
+  if (!fsReady) {
+    Serial.println(F("WiFiManager: LittleFS unavailable; AP password is not persistent"));
+    return false;
+  }
+
+  File f = LittleFS.open(SETUP_AP_PASSWORD_FILE, "w");
+  if (!f) {
+    Serial.println(F("WiFiManager: could not save AP password; it may change next boot"));
+    return false;
+  }
+  const size_t bytesWritten = f.print(setupApPassword);
+  f.flush();
+  f.close();
+  if (bytesWritten != 32) {
+    LittleFS.remove(SETUP_AP_PASSWORD_FILE);
+    Serial.println(F("WiFiManager: AP password save failed; it may change next boot"));
+    return false;
+  }
+  Serial.println(F("WiFiManager: created and saved a unique AP password for this board"));
+  return true;
+}
+
+void configureSetupPortal(WiFiManager &wm) {
+  wm.setConfigPortalTimeout(WIFI_PORTAL_TIMEOUT_SECONDS);
+  wm.setAPCallback([](WiFiManager *) {
+    Serial.printf("WiFiManager AP ready SSID=%s\n", WIFI_SETUP_AP_SSID);
+    Serial.printf("Setup AP WPA2 password (USB Serial only): %s\n",
+                  setupApPassword);
+  });
+}
+
 void clearSchedules() {
   for (uint8_t r = 0; r < RELAY_COUNT; r++)
     for (uint8_t s = 0; s < SLOT_COUNT; s++)
@@ -1501,11 +1600,9 @@ void openMqttSetupPortal() {
   mqttPortalOpened = true;
   Serial.println(F("MQTT CONFIG: opening SmartFarm_Setup portal"));
   WiFiManager wm;
-  wm.setConfigPortalTimeout(WIFI_PORTAL_TIMEOUT_SECONDS);
+  configureSetupPortal(wm);
   pUser.setValue(mqttUser, sizeof(mqttUser));
-  pPass.setValue(mqttPass, sizeof(mqttPass));
-  pOta.setValue(otaPass, sizeof(otaPass));
-  pTelegramToken.setValue(telegramBotToken, sizeof(telegramBotToken));
+  clearSecretPortalFields();
   pTelegramChat.setValue(telegramChatId, sizeof(telegramChatId));
   pName.setValue(deviceName, sizeof(deviceName));
   wm.addParameter(&pUser);
@@ -1514,12 +1611,12 @@ void openMqttSetupPortal() {
   wm.addParameter(&pTelegramToken);
   wm.addParameter(&pTelegramChat);
   wm.addParameter(&pName);
-  if (wm.startConfigPortal("SmartFarm_Setup")) {
+  if (wm.startConfigPortal(WIFI_SETUP_AP_SSID, setupApPassword)) {
     strlcpy(mqttUser, pUser.getValue(), sizeof(mqttUser));
-    strlcpy(mqttPass, pPass.getValue(), sizeof(mqttPass));
-    strlcpy(otaPass, pOta.getValue(), sizeof(otaPass));
-    strlcpy(telegramBotToken, pTelegramToken.getValue(),
-            sizeof(telegramBotToken));
+    updateSecretIfProvided(mqttPass, sizeof(mqttPass), pPass.getValue());
+    updateSecretIfProvided(otaPass, sizeof(otaPass), pOta.getValue());
+    updateSecretIfProvided(telegramBotToken, sizeof(telegramBotToken),
+                           pTelegramToken.getValue());
     strlcpy(telegramChatId, pTelegramChat.getValue(), sizeof(telegramChatId));
     strlcpy(deviceName, pName.getValue(), sizeof(deviceName));
     if (saveSecrets()) {
@@ -1647,6 +1744,32 @@ void mqttCallback(char *topic, byte *payload, unsigned int len) {
     if (logMsg.length() > 96)
       logMsg.remove(96);
     Serial.printf("MQTT RX: topic=%s payload=%s\n", t.c_str(), logMsg.c_str());
+  }
+
+  // This secret-bearing response is safe only with the documented broker ACL:
+  // admin may request/read it; ordinary dashboard identities must be denied.
+  // Include this board's Chip ID so only the intended ESP replies.
+  if (strcmp(topic, setupApPasswordRequestTopic) == 0) {
+    if (msg != "SHOW") return;
+    static uint32_t lastReplyAt = 0;
+    static bool hasReplied = false;
+    const uint32_t now = millis();
+    if (hasReplied && (uint32_t)(now - lastReplyAt) < 30000UL) {
+      Serial.println(F("ADMIN: AP password reply rate-limited"));
+      return;
+    }
+    if (!isValidSetupApPassword(setupApPassword)) {
+      Serial.println(F("ADMIN: AP password is unavailable"));
+      return;
+    }
+    if (mqtt.publish(setupApPasswordResponseTopic, setupApPassword, false)) {
+      lastReplyAt = now;
+      hasReplied = true;
+      Serial.println(F("ADMIN: AP password response sent (non-retained)"));
+    } else {
+      Serial.println(F("ADMIN: AP password response publish failed"));
+    }
+    return;
   }
 
   if (t == MQTT_BASE "/mode/set") {
@@ -1886,6 +2009,7 @@ void connectMqtt() {
     bool subscriptionsOk = true;
     for (uint8_t i = 0; i < MQTT_COMMAND_TOPIC_COUNT; ++i)
       subscriptionsOk = mqtt.subscribe(MQTT_COMMAND_TOPICS[i]) && subscriptionsOk;
+    subscriptionsOk = mqtt.subscribe(setupApPasswordRequestTopic) && subscriptionsOk;
     publishStatus();
     publishTelegramStatus();
     publishReminderStatus("online");
@@ -2277,12 +2401,12 @@ void setupWifi() {
   pinMode(WIFI_RESET_BUTTON, INPUT_PULLUP);
   resetWifiIfButtonHeldAtBoot();
   WiFiManager wm;
-  wm.setConfigPortalTimeout(WIFI_PORTAL_TIMEOUT_SECONDS);
   loadSecrets();
+  loadOrCreateSetupApPassword();
+  configureSetupApPasswordTopics();
+  configureSetupPortal(wm);
   pUser.setValue(mqttUser, sizeof(mqttUser));
-  pPass.setValue(mqttPass, sizeof(mqttPass));
-  pOta.setValue(otaPass, sizeof(otaPass));
-  pTelegramToken.setValue(telegramBotToken, sizeof(telegramBotToken));
+  clearSecretPortalFields();
   pTelegramChat.setValue(telegramChatId, sizeof(telegramChatId));
   pName.setValue(deviceName, sizeof(deviceName));
   wm.addParameter(&pUser);
@@ -2292,7 +2416,7 @@ void setupWifi() {
   wm.addParameter(&pTelegramChat);
   wm.addParameter(&pName);
   Serial.println(F("WiFiManager: connecting to saved AP (credentials persist in flash)..."));
-  if (!wm.autoConnect("SmartFarm_Setup")) {
+  if (!wm.autoConnect(WIFI_SETUP_AP_SSID, setupApPassword)) {
     // autoConnect() may block until the portal timeout, but a timeout must
     // not turn into an unconditional reboot loop. Continue in STA mode and
     // let maintainWifi() retry in the normal loop.
@@ -2302,10 +2426,10 @@ void setupWifi() {
     return;
   }
   strlcpy(mqttUser, pUser.getValue(), sizeof(mqttUser));
-  strlcpy(mqttPass, pPass.getValue(), sizeof(mqttPass));
-  strlcpy(otaPass, pOta.getValue(), sizeof(otaPass));
-  strlcpy(telegramBotToken, pTelegramToken.getValue(),
-          sizeof(telegramBotToken));
+  updateSecretIfProvided(mqttPass, sizeof(mqttPass), pPass.getValue());
+  updateSecretIfProvided(otaPass, sizeof(otaPass), pOta.getValue());
+  updateSecretIfProvided(telegramBotToken, sizeof(telegramBotToken),
+                         pTelegramToken.getValue());
   strlcpy(telegramChatId, pTelegramChat.getValue(), sizeof(telegramChatId));
   strlcpy(deviceName, pName.getValue(), sizeof(deviceName));
   if (!saveSecrets()) Serial.println(F("Credential persistence failed after WiFi setup"));
@@ -2474,6 +2598,9 @@ void publishHeartbeat() {
   // cannot parse status/device and incorrectly keep ESP8266 offline.
   StaticJsonDocument<1024> d;
   d["device_id"] = deviceName[0] ? deviceName : "esp8266-01";
+  char chipId[7];
+  snprintf(chipId, sizeof(chipId), "%06X", ESP.getChipId());
+  d["chip_id"] = chipId;
   d["online"] = true;
   d["wifi"] = WiFi.status() == WL_CONNECTED;
   d["mqtt"] = mqtt.connected();
