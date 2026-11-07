@@ -1,0 +1,31 @@
+const assert = require('node:assert/strict');
+require('../dashboard/js/command-flow.js');
+const RelayCommandMachine = globalThis.RelayCommandMachine;
+const onlineSnapshot = () => ({ connection: 'online', espOnline: true, emergency: { active: false }, relays: { pump: false } });
+
+(async () => {
+  const states = []; let current = onlineSnapshot();
+  const flow = new RelayCommandMachine({ relayIds: ['pump'], getSnapshot: () => current, confirm: async () => true, onChange: item => states.push(item.state), commandRelay: async (id, target, hooks) => { hooks.onPublished(); current.relays[id] = target; return true; } });
+  const confirmed = await flow.request('pump', true);
+  assert.equal(confirmed.state, 'confirmed');
+  assert.deepEqual(states, ['confirming', 'sending', 'awaiting_ack', 'confirmed']);
+  await assert.rejects(() => flow.request('unknown', true), /ไม่รู้จัก relay/);
+  const offline = new RelayCommandMachine({ relayIds: ['pump'], getSnapshot: () => ({ ...onlineSnapshot(), connection: 'offline' }), confirm: async () => true, commandRelay: async () => { throw Error('must not publish'); } });
+  await assert.rejects(() => offline.request('pump', true), /MQTT ยังไม่เชื่อมต่อ/);
+  const unsafe = new RelayCommandMachine({ relayIds: ['pump'], getSnapshot: () => ({ ...onlineSnapshot(), emergency: { active: true } }), confirm: async () => true, commandRelay: async () => { throw Error('must not publish'); } });
+  await assert.rejects(() => unsafe.request('pump', true), /Emergency Stop/);
+  let live = onlineSnapshot(), stalePublished = false;
+  const staleConfirm = new RelayCommandMachine({ relayIds: ['pump'], getSnapshot: () => live, confirm: async () => { live = { ...live, emergency: { active: true } }; return true; }, commandRelay: async () => { stalePublished = true; throw Error('must not publish'); } });
+  const staleResult = await staleConfirm.request('pump', true);
+  assert.equal(staleResult.state, 'failed');
+  assert.match(staleResult.message, /Emergency Stop/);
+  assert.equal(stalePublished, false, 'fresh safety state is re-checked after confirmation');
+  let changed = onlineSnapshot();
+  const relayChanged = new RelayCommandMachine({ relayIds: ['pump'], getSnapshot: () => changed, confirm: async () => { changed.relays.pump = true; return true; }, commandRelay: async () => { throw Error('must not publish'); } });
+  assert.equal((await relayChanged.request('pump', true)).state, 'failed', 'no stale command after relay changes in dialog');
+  const cancelled = new RelayCommandMachine({ relayIds: ['pump'], getSnapshot: onlineSnapshot, confirm: async () => false, commandRelay: async () => { throw Error('must not publish'); } });
+  assert.equal((await cancelled.request('pump', true)).state, 'cancelled');
+  const timedout = new RelayCommandMachine({ relayIds: ['pump'], getSnapshot: onlineSnapshot, confirm: async () => true, commandRelay: async () => { throw Error('ไม่สามารถยืนยันสถานะได้ภายในเวลาที่กำหนด'); } });
+  assert.equal((await timedout.request('pump', true)).state, 'timeout');
+  console.log('PASS command flow: step transitions, pre/post-confirmation safety guards, cancel and timeout');
+})().catch(error => { console.error(error); process.exitCode = 1; });

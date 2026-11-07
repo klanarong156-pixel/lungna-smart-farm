@@ -1,11 +1,13 @@
-const CACHE = 'lungna-shell-v18';
+const CACHE = 'lungna-shell-v20';
 const OWNED_CACHE_PREFIX = 'lungna-shell-';
 const SHELL = [
-  './', './index.html', './css/app.css', './css/reference-layout.css?v=1.6.8', './js/config.js', './js/state.js',
-  './js/mqtt.js', './js/sensor-alerts.js?v=1.6.8', './js/app.js?v=1.6.8', './manifest.json',
+  './', './index.html', './css/app.css', './css/reference-layout.css?v=2.0.0', './js/config.js', './js/state.js',
+  './js/mqtt.js', './js/command-flow.js?v=2.0.0', './js/sensor-alerts.js?v=2.0.0', './js/app.js?v=2.0.0', './manifest.json',
   './assets/icons/icon-192.png', './assets/icons/icon-512.png',
   './assets/logo/logo-suanlungna-modern.png',
-  './assets/illustrations/farm-aerial.webp', './assets/illustrations/farm-landscape.webp'
+  './assets/illustrations/farm-landscape.webp',
+  './assets/v2/hero-farmer-garden.jpg', './assets/v2/cucumber-illustration.jpg',
+  './assets/v2/water-pump-illustration.jpg', './assets/v2/ai-farm-helper.jpg'
 ];
 self.addEventListener('install', event => event.waitUntil(
   caches.open(CACHE).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting())

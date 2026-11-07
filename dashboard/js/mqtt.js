@@ -229,7 +229,7 @@
       }
     },
 
-    commandRelay(id, target) {
+    commandRelay(id, target, hooks = {}) {
       if (!Object.hasOwn(FarmState.get().relays, id)) return Promise.reject(Error('unknown relay'));
       if (!this.client?.connected) return Promise.reject(Error('MQTT ยังไม่เชื่อมต่อ'));
       if (this.pending.has(id)) return Promise.reject(Error('กำลังรอการยืนยันคำสั่งก่อนหน้า'));
@@ -243,7 +243,11 @@
       });
       this.pending.set(id, request);
       this.client.publish(topics.relaySet(id), target ? 'ON' : 'OFF', { qos: 1, retain: false }, error => {
-        if (!error) return;
+        if (!error) {
+          // This means MQTT publish completed; it is NOT ESP acknowledgement.
+          try { hooks.onPublished?.(); } catch (hookError) { FarmState.addError('command-flow-hook', hookError.message || String(hookError)); }
+          return;
+        }
         clearTimeout(request.timer);
         this.pending.delete(id);
         request.resolve(false);
