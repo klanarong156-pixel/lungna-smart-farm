@@ -1,0 +1,15 @@
+name = "lungna-smart-farm-ai"
+main = "src/index.mjs"
+compatibility_date = "2026-11-08"
+
+[vars]
+# ต้องตั้ง model ที่บัญชีผู้ให้บริการใช้งานได้ก่อน deploy; ไม่มีค่า default ที่เดารุ่นให้
+AI_MODEL = ""
+ALLOWED_ORIGIN = "https://klanarong156-pixel.github.io"
+TURNSTILE_HOSTNAME = "klanarong156-pixel.github.io"
+
+# เลือก namespace_id ที่ยังไม่ถูกใช้ใน Cloudflare account ของคุณก่อน deploy
+[[ratelimits]]
+name = "AI_RATE_LIMITER"
+namespace_id = "73120411"
+simple = { limit = 5, period = 60 }

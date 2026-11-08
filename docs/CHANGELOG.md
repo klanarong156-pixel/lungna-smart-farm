@@ -1,3 +1,11 @@
+## AI วิเคราะห์สถานะระบบแบบอ่านอย่างเดียว — 2026-11-08 (feature branch; ยังไม่ deploy)
+
+- เพิ่ม AI analysis แบบผู้ใช้กดเอง ส่ง snapshot allowlist จาก MQTT/ESP, heartbeat, DHT11, thresholds, relay states, mode, Emergency Stop และ firmware; retained relay/mode/E-Stop inactive ถูกทำเป็น unknown จนมี live evidence, active E-Stop คง fail-safe, และ retained status ไม่ยืนยันคำสั่งใหม่. ไม่ส่ง credentials, IP, finance, schedule, raw logs หรือพิกัด
+- เพิ่ม Cloudflare Worker backend พร้อม server-side Turnstile validation, exact-origin CORS, payload/schema validation, output allowlist, hashed-IP approximate rate limit และ server-only API key. ไม่มี function/tool calling หรือเส้นทางสั่ง MQTT/relay
+- ปุ่ม AI ปิดอยู่เป็นค่าเริ่มต้นจนตั้ง Worker endpoint และ public Turnstile site key; ผู้ให้บริการ/secret, model, usage budget และ rate-limit namespace ต้องตั้งโดยผู้ดูแลก่อนเปิดใช้
+- เพิ่ม regression tests สำหรับ privacy allowlist, stale data, CORS, Turnstile, limits, failure handling และ worker output; bump Dashboard assets เป็น v2.1.0 และ shell cache เป็น v21
+- ไม่มี API key/account secret ถูกบันทึก, ไม่มี Worker deploy, ไม่มีการเรียก AI จริง, ไม่มีการเปลี่ยน firmware/MQTT contract, hardware หรือ GitHub Pages production
+
 ## Dashboard V2 — ปรับหน้าตาและเมนูหลัก 4 รายการ — 2026-11-07 (feature branch; ยังไม่ deploy)
 
 - Applied the user-approved bright green/blue mobile-first visual direction, four primary tabs (Home, Reports, Alerts, Profile), contextual access to existing Water/Devices/System/Weather routes, and new illustrative crop/pump/hero/AI assets.

@@ -8,7 +8,7 @@ Browser GitHub Pages/PWA ↔ MQTT over WSS ↔ HiveMQ Cloud ↔ ESP8266 NodeMCU 
 
 ## Dashboard
 
-Dashboard V2.0.0 candidate (branch `redesign/dashboard-v2-four-tabs`) ใช้ 4 เมนูหลัก: Home, Reports, Alerts และ Profile. Water, Devices, System และ Weather ยังคงเป็น utility views ที่เปิดผ่านลิงก์บริบท/โปรไฟล์และ direct hashes ได้. Home จัดลำดับสถานะจริงจาก MQTT/ESP, DHT11, รีเลย์ 4 ช่อง, ระบบน้ำ, แนวโน้ม และเหตุการณ์ โดยไม่แสดงความชื้นดิน/อายุพืช/ผลผลิตที่ firmware หรือสมุดบันทึกยังไม่มี. ภาพเกษตรกร/แตงกวา/ปั๊ม/AI เป็นภาพประกอบ ไม่ใช่ภาพสวนหรืออุปกรณ์จริง. Relay command มี dialog ยืนยัน, guard ความปลอดภัยและ state machine รอ `relay/status` จาก ESP; เพิ่มการตรวจสถานะซ้ำหลังยืนยัน. Alerts badge นับ unread local events จริงและซ่อนเมื่อไม่มี. Finance ledger, schedule editor, weather และ diagnostics เดิมยังคงไว้. ดูรายละเอียดที่ [`docs/dashboard.md`](docs/dashboard.md). การเปลี่ยนแปลงอยู่ใน feature branch ไม่กระทบ production.
+Dashboard V2.1.0 candidate (branch `redesign/dashboard-v2-four-tabs`) ใช้ 4 เมนูหลัก: Home, Reports, Alerts และ Profile. Water, Devices, System และ Weather ยังคงเป็น utility views ที่เปิดผ่านลิงก์บริบท/โปรไฟล์และ direct hashes ได้. Home จัดลำดับสถานะจริงจาก MQTT/ESP, DHT11, รีเลย์ 4 ช่อง, ระบบน้ำ, แนวโน้ม และเหตุการณ์ โดยไม่แสดงความชื้นดิน/อายุพืช/ผลผลิตที่ firmware หรือสมุดบันทึกยังไม่มี. เพิ่ม AI วิเคราะห์ snapshot แบบ read-only ที่ผู้ใช้กดเอง; ไม่มี tool หรือเส้นทางสั่ง MQTT และปุ่มยังปิดจนกว่าจะติดตั้ง Worker, Turnstile และตั้ง secret ฝั่ง server. ไม่มี API key ใน browser. Relay command เดิมยังมี dialog ยืนยัน, safety guard และ state machine รอ `relay/status` จาก ESP. Finance ledger, schedule editor, weather และ diagnostics เดิมยังคงไว้. ดูรายละเอียดที่ [`docs/dashboard.md`](docs/dashboard.md) และ [`docs/ai-assistant.md`](docs/ai-assistant.md). การเปลี่ยนแปลงอยู่ใน feature branch ไม่กระทบ production.
 
 MQTT user/password ให้ผู้ดูแลป้อนที่หน้า “ระบบ”; โดยปริยายเก็บ credentials ใน session storage และเลือกบันทึก localStorage ได้. Weather page เรียก Open-Meteo ด้วยจุดอ้างอิงระดับภูมิภาคแบบประมาณ แยกจาก DHT11; integration ที่ไม่มีจริงจะไม่ถูกนำเสนอเป็นฟังก์ชัน.
 
@@ -27,7 +27,7 @@ Firmware TLS: HiveMQ Cloud port 8883. Browser: secure WebSocket port 8884 `/mqtt
 3. Workflow `.github/workflows/pages.yml` uploads contents of `dashboard/` to Pages.
 4. Expected URL: https://klanarong156-pixel.github.io/lungna-smart-farm/ (available only after Pages has been enabled and Actions deploy succeeds).
 
-PWA needs HTTPS. Production baseline cache remains separate; Dashboard V2 feature branch uses `lungna-shell-v20`. Service Worker activation removes only older `lungna-shell-*` caches and preserves unrelated caches on the same origin. HTTP OTA is disabled by default; use password-protected ArduinoOTA on the trusted LAN.
+PWA needs HTTPS. Production baseline cache remains separate; Dashboard V2.1 feature branch uses `lungna-shell-v21`. Service Worker activation removes only older `lungna-shell-*` caches and preserves unrelated caches on the same origin. AI Worker ต้อง deploy/ตั้งค่าแยกจาก GitHub Pages และฟีเจอร์จะยังไม่ทำงานจนกว่าจะตั้ง URL กับ public Turnstile site key; secret ใช้ Cloudflare Worker secrets เท่านั้น. HTTP OTA is disabled by default; use password-protected ArduinoOTA on the trusted LAN.
 
 ## Firebase, weather, data
 

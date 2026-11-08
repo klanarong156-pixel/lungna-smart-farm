@@ -173,18 +173,18 @@
           return;
         }
         if (topic === topics.device) { FarmState.setDevice(JSON.parse(value), retained); return; }
-        if (topic === topics.dht11) { FarmState.setSensor(JSON.parse(value)); return; }
+        if (topic === topics.dht11) { FarmState.setSensor(JSON.parse(value), retained); return; }
         if (topic === topics.modeStatus) {
           const mode = value.trim();
-          FarmState.setMode(mode);
-          if (this.pendingMode?.target === mode) {
+          FarmState.setMode(mode, retained);
+          if (!retained && this.pendingMode?.target === mode) {
             clearTimeout(this.pendingMode.timer);
             this.pendingMode.resolve(true);
             this.pendingMode = null;
           }
           return;
         }
-        if (topic === topics.emergencyStatus) { FarmState.setEmergency(JSON.parse(value)); return; }
+        if (topic === topics.emergencyStatus) { FarmState.setEmergency(JSON.parse(value), retained); return; }
         if (topic === topics.systemError) { FarmState.setSystemError(JSON.parse(value)); return; }
         const scheduleTopic = /^smartfarm\/schedule\/([^/]+)\/status$/.exec(topic);
         if (scheduleTopic) {
@@ -192,7 +192,7 @@
           const schedule = FarmState.normalizeSchedule(id, JSON.parse(value));
           FarmState.setSchedule(id, schedule);
           const pending = this.pendingSchedules.get(id);
-          if (pending) {
+          if (pending && !retained) {
             const matches = JSON.stringify(pending.target.slots) === JSON.stringify(schedule.slots);
             if (matches) {
               clearTimeout(pending.timer);
@@ -214,9 +214,9 @@
         if (topic.startsWith('smartfarm/relay/') && topic.endsWith('/status')) {
           const id = topic.split('/')[2];
           const status = value.trim();
-          FarmState.setRelay(id, status);
+          FarmState.setRelay(id, status, retained);
           const pending = this.pending.get(id);
-          if (pending && pending.target === (status === 'ON')) {
+          if (!retained && pending?.target === (status === 'ON')) {
             clearTimeout(pending.timer);
             this.pending.delete(id);
             pending.resolve(true);

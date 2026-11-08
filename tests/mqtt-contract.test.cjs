@@ -47,6 +47,8 @@ manager.client = {
   assert.equal(published.at(-1).payload, 'AUTO');
   assert.equal(published.at(-1).options.qos, 1);
   assert.equal(published.at(-1).options.retain, false);
+  manager.message('smartfarm/mode/status', 'AUTO', true);
+  assert.ok(manager.pendingMode, 'retained mode cannot acknowledge a new command');
   manager.message('smartfarm/mode/status', 'AUTO', false);
   assert.equal(await modePromise, true);
   assert.equal(state.get().mode, 'AUTO');
@@ -64,12 +66,19 @@ manager.client = {
   assert.equal(state.get().errors[0].kind, 'invalid-payload', 'malformed sensor payload is surfaced as an MQTT error');
   unsubscribeSensor();
 
+  manager.message('smartfarm/sensor/dht11', JSON.stringify({ temperature: 40, humidity: 85 }), true);
+  assert.equal(state.get().sensorObservedAt, null, 'retained DHT11 must not be marked as a new observation');
+  manager.message('smartfarm/sensor/dht11', JSON.stringify({ temperature: 40, humidity: 85 }), false);
+  assert.ok(Number.isFinite(state.get().sensorObservedAt), 'live DHT11 message records its receive time');
+
   state.setConnection('online', 'test');
   state.setDevice({ online: true, mqtt: true }, false);
   const relayPromise = manager.commandRelay('pump', true);
   assert.equal(published.at(-1).topic, 'smartfarm/relay/pump/set');
   assert.equal(published.at(-1).payload, 'ON');
   assert.equal(published.at(-1).options.retain, false);
+  manager.message('smartfarm/relay/pump/status', 'ON', true);
+  assert.equal(manager.pending.has('pump'), true, 'retained relay cannot acknowledge a new command');
   manager.message('smartfarm/relay/pump/status', 'ON', false);
   assert.equal(await relayPromise, true);
   assert.equal(state.get().relays.pump, true);
@@ -93,6 +102,8 @@ manager.client = {
   assert.equal(published.at(-1).options.retain, false);
   assert.equal(JSON.stringify(JSON.parse(published.at(-1).payload)), JSON.stringify(schedule));
   assert.equal(manager.pendingSchedules.has('pump'), true, 'broker PUBACK is not ESP schedule ACK');
+  manager.message('smartfarm/schedule/pump/status', JSON.stringify(schedule), true);
+  assert.equal(manager.pendingSchedules.has('pump'), true, 'retained schedule cannot acknowledge a new command');
   manager.message('smartfarm/schedule/pump/status', JSON.stringify(schedule), false);
   assert.equal(await schedulePromise, true);
   assert.equal(state.get().schedules.pump.slots[0].on, '06:00');

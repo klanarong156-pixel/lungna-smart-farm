@@ -1,4 +1,4 @@
-# Dashboard V2 — เมนูและแนวทางใช้งาน
+# Dashboard V2.1 — เมนูและแนวทางใช้งาน
 
 ## เมนูหลัก 4 รายการ
 
@@ -17,7 +17,7 @@ Firmware ที่ตรวจสอบเป็น ESP8266 V7.2.0-OTA-STABLE. �
 
 ปุ่มรีเลย์ต้องผ่านการยืนยันจากผู้ใช้ และใช้งานได้เมื่อ MQTT online, ESP มี heartbeat ล่าสุด, สถานะรีเลย์ทราบค่า และ Emergency Stop ไม่ทำงาน State machine ตรวจเงื่อนไขจาก state ล่าสุดอีกครั้งหลังปิดหน้าต่างยืนยัน เพื่อไม่ส่งคำสั่งเก่าหาก connection/heartbeat/safety/relay เปลี่ยนระหว่างผู้ใช้กำลังตัดสินใจ ระบบรอ `relay/status` ที่ตรงกับคำสั่งจาก ESP; MQTT PUBACK ไม่ใช่การยืนยันจากอุปกรณ์
 
-ภาพเกษตรกร แตงกวา ปั๊มน้ำ และผู้ช่วย AI เป็นภาพประกอบที่สร้างขึ้น ไม่ใช่ภาพสวนหรืออุปกรณ์จริง ส่วน AI เป็นแผงอธิบายแนวคิดเท่านั้น ยังไม่มีบริการหรือ pipeline จึงไม่สร้างคำแนะนำ และจะไม่คำนวณอายุ/ความคืบหน้าแปลงโดยไม่มีข้อมูลปลูกที่ยืนยันได้
+ภาพเกษตรกร แตงกวา ปั๊มน้ำ และผู้ช่วย AI เป็นภาพประกอบที่สร้างขึ้น ไม่ใช่ภาพสวนหรืออุปกรณ์จริง AI วิเคราะห์สถานะเป็นฟีเจอร์ opt-in ที่ผู้ใช้กดเองและอ่าน snapshot เท่านั้น; ค่าเริ่มต้นปิดจนติดตั้ง Worker/Turnstile และตั้งค่า public endpoint/site key. ส่งเฉพาะสถานะ MQTT/ESP, heartbeat, DHT11, thresholds, relay states, mode, Emergency Stop และ firmware. ไม่ส่ง MQTT credentials, IP, finance, schedules, raw logs หรือพิกัด. AI ไม่มี MQTT client, tool/function calling หรือ actuator command path; ผลลัพธ์เป็นข้อความให้ผู้ใช้ตรวจสอบและไม่ถือเป็นคำวินิจฉัย. ดูขั้นตอนตั้งค่าและ policy ที่ [`ai-assistant.md`](ai-assistant.md).
 
 ## ระบบน้ำ การตั้งค่า และอากาศ
 
@@ -27,7 +27,7 @@ Firmware ที่ตรวจสอบเป็น ESP8266 V7.2.0-OTA-STABLE. �
 
 ## ข้อมูลในเบราว์เซอร์และการตรวจสอบ
 
-ประวัติเหตุการณ์/แนวโน้มเซนเซอร์ เกณฑ์แจ้งเตือน และสมุดการเงินเก็บใน browser storage ตามฟังก์ชันเดิม ไม่มี cloud backup และไม่ใช่ประวัติรวมจากหลายอุปกรณ์ PWA shell ใช้ cache `lungna-shell-v20`; Service Worker ลบเฉพาะ cache เก่าที่มี prefix `lungna-shell-*` และคง cache ของระบบอื่นไว้
+ประวัติเหตุการณ์/แนวโน้มเซนเซอร์ เกณฑ์แจ้งเตือน และสมุดการเงินเก็บใน browser storage ตามฟังก์ชันเดิม ไม่มี cloud backup และไม่ใช่ประวัติรวมจากหลายอุปกรณ์ PWA shell ใช้ cache `lungna-shell-v21`; Service Worker ลบเฉพาะ cache เก่าที่มี prefix `lungna-shell-*` และคง cache ของระบบอื่นไว้. โค้ดแอปไม่เก็บ AI snapshot เป็นประวัติ แต่การประมวลผลหรือ retention ฝั่ง AI provider ขึ้นกับ provider/account policy และต้องตรวจสอบก่อนเปิดใช้
 
 ก่อน deploy ให้รัน `./scripts/pre-deploy-check.sh` ซึ่งตรวจ syntax, manifest, tests, firmware source contract และ static asset paths. การตรวจ MQTT hardware เป็นแบบ opt-in/read-only และไม่อยู่ใน predeploy ปกติ; การทดสอบ relay, pump, MQTT จริง และ OTA ต้องทำแยกในสถานที่อย่างปลอดภัย
 

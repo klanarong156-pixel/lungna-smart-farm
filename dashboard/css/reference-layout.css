@@ -896,3 +896,27 @@ body{background:linear-gradient(180deg,#e9f8ed 0,#f5fbf6 36%,#f1fbf3 100%);color
 
 /* Ensure environmental sensor glyphs remain legible on mobile cards. */
 .home-climate-value .climate-symbol{font-size:20px;line-height:1}
+
+
+/* Read-only AI status analysis: visible disclosure, verification and text-only results. */
+.ai-assistant-content{display:grid;gap:11px;padding:14px 2px 3px;color:var(--app-ink);font-size:12px;line-height:1.65}
+.ai-assistant-content>p{margin:0}
+.ai-privacy-note{padding:10px 12px;border:1px solid #dce9df;border-radius:12px;background:#f4faf5;color:var(--app-muted);font-size:11px}
+.ai-turnstile{min-height:0;max-width:100%;overflow-x:auto}
+.ai-analyze-button{min-height:48px;width:100%;font-size:14px}
+.ai-analyze-button:disabled{opacity:.55;cursor:not-allowed}
+.ai-setup-status{min-height:22px;margin:0;color:var(--app-muted);font-size:11px}
+.ai-setup-status[data-state="error"]{color:#a43f36}
+.ai-result{display:grid;gap:8px;padding:14px;border:1px solid #cfe5d3;border-radius:16px;background:#f8fcf8}
+.ai-result[hidden]{display:none}
+.ai-result-header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.ai-result-header h3{margin:0;color:var(--app-forest);font-size:16px}
+.ai-result-header small,.ai-result-time{color:var(--app-muted);font-size:10px}
+.ai-result-status{width:max-content;max-width:100%;margin:0;padding:4px 9px;border-radius:999px;background:#e6f4e9;color:#17683a;font-size:10px;font-weight:700}
+.ai-result-summary{margin:0;font-size:13px;font-weight:600}
+.ai-result-system{margin:0;padding:8px 10px;border-radius:10px;background:#eef5f0;color:#405649;font-size:11px}
+.ai-result h4{margin:5px 0 0;color:#31533b;font-size:12px}
+.ai-result ul{display:grid;gap:5px;margin:0;padding-left:20px;color:#34463a;font-size:11px;line-height:1.6}
+.ai-result li{overflow-wrap:anywhere}
+.ai-human-review-note{padding-top:7px;border-top:1px solid #dce9df;color:#8a5a00;font-size:10px;line-height:1.5}
+@media(max-width:420px){.ai-assistant-content{padding-inline:0}.ai-result{padding:11px}.ai-result-header{display:grid}.ai-analyze-button{min-height:52px}}

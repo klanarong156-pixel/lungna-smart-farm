@@ -2,11 +2,13 @@
   'use strict';
 
   const relays = Object.fromEntries(SmartFarmConfig.relays.map(relay => [relay.id, null]));
+  const relayObservedAt = Object.fromEntries(SmartFarmConfig.relays.map(relay => [relay.id, null]));
   const schedules = Object.fromEntries(SmartFarmConfig.relays.map(relay => [relay.id, null]));
   const state = {
     connection: 'offline', connectionReason: 'ยังไม่ได้เชื่อมต่อ',
     espOnline: null, heartbeatAt: 0, device: null, mode: null,
-    temperature: null, humidity: null, relays, schedules, emergency: null, systemError: null, errors: []
+    modeObservedAt: null, temperature: null, humidity: null, sensorObservedAt: null,
+    relays, relayObservedAt, schedules, emergency: null, emergencyObservedAt: null, systemError: null, errors: []
   };
   const listeners = new Set();
 
@@ -82,6 +84,9 @@
       state.espOnline = false;
       state.mode = null;
       Object.keys(state.relays).forEach(id => { state.relays[id] = null; });
+      Object.keys(state.relayObservedAt).forEach(id => { state.relayObservedAt[id] = null; });
+      state.modeObservedAt = null;
+      state.emergencyObservedAt = null;
       Object.keys(state.schedules).forEach(id => { state.schedules[id] = null; });
     }
     emit(`connection:${status}`);
@@ -92,6 +97,9 @@
     state.mode = null;
     state.connectionReason = reason;
     Object.keys(state.relays).forEach(id => { state.relays[id] = null; });
+    Object.keys(state.relayObservedAt).forEach(id => { state.relayObservedAt[id] = null; });
+    state.modeObservedAt = null;
+    state.emergencyObservedAt = null;
     Object.keys(state.schedules).forEach(id => { state.schedules[id] = null; });
     emit('esp:offline');
   }
@@ -108,7 +116,7 @@
     emit('device:update');
   }
 
-  function setSensor(obj) {
+  function setSensor(obj, retained = false) {
     if (!obj || typeof obj !== 'object' || Array.isArray(obj)) throw Error('DHT11 payload must be object');
     for (const key of ['temperature', 'humidity']) {
       if (!Object.hasOwn(obj, key) || typeof obj[key] !== 'number' || !Number.isFinite(obj[key])) {
@@ -119,14 +127,16 @@
     // mutating state so a missing field cannot clear a valid value or its alert.
     state.temperature = obj.temperature;
     state.humidity = obj.humidity;
-    emit('sensor:update');
+    state.sensorObservedAt = retained ? null : Date.now();
+    emit(retained ? 'sensor:retained' : 'sensor:update');
   }
 
-  function setRelay(id, payload) {
+  function setRelay(id, payload, retained = false) {
     if (!Object.hasOwn(state.relays, id)) throw Error(`unknown relay ${id}`);
     if (payload !== 'ON' && payload !== 'OFF') throw Error('invalid relay state');
     state.relays[id] = payload === 'ON';
-    emit(`relay:${id}`);
+    state.relayObservedAt[id] = retained ? null : Date.now();
+    emit(retained ? `retained:relay:${id}` : `relay:${id}`);
   }
 
   function setSchedule(id, payload) {
@@ -134,18 +144,20 @@
     emit(`schedule:${id}`);
   }
 
-  function setMode(payload) {
+  function setMode(payload, retained = false) {
     if (!['AUTO', 'MANUAL'].includes(payload)) throw Error('unsupported firmware mode');
     state.mode = payload;
-    emit('mode:update');
+    state.modeObservedAt = retained ? null : Date.now();
+    emit(retained ? 'mode:retained' : 'mode:update');
   }
 
-  function setEmergency(obj) {
+  function setEmergency(obj, retained = false) {
     if (!obj || typeof obj !== 'object' || Array.isArray(obj) || typeof obj.active !== 'boolean') {
       throw Error('emergency status payload invalid');
     }
     state.emergency = { active: obj.active, source: typeof obj.source === 'string' ? obj.source : '', at: Number.isFinite(obj.at) ? obj.at : null };
-    emit('emergency:update');
+    state.emergencyObservedAt = retained ? null : Date.now();
+    emit(retained ? 'emergency:retained' : 'emergency:update');
   }
 
   function setSystemError(obj) {
