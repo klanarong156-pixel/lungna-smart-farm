@@ -1,3 +1,27 @@
+## AI วิเคราะห์สถานะระบบแบบอ่านอย่างเดียว — 2026-11-08 (feature branch; ยังไม่ deploy)
+
+- เพิ่ม AI analysis แบบผู้ใช้กดเอง ส่ง snapshot allowlist จาก MQTT/ESP, heartbeat, DHT11, thresholds, relay states, mode, Emergency Stop และ firmware; retained relay/mode/E-Stop inactive ถูกทำเป็น unknown จนมี live evidence, active E-Stop คง fail-safe, และ retained status ไม่ยืนยันคำสั่งใหม่. ไม่ส่ง credentials, IP, finance, schedule, raw logs หรือพิกัด
+- เพิ่ม Cloudflare Worker backend พร้อม server-side Turnstile validation, exact-origin CORS, payload/schema validation, output allowlist, hashed-IP approximate rate limit และ server-only API key. ไม่มี function/tool calling หรือเส้นทางสั่ง MQTT/relay
+- ปุ่ม AI ปิดอยู่เป็นค่าเริ่มต้นจนตั้ง Worker endpoint และ public Turnstile site key; ผู้ให้บริการ/secret, model, usage budget และ rate-limit namespace ต้องตั้งโดยผู้ดูแลก่อนเปิดใช้
+- เพิ่ม regression tests สำหรับ privacy allowlist, stale data, CORS, Turnstile, limits, failure handling และ worker output; bump Dashboard assets เป็น v2.1.0 และ shell cache เป็น v21
+- ไม่มี API key/account secret ถูกบันทึก, ไม่มี Worker deploy, ไม่มีการเรียก AI จริง, ไม่มีการเปลี่ยน firmware/MQTT contract, hardware หรือ GitHub Pages production
+
+## Dashboard V2 — ปรับหน้าตาและเมนูหลัก 4 รายการ — 2026-11-07 (feature branch; ยังไม่ deploy)
+
+- Applied the user-approved bright green/blue mobile-first visual direction, four primary tabs (Home, Reports, Alerts, Profile), contextual access to existing Water/Devices/System/Weather routes, and new illustrative crop/pump/hero/AI assets.
+- Kept device readings sourced from ESP/MQTT only; soil moisture, crop age, yield, Firebase profile, AI recommendations and user-account claims remain unavailable until supported by verified data/services. The alert badge reflects actual unread local events and stays hidden at zero.
+- Preserved finance ledger, event history, thresholds, weather and existing MQTT topics/payloads; moved finance summary into Reports and retained event filters under Alerts. Added Profile links to existing diagnostics and settings.
+- Revalidated relay state after confirmation to prevent sending if heartbeat, emergency state, connection or relay status changes while the dialog is open.
+- Bumped Dashboard assets to v2.0.0 and PWA shell cache to v20. No firmware, broker, GitHub Pages deployment or hardware was changed/tested by this branch.
+
+## VNext Frontend interaction foundation — 2026-11-05
+
+- Reworked the Home overview to prioritize pump state, real DHT11 readings, the four installed relays, and actionable summaries; removed the non-geographic illustrative farm map and decorative quote from the primary screen.
+- Reduced primary navigation from six items to five while retaining the regional weather route through a contextual Home link and preserving direct/legacy routes.
+- Added a frontend relay command state machine with confirmation, send lifecycle, ESP status acknowledgement, offline/heartbeat/emergency guards, duplicate prevention, and explicit timeout/failure/cancel states. MQTT topic, payload, QoS, retain, and firmware behavior are unchanged.
+- Added expandable event guidance and unread filtering; recommendations are informational only and do not claim automated diagnosis or action.
+- Bumped dashboard asset versions and offline shell cache. Added mock-adapter regression tests; no live broker or hardware test is claimed.
+
 ## Dashboard sensor threshold alerts — 2026-10-30
 - Added editable DHT11 temperature and relative-humidity alert thresholds under the existing System settings page; browser-local sample defaults are 35 °C and 80% RH.
 - Home shows an in-app warning only for a recent real sensor reading (90-second freshness limit); alert transitions are added to the local event timeline without logging every sample.

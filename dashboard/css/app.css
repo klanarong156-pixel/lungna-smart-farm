@@ -413,18 +413,18 @@ body{background:linear-gradient(180deg,#f8f6ef 0%,var(--background) 100%)}
 .button:disabled{opacity:1!important;background:#eeece4!important;border:1px solid #dfddd4!important;color:#999b91!important;cursor:not-allowed}
 .status-badge{background:#f0efe7;color:#6d776b}.status-badge.online{background:#e5efe1;color:var(--success)}
 .page-heading .home-heading-tag{padding:7px 10px;border-color:#e7ddc1;background:#faf3df;color:#98713b;font:600 10px 'IBM Plex Sans Thai',sans-serif;letter-spacing:0}
-.home-map-layout{grid-template-columns:minmax(0,1.45fr) minmax(280px,.8fr);gap:14px}
-.farm-map-card{background:#fffdf8;border-color:var(--border);border-radius:16px;box-shadow:var(--shadow-card)}
-.farm-map-heading h2,.home-panel-heading h2{color:var(--text);font-size:16px}
-.farm-map-heading .eyebrow{color:#71846a}.farm-map-source{border-color:var(--border);background:#f3f1e8;color:var(--text-muted)}
-.map-ground{fill:#f8f6ee;stroke:#e7e3d5}.map-field{fill:#e9efe1;stroke:#55794e}
-.map-field-rows{stroke:#bdc9b5}.map-lane{stroke:#e0ddcf}.map-lane-edge{stroke:#b6b29f}
-.zone-pin{stroke:#55794e}.zone-number{fill:#2f5638}.zone-label,.zone-status{stroke:#f8f6ee}.zone-label{fill:#334b37}.zone-status{fill:#718076}
-.farm-zone[data-state=on] .zone-pin{fill:#55794e;stroke:#fff}.farm-zone[data-state=on] .zone-status{fill:#2f5638}
-.farm-zone[data-state=off] .zone-pin{fill:#f2f0e6;stroke:#899888}.farm-zone[data-state=off] .zone-number{fill:#647364}
-.farm-zone[aria-current=true] .zone-pin,.farm-zone:hover .zone-pin,.farm-zone:focus-visible .zone-pin{stroke:#bc8540;filter:drop-shadow(0 0 6px #bc854022)}
-.farm-map-disclaimer{color:var(--text-muted)}.farm-map-legend{color:#5f7162}.legend-on{background:var(--success)}.legend-off{background:#929b8f}.legend-unknown{background:#bdc3b8}
-.home-telemetry{gap:12px}.home-live-panel{gap:13px;padding:16px}.home-climate-value{background:#f7f5ed;border-color:#ebe8dc;padding:11px}
+
+
+
+
+
+
+
+
+
+
+
+home-live-panel{gap:13px;padding:16px}.home-climate-value{background:#f7f5ed;border-color:#ebe8dc;padding:11px}
 .home-climate-value span,.home-climate-value small{color:var(--text-muted)}.home-climate-value strong{color:var(--text);font-size:clamp(16px,1.8vw,21px)}
 .home-status-list>div{border-color:var(--border);padding:9px 0}.home-status-list dd{color:var(--text)}
 .home-control-card{padding:16px;border:1px solid #e5e0d0;border-radius:15px;background:#f4f1e6;box-shadow:none}
@@ -490,14 +490,14 @@ body{background:linear-gradient(180deg,#f8f6ef 0%,var(--background) 100%)}
   .sidebar button.active,.sidebar button:hover{background:#e8efe2;color:var(--primary-dark)}.sidebar button.active span{color:var(--primary-dark)}
   .app-shell main{margin-left:225px;padding:30px clamp(24px,4vw,58px) 44px}
   .bottom-nav{display:none!important}.page{max-width:1400px}.site-footer{padding-left:clamp(24px,4vw,58px);padding-right:clamp(24px,4vw,58px)}
-  .home-map-layout{grid-template-columns:minmax(0,1.5fr) minmax(280px,.82fr)}.farm-map-card{position:sticky;top:90px}
+
   .home-climate-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.weather-main{max-width:none}.form-card{max-width:none}
   #financeForm{grid-template-columns:repeat(2,minmax(0,1fr))}#financeForm .button{grid-column:1/-1}
 }
 @media(max-width:759px){
   .sidebar{display:none}.app-shell main{margin-left:0;padding:22px 14px 34px}.bottom-nav{width:100%;padding:7px 4px calc(7px + env(safe-area-inset-bottom));background:#fffdf8f2;border-color:var(--border);box-shadow:0 -4px 18px #302b1d0a}
   .bottom-nav button{min-width:0;min-height:51px;gap:2px;border-radius:10px;color:#7b877b}.bottom-nav button span{font-size:18px}.bottom-nav button small{font-size:9px}.bottom-nav button.active{background:#e8efe2;color:var(--primary-dark)}
-  .home-map-layout,.water-workspace,.weather-layout{grid-template-columns:1fr}.farm-map-card{position:static}.home-telemetry{grid-template-columns:1fr}.weather-aside{display:block}
+
   .system-overview-grid{grid-template-columns:1fr}.system-version-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
   .finance-totals{grid-template-columns:repeat(2,minmax(0,1fr))}.finance-tools{align-items:stretch;flex-direction:column}.finance-tools .button{width:100%}
   .records-tabs{width:100%}.records-tab{flex:1}.page-heading{margin-bottom:15px}
@@ -505,7 +505,7 @@ body{background:linear-gradient(180deg,#f8f6ef 0%,var(--background) 100%)}
 @media(max-width:520px){
   .topbar{height:66px;padding:0 13px}.brand img{width:37px;height:37px}.brand b{font-size:15px}.brand small{font-size:8px}
   .connection-pill{padding:6px 9px;font-size:10px}.page-heading .home-heading-tag{display:none}
-  .farm-map-card{padding:12px}.farm-map-footer{align-items:flex-start;flex-direction:column;gap:8px}
+
   .home-status-list{gap:0 9px}.home-climate-value{padding:10px}.relay-panel,.schedule-panel{padding:14px}
   .water-control-column .relay-list{grid-template-columns:1fr}.water-control-column .relay-list .relay-card{min-height:88px;flex-direction:row;align-items:center}
   .forecast-days{grid-template-columns:repeat(3,minmax(0,1fr))}.system-version-grid{grid-template-columns:1fr}
@@ -514,13 +514,13 @@ body{background:linear-gradient(180deg,#f8f6ef 0%,var(--background) 100%)}
   .site-footer{padding-bottom:calc(14px + env(safe-area-inset-bottom))}
 }
 @media(max-width:380px){.page h1{font-size:24px}.bottom-nav button small{font-size:8px}.records-tab{padding-left:8px;padding-right:8px}.home-climate-grid{gap:7px}}
-@media(prefers-reduced-motion:reduce){.page,.card,.button,.farm-zone .zone-shape{animation:none!important;transition:none!important}}
+@media(prefers-reduced-motion:reduce){.page,.card,.button{animation:none!important;transition:none!important}}
 
 @media(min-width:760px) and (max-width:1079px){
-  .home-map-layout,.weather-layout,.system-overview-grid{grid-template-columns:minmax(0,1fr)}
-  .farm-map-card{position:static}
+
+
 }
 @media(min-width:1080px){
-  .home-map-layout{grid-template-columns:minmax(0,1.5fr) minmax(280px,.82fr)}
+
   .weather-layout{grid-template-columns:minmax(0,1.35fr) minmax(230px,.65fr)}
 }

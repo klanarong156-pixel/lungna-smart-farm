@@ -3,7 +3,7 @@ class CE{constructor(type,options={}){this.type=type;this.detail=options.detail;
 const context={console,structuredClone,Date,Math,JSON,Number,String,Object,Array,Set,Map,Error,CustomEvent:CE,window:{dispatchEvent(){}}};context.window.window=context.window;context.window.SmartFarmConfig={scheduleSlotCount:4,relays:[{id:'pump'},{id:'zone1'},{id:'lighthome'},{id:'lightsala'}]};context.SmartFarmConfig=context.window.SmartFarmConfig;vm.createContext(context);vm.runInContext(fs.readFileSync('dashboard/js/state.js','utf8'),context);const s=context.window.FarmState;
 let state=s.get();for(const value of Object.values(state.relays))assert.equal(value,null,'relay starts unknown');assert.equal(state.espOnline,null);
 assert.throws(()=>s.setRelay('pump',true),/invalid relay state/);assert.equal(s.get().relays.pump,null);
-s.setRelay('pump','ON');assert.equal(s.get().relays.pump,true);s.setConnection('offline','test disconnect');assert.equal(s.get().relays.pump,null);assert.equal(s.get().espOnline,false);
+s.setRelay('pump','ON',true);assert.equal(s.get().relays.pump,true);assert.equal(s.get().relayObservedAt.pump,null,'retained relay has no live observation timestamp');s.setRelay('pump','ON');assert.ok(Number.isFinite(s.get().relayObservedAt.pump));s.setConnection('offline','test disconnect');assert.equal(s.get().relays.pump,null);assert.equal(s.get().relayObservedAt.pump,null);assert.equal(s.get().espOnline,false);
 s.setConnection('online','connected');s.setDevice({online:true,mqtt:true,firmware:'test',device_id:'unit-1'},true);assert.equal(s.get().espOnline,false,'retained heartbeat cannot establish liveness');s.setDevice({online:true,mqtt:true,firmware:'V7.2.0-OTA-STABLE',device_id:'unit-1'},false);assert.equal(s.get().espOnline,true);
 s.setRelay('zone1','OFF');assert.equal(s.get().relays.zone1,false);
 const schedule={slots:[{enabled:true,on:'23:30',off:'00:15'},{enabled:true,on:'02:00',off:'02:30'},{enabled:false,on:'00:00',off:'00:00'},{enabled:false,on:'00:00',off:'00:00'}]};
@@ -11,11 +11,12 @@ assert.equal(JSON.stringify(s.normalizeSchedule('pump',schedule).slots),JSON.str
 assert.throws(()=>s.normalizeSchedule('pump',{slots:[{enabled:true,on:'23:30',off:'00:15'},{enabled:true,on:'00:00',off:'00:10'},{enabled:false,on:'00:00',off:'00:00'},{enabled:false,on:'00:00',off:'00:00'}]}),/ทับซ้อน/);
 assert.throws(()=>s.normalizeSchedule('pump',{slots:[{enabled:true,on:'06:00',off:'06:00'},{enabled:false,on:'00:00',off:'00:00'},{enabled:false,on:'00:00',off:'00:00'},{enabled:false,on:'00:00',off:'00:00'}]}),/ต่างกัน/);
 assert.throws(()=>s.normalizeSchedule('pump',{slots:[{enabled:true,on:'24:00',off:'06:00'},{enabled:false,on:'00:00',off:'00:00'},{enabled:false,on:'00:00',off:'00:00'},{enabled:false,on:'00:00',off:'00:00'}]}),/HH:MM/);
-s.setEspOffline('heartbeat timeout');for(const value of Object.values(s.get().relays))assert.equal(value,null,'ESP offline resets live relay state to unknown');for(const value of Object.values(s.get().schedules))assert.equal(value,null,'ESP offline resets schedules to unknown');
+s.setEspOffline('heartbeat timeout');for(const value of Object.values(s.get().relays))assert.equal(value,null,'ESP offline resets live relay state to unknown');for(const value of Object.values(s.get().relayObservedAt))assert.equal(value,null);for(const value of Object.values(s.get().schedules))assert.equal(value,null,'ESP offline resets schedules to unknown');
 let sensorUpdates = 0;
 const unsubscribeSensor = s.subscribe((snapshot,event) => { if (event === 'sensor:update') sensorUpdates++; });
+s.setSensor({temperature:29.5,humidity:71},true);assert.equal(s.get().sensorObservedAt,null,'retained DHT11 cannot be treated as freshly observed');assert.equal(sensorUpdates,0);
 s.setSensor({temperature:29.5,humidity:71});
-assert.equal(s.get().temperature,29.5);assert.equal(s.get().humidity,71);
+assert.equal(s.get().temperature,29.5);assert.equal(s.get().humidity,71);assert.ok(Number.isFinite(s.get().sensorObservedAt),'live DHT11 sets receive timestamp');
 for (const payload of [{temperature:30},{humidity:80},{temperature:null,humidity:80},{temperature:30,humidity:null},{temperature:'30',humidity:80}]) {
   assert.throws(()=>s.setSensor(payload),/invalid sensor field/);
   assert.equal(s.get().temperature,29.5,'invalid payload preserves the last valid temperature');
@@ -23,6 +24,8 @@ for (const payload of [{temperature:30},{humidity:80},{temperature:null,humidity
   assert.equal(sensorUpdates,1,'invalid payload does not emit sensor:update');
 }
 unsubscribeSensor();
+s.setMode('AUTO',true);assert.equal(s.get().modeObservedAt,null);s.setMode('AUTO');assert.ok(Number.isFinite(s.get().modeObservedAt));
+s.setEmergency({active:false},true);assert.equal(s.get().emergencyObservedAt,null);s.setEmergency({active:false});assert.ok(Number.isFinite(s.get().emergencyObservedAt));
 assert.throws(()=>s.setEmergency({active:'yes'}),/emergency status payload invalid/);s.setEmergency({active:true,source:'mqtt',at:123});assert.equal(s.get().emergency.active,true);assert.equal(s.get().emergency.source,'mqtt');s.setEmergency({active:false});assert.equal(s.get().emergency.active,false);
 assert.throws(()=>s.setSystemError({code:'BAD'}),/system error payload invalid/);s.setSystemError({code:'RELAY_BLOCKED',message:'Emergency Stop active',at:456});assert.equal(s.get().systemError.code,'RELAY_BLOCKED');assert.equal(s.get().errors[0].kind,'firmware:RELAY_BLOCKED');
 assert.throws(()=>s.setMode('SCHEDULE'),/unsupported firmware mode/);s.setMode('AUTO');assert.equal(s.get().mode,'AUTO');
