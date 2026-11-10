@@ -24,7 +24,7 @@ Worker ส่งข้อความ system/user ไปยัง Chat Completio
 
 ## การตั้งค่าและเปิดใช้งาน
 
-ค่าเริ่มต้นใน `dashboard/js/ai-config.js` ว่างไว้และปุ่มวิเคราะห์ปิดอยู่ จนกว่าจะติดตั้ง Worker และกรอก endpoint กับ public Turnstile site key. ก่อน deploy ให้แก้ `ai-worker/wrangler.toml`: ตั้ง `AI_MODEL` ให้เป็นรุ่นที่บัญชีใช้ได้, ตรวจ `ALLOWED_ORIGIN`/`TURNSTILE_HOSTNAME` ให้ตรง GitHub Pages, และเปลี่ยน `AI_RATE_LIMITER.namespace_id` เป็น namespace เฉพาะที่ยังไม่ใช้ใน Cloudflare account. สร้าง Turnstile widget โดยใช้ hostname เดียวกัน จากนั้นรันคำสั่งด้านล่างโดยผู้ดูแลในเครื่องที่ login Cloudflare แล้ว:
+สำหรับ deployment ของสวนลุงนะ branch นี้ตั้ง Worker endpoint และ public Turnstile site key ใน `dashboard/js/ai-config.js` แล้ว โดยไม่มี secret อยู่ในไฟล์ frontend. Worker ใช้ `gpt-6-luna` ตามที่เจ้าของระบบเลือก และกำหนด `ALLOWED_ORIGIN`/`TURNSTILE_HOSTNAME` ให้ตรง GitHub Pages. เมื่อติดตั้งในบัญชีหรือโดเมนอื่น ให้เลือก model ที่บัญชีใช้งานได้, ตรวจ origin/hostname และกำหนด rate-limit namespace เฉพาะที่ยังไม่ใช้ จากนั้นสร้าง Turnstile widget ที่อนุญาต hostname เดียวกัน:
 
 ```sh
 cd ai-worker
@@ -33,9 +33,9 @@ npx wrangler secret put TURNSTILE_SECRET
 npx wrangler deploy
 ```
 
-หลัง deploy ให้นำ Worker URL ที่ได้มาต่อ `/analyze` และใส่ใน `dashboard/js/ai-config.js` พร้อม public Turnstile site key เท่านั้น ห้ามใส่ provider key หรือ Turnstile secret ในไฟล์ frontend. ทดสอบ CORS, Turnstile, rate-limit และ budget ก่อนเปิด UI ให้ผู้ใช้จริง
+สำหรับ deployment นี้ frontend ชี้ไปยัง Worker endpoint และ public Site Key แล้ว. เมื่อ deploy ในสภาพแวดล้อมอื่น ให้นำ Worker URL มาต่อ `/analyze` และใส่เฉพาะ public Site Key ใน `dashboard/js/ai-config.js`; ห้ามใส่ provider key หรือ Turnstile secret ใน frontend. ก่อนเปิด UI ให้ผู้ใช้จริง ให้ทดสอบ CORS, Turnstile, rate-limit และ budget
 
-การแก้ไขใน repository นี้เตรียม source, UI และ tests เท่านั้น ไม่ได้สร้าง Cloudflare account, ใส่ key, deploy Worker หรือเปิดใช้งานการเรียกเก็บเงิน Rate-limit binding ที่กำหนดเป็น 5 คำขอต่อนาทีต่อ IP เป็นค่า approximate ไม่ใช่เพดานค่าใช้จ่ายที่เข้มงวด; ค่าใช้บริการ AI เกิดขึ้นเมื่อ Worker ที่ตั้งค่าแล้วรับคำขอจริง จึงต้องกำหนด budget/usage limit ที่ provider เพิ่มเติม. CORS และ Turnstile ไม่ใช่ระบบบัญชีผู้ใช้ ผู้ที่ใช้ domain และผ่าน challenge อาจเรียกได้ตาม rate limit
+Worker สำหรับ deployment นี้ถูก deploy ใน Cloudflare และ secrets ถูกจัดเก็บเป็น Worker Secrets แยกจาก repository; หน้า Dashboard จะใช้ config ใหม่นี้หลัง deploy branch ไปยัง GitHub Pages. Rate-limit binding 5 คำขอต่อนาทีต่อ IP เป็นค่าประมาณ ไม่ใช่เพดานค่าใช้จ่ายที่เข้มงวด จึงควรกำหนด budget/usage limit ที่ผู้ให้บริการ AI เพิ่มเติม. CORS และ Turnstile ไม่ใช่ระบบบัญชีผู้ใช้ ผู้ที่ใช้ domain และผ่าน challenge อาจเรียกได้ตาม rate limit
 
 ## แหล่งอ้างอิง
 
