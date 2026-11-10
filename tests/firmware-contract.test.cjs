@@ -3,7 +3,7 @@ const fs = require('node:fs');
 
 const source = fs.readFileSync('firmware/esp8266/src/main.ino', 'utf8');
 
-assert.match(source, /#define SMARTFARM_VERSION "V7\.2\.0-OTA-STABLE"/);
+assert.match(source, /#define SMARTFARM_VERSION "V7\.3\.0-OTA-STABLE"/);
 assert.match(source, /#define ENABLE_HTTP_OTA 0/);
 assert.doesNotMatch(source, /telegramTls\.setInsecure\(\)/);
 assert.match(source, /telegramTls\.setTrustAnchors\(mqttTrustAnchor\)/);

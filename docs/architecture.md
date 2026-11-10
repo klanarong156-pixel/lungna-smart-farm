@@ -13,7 +13,7 @@ Browser Dashboard (GitHub Pages / PWA)
               ├── 4-channel relay / pump / local AUTO + schedule
               ├── DHT11 D2, RTC DS3231 D3/D4
               ├── emergency + OTA safety state
-              └── firmware V7.2.0-OTA-STABLE
+              └── firmware V7.3.0-OTA-STABLE candidate
 ```
 
 ## Source of truth / state boundaries

@@ -41,13 +41,13 @@ jobs:
         run: pio run -e nodemcuv2
       - name: Create versioned release image and checksum
         run: |
-          cp firmware/esp8266/.pio/build/nodemcuv2/firmware.bin releases/firmware/SmartFarm_V7.2.0.bin
-          sha256sum releases/firmware/SmartFarm_V7.2.0.bin > releases/firmware/SmartFarm_V7.2.0.bin.sha256
+          cp firmware/esp8266/.pio/build/nodemcuv2/firmware.bin releases/firmware/SmartFarm_V7.3.0.bin
+          sha256sum releases/firmware/SmartFarm_V7.3.0.bin > releases/firmware/SmartFarm_V7.3.0.bin.sha256
       - uses: actions/upload-artifact@v4
         with:
-          name: SmartFarm_V7.2.0
+          name: SmartFarm_V7.3.0
           path: |
-            releases/firmware/SmartFarm_V7.2.0.bin
-            releases/firmware/SmartFarm_V7.2.0.bin.sha256
+            releases/firmware/SmartFarm_V7.3.0.bin
+            releases/firmware/SmartFarm_V7.3.0.bin.sha256
           if-no-files-found: error
           retention-days: 30

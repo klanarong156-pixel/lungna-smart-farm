@@ -1,15 +1,12 @@
-## AI วิเคราะห์สถานะระบบแบบอ่านอย่างเดียว — 2026-11-08 (feature branch; ยังไม่ deploy)
-
-- เพิ่ม AI analysis แบบผู้ใช้กดเอง ส่ง snapshot allowlist จาก MQTT/ESP, heartbeat, DHT11, thresholds, relay states, mode, Emergency Stop และ firmware; retained relay/mode/E-Stop inactive ถูกทำเป็น unknown จนมี live evidence, active E-Stop คง fail-safe, และ retained status ไม่ยืนยันคำสั่งใหม่. ไม่ส่ง credentials, IP, finance, schedule, raw logs หรือพิกัด
-- เพิ่ม Cloudflare Worker backend พร้อม server-side Turnstile validation, exact-origin CORS, payload/schema validation, output allowlist, hashed-IP approximate rate limit และ server-only API key. ไม่มี function/tool calling หรือเส้นทางสั่ง MQTT/relay
-- ปุ่ม AI ปิดอยู่เป็นค่าเริ่มต้นจนตั้ง Worker endpoint และ public Turnstile site key; ผู้ให้บริการ/secret, model, usage budget และ rate-limit namespace ต้องตั้งโดยผู้ดูแลก่อนเปิดใช้
-- เพิ่ม regression tests สำหรับ privacy allowlist, stale data, CORS, Turnstile, limits, failure handling และ worker output; bump Dashboard assets เป็น v2.1.0 และ shell cache เป็น v21
-- ไม่มี API key/account secret ถูกบันทึก, ไม่มี Worker deploy, ไม่มีการเรียก AI จริง, ไม่มีการเปลี่ยน firmware/MQTT contract, hardware หรือ GitHub Pages production
+## Dashboard V2.2 — ภาพรวมข้อมูลและเมนูระบบน้ำ — 2026-11-11 (feature branch; ยังไม่ deploy)
+- ลดหน้าแรกเหลือข้อมูลจริงและสรุปสถานะ; ย้ายจุดควบคุมทั้งหมดไปหน้า Water เดียว และเพิ่ม Water ในแถบเมนู desktop/mobile.
+- ปรับ PWA shell cache และชุดทดสอบให้ตรงกับหน้าแรกแบบอ่านอย่างเดียวและเมนูหลัก 5 รายการ.
+- คง MQTT relay/mode/schedule contract หลักและ safety checks; firmware candidate เปลี่ยนเฉพาะส่วนรับ alert ภายนอกและ bump เป็น V7.3.0.
 
 ## Dashboard V2 — ปรับหน้าตาและเมนูหลัก 4 รายการ — 2026-11-07 (feature branch; ยังไม่ deploy)
 
-- Applied the user-approved bright green/blue mobile-first visual direction, four primary tabs (Home, Reports, Alerts, Profile), contextual access to existing Water/Devices/System/Weather routes, and new illustrative crop/pump/hero/AI assets.
-- Kept device readings sourced from ESP/MQTT only; soil moisture, crop age, yield, Firebase profile, AI recommendations and user-account claims remain unavailable until supported by verified data/services. The alert badge reflects actual unread local events and stays hidden at zero.
+- Applied the approved green/blue mobile-first visual direction, four primary tabs, and contextual access to existing Water/Devices/System/Weather routes.
+- Kept device readings sourced from ESP/MQTT only; soil moisture, crop age, yield, Firebase profile and user-account claims remain unavailable until supported by verified data/services. The alert badge reflects actual unread local events and stays hidden at zero.
 - Preserved finance ledger, event history, thresholds, weather and existing MQTT topics/payloads; moved finance summary into Reports and retained event filters under Alerts. Added Profile links to existing diagnostics and settings.
 - Revalidated relay state after confirmation to prevent sending if heartbeat, emergency state, connection or relay status changes while the dialog is open.
 - Bumped Dashboard assets to v2.0.0 and PWA shell cache to v20. No firmware, broker, GitHub Pages deployment or hardware was changed/tested by this branch.
