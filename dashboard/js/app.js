@@ -8,7 +8,7 @@
   const schedulePending = new Set();
   let expandedEventId = null;
   const commandLabels = { confirming: 'รอยืนยันคำสั่ง', sending: 'กำลังส่งคำสั่ง', awaiting_ack: 'รอ ESP ยืนยัน', confirmed: 'ESP ยืนยันแล้ว', timeout: 'หมดเวลารอการยืนยัน', failed: 'คำสั่งไม่สำเร็จ', cancelled: 'ยกเลิกคำสั่งแล้ว' };
-  let modePending = null, scheduleFeedback = '', toastTimer, activeFilter = 'all', selectedFarmRelay = null, scheduleDraftActive = false, scheduleDraft = null;
+  let modePending = null, scheduleFeedback = '', toastTimer, activeFilter = 'all', scheduleDraftActive = false, scheduleDraft = null;
   let lastConnection = null, connectedSince = null, reconnectCount = 0, sensorUpdatedAt = null, lastHeartbeatSeen = 0;
   const EVENT_STORAGE_KEY = 'sf.dashboard.events.v1', SENSOR_STORAGE_KEY = 'sf.dashboard.sensor-history.v1';
   const SENSOR_ALERT_MAX_AGE_MS = 90 * 1000, sensorAlertConfig = window.SensorAlertConfig;
@@ -109,7 +109,7 @@
     let page = aliases[requestedPage] || requestedPage;
     if (!document.querySelector(`[data-page="${page}"]`)) page = 'home';
     document.querySelectorAll('.page').forEach(n => n.classList.toggle('active', n.dataset.page === page));
-    const navPage = openFinance ? 'reports' : openEvents ? 'alerts' : (page === 'weather' || page === 'water') ? 'home' : (page === 'devices' || page === 'system') ? 'profile' : page;
+    const navPage = openFinance ? 'reports' : openEvents ? 'alerts' : (page === 'weather' || page === 'devices' || page === 'system') ? 'profile' : page;
     document.querySelectorAll('[data-nav]').forEach(n => n.classList.toggle('active', n.dataset.nav === navPage));
     const hashPage = openFinance ? 'finance' : (requestedPage === 'records' ? 'records' : openEvents ? 'events' : page);
     history.replaceState(null, '', `#${hashPage}`);
@@ -121,23 +121,6 @@
   document.querySelectorAll('[data-records-view]').forEach(el => el.addEventListener('click', () => navigate(el.dataset.recordsView)));
   window.addEventListener('hashchange', () => navigate(location.hash.slice(1)));
   navigate(location.hash.slice(1) || 'home');
-
-  function openWaterRelay(relayId) {
-    if (!SmartFarmConfig.relays.some(relay => relay.id === relayId)) return;
-    selectedFarmRelay = relayId;
-    $('scheduleRelay').value = relayId;
-    scheduleFeedback = '';
-    renderScheduleEditor(FarmState.get());
-    navigate('water');
-    requestAnimationFrame(() => {
-      const card = [...document.querySelectorAll('#waterRelays [data-relay]')].find(item => item.dataset.relay === relayId);
-      if (!card) return;
-      card.classList.add('farm-relay-target');
-      card.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
-      card.focus({ preventScroll: true });
-    });
-  }
-  document.querySelectorAll('[data-home-relay]').forEach(row => row.addEventListener('click', () => openWaterRelay(row.dataset.homeRelay)));
 
   const COMMAND_STEPS = ['ยืนยันคำสั่ง', 'กำลังส่ง', 'รอ ESP ยืนยัน', 'ยืนยันสถานะแล้ว'];
   function commandProgressMarkup(relayLabel, command) {
@@ -341,7 +324,6 @@
       const label = value === true ? 'เปิดอยู่' : value === false ? 'ปิดอยู่' : 'รอข้อมูล';
       const status = row.querySelector('[data-home-relay-status]');
       if (status) status.textContent = label;
-      row.setAttribute('aria-label', `${row.querySelector('span:not(.home-row-chevron)')?.textContent || row.dataset.homeRelay} · ${label} · เลือกเพื่อเปิดหน้าควบคุม`);
     });
   }
   function bindSensorAlertSettings() {
@@ -440,7 +422,6 @@
   function render(s) {
     const conn = $('connection'); conn.dataset.state = s.connection; conn.querySelector('span').textContent = `MQTT · ${labels[s.connection] || s.connection}`;
     const connectionCopy = { offline: ['พร้อมเชื่อมต่อ', 'รอ credential สำหรับการเชื่อมต่อครั้งแรก', 'พร้อม'], connecting: ['กำลังเชื่อมต่อ MQTT', 'กำลังตรวจสอบ broker และสมัครรับข้อมูลจากฟาร์ม', 'กำลังเชื่อมต่อ'], online: ['เชื่อมต่อ MQTT แล้ว', 'กำลังรอ heartbeat และสถานะจริงจาก ESP8266', 'ออนไลน์'], reconnecting: ['กำลังเชื่อมต่อใหม่', s.connectionReason || 'ระบบจะลองเชื่อมต่อใหม่อัตโนมัติ', 'กำลังลองใหม่'], error: ['เชื่อมต่อไม่สำเร็จ', s.connectionReason || 'ตรวจสอบ credential และการเข้าถึง broker', 'ต้องตรวจสอบ'] }[s.connection] || ['สถานะ MQTT', s.connectionReason || 'ยังไม่มีข้อมูล', 'ตรวจสอบ'];
-    const heroConnection = $('heroConnection'); if (heroConnection) { heroConnection.dataset.state = s.connection; heroConnection.querySelector('b').textContent = `MQTT · ${labels[s.connection] || s.connection}`; }
     if ($('profileMqtt')) $('profileMqtt').textContent = labels[s.connection] || s.connection;
     if ($('profileConnectionReason')) $('profileConnectionReason').textContent = s.connectionReason || 'ยังไม่มีรายละเอียด';
     if ($('mqttAutoStatus')) $('mqttAutoStatus').textContent = connectionCopy[0];
@@ -448,18 +429,15 @@
     if ($('connectionHeroState')) { $('connectionHeroState').textContent = connectionCopy[2]; $('connectionHeroState').dataset.state = s.connection; }
     const espStatus = s.espOnline === true ? 'ออนไลน์' : s.espOnline === false ? 'ออฟไลน์' : 'ยังไม่มีข้อมูล';
     $('mqttReason').textContent = s.connectionReason;
-    $('waterMode').textContent = txt(s.mode); $('waterModeLabel').textContent = txt(s.mode); $('homeModeStatus').textContent = s.mode ? `โหมด ${s.mode}` : 'รอโหมดจาก ESP'; $('modeFeedback').textContent = modePending ? `กำลังรอ ESP ยืนยัน ${modePending}…` : '';
+    $('waterMode').textContent = txt(s.mode); $('waterModeLabel').textContent = txt(s.mode); $('modeFeedback').textContent = modePending ? `กำลังรอ ESP ยืนยัน ${modePending}…` : '';
     const waterDot = document.querySelector('[data-status-for="waterDevice"]'); if (waterDot) waterDot.dataset.state = s.espOnline === true ? 'online' : s.espOnline === false ? 'offline' : 'unknown';
     document.querySelectorAll('[data-mode]').forEach(b => { b.disabled = s.connection !== 'online' || s.espOnline !== true || Boolean(modePending); b.classList.toggle('primary', s.mode === b.dataset.mode); });
     $('waterDevice').textContent = espStatus; $('systemEsp').textContent = espStatus;
     const temp = detail(s.temperature, ' °C'), humid = detail(s.humidity, ' %'); $('temperature').textContent = temp; $('humidity').textContent = humid; renderHomeEquipment(s);
     const heartbeatLabel = s.heartbeatAt ? new Date(s.heartbeatAt).toLocaleString('th-TH', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'รอข้อมูล';
-    if ($('heroHeartbeat')) $('heroHeartbeat').textContent = `ESP · ${espStatus}${s.heartbeatAt ? ` · ${Math.max(0,Math.floor((Date.now()-s.heartbeatAt)/1000))} วินาที` : ''}`;
-    if ($('heroUpdated')) $('heroUpdated').textContent = heartbeatLabel === 'รอข้อมูล' ? 'ยังไม่มีข้อมูล' : `อัปเดต ${heartbeatLabel}`;
     if ($('profileHeartbeat')) $('profileHeartbeat').textContent = s.heartbeatAt ? `Heartbeat ${heartbeatLabel}` : 'ยังไม่มี heartbeat ล่าสุด';
     $('headerUpdated').textContent = heartbeatLabel; $('deviceControllerUpdated').textContent = heartbeatLabel;
     $('waterRelays').innerHTML = SmartFarmConfig.relays.map(r => relayMarkup(r,s)).join(''); bindRelayButtons();
-    if (selectedFarmRelay) [...document.querySelectorAll('#waterRelays [data-relay]')].find(item => item.dataset.relay === selectedFarmRelay)?.classList.add('farm-relay-target');
 
     const d = s.device || {}, firmware = txt(d.firmware), uptime = Number.isFinite(d.uptimeSec) ? `${Math.floor(d.uptimeSec/3600)} ชม. ${Math.floor((d.uptimeSec%3600)/60)} นาที` : null;
     $('firmwareVersion').textContent = firmware; $('footerFirmware').textContent = firmware; $('deviceFirmware').textContent = firmware; $('connectionFirmware').textContent = firmware; $('deviceId').textContent = txt(d.device_id);
@@ -581,7 +559,7 @@
     finally { btn.disabled=false; }
   }
   $('weatherRefresh').addEventListener('click',loadWeather); loadWeather();
-  $('systemCheck').addEventListener('click',async()=>{const result=$('systemCheckResult');result.textContent='กำลังตรวจไฟล์และความพร้อมของระบบ…';try{const paths=['./index.html','./css/app.css','./css/reference-layout.css','./assets/illustrations/farm-landscape.webp','./manifest.json','./sw.js','./js/config.js','./js/state.js','./js/mqtt.js','./js/command-flow.js','./js/sensor-alerts.js','./js/ai-config.js','./js/ai-assistant.js','./js/app.js'];const checks=await Promise.all(paths.map(async p=>{const r=await fetch(p,{cache:'no-store'});return r.ok;}));const manifest=await fetch('./manifest.json',{cache:'no-store'});await manifest.json();result.textContent=checks.every(Boolean)?'ตรวจไฟล์ Dashboard, ภาพประกอบ และ manifest ผ่าน · MQTT/ESP ยังต้องตรวจจากการเชื่อมต่อจริง':'พบไฟล์ที่โหลดไม่สำเร็จ';}catch(e){result.textContent=`ตรวจระบบไม่สำเร็จ: ${e.message}`;}});
+  $('systemCheck').addEventListener('click',async()=>{const result=$('systemCheckResult');result.textContent='กำลังตรวจไฟล์และความพร้อมของระบบ…';try{const paths=['./index.html','./css/app.css','./css/reference-layout.css','./assets/illustrations/farm-landscape.webp','./manifest.json','./sw.js','./js/config.js','./js/state.js','./js/mqtt.js','./js/command-flow.js','./js/sensor-alerts.js','./js/app.js'];const checks=await Promise.all(paths.map(async p=>{const r=await fetch(p,{cache:'no-store'});return r.ok;}));const manifest=await fetch('./manifest.json',{cache:'no-store'});await manifest.json();result.textContent=checks.every(Boolean)?'ตรวจไฟล์ Dashboard, ภาพประกอบ และ manifest ผ่าน · MQTT/ESP ยังต้องตรวจจากการเชื่อมต่อจริง':'พบไฟล์ที่โหลดไม่สำเร็จ';}catch(e){result.textContent=`ตรวจระบบไม่สำเร็จ: ${e.message}`;}});
   $('reloadDashboard').addEventListener('click',async()=>{if(navigator.serviceWorker?.controller){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.update()));}location.reload();});
   if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(e=>FarmState.addError('service-worker',e.message)));
   window.addEventListener('farm:esp-timeout',()=>toast('ไม่ได้รับ heartbeat จาก ESP · แสดงออฟไลน์')); window.addEventListener('farm:presence-offline',()=>toast('ESP รายงานออฟไลน์'));

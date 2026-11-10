@@ -1,6 +1,6 @@
 # MQTT Topics และ Payload
 
-คง contract ที่ตรวจพบจาก firmware V7.2.0 เดิม (ดู `compatibility-report.md`). ห้ามแก้ topic โดยไม่มี firmware compatibility plan.
+คง contract หลักที่ตรวจพบจาก firmware V7.2.0 และ source candidate V7.3.0 (ดู `compatibility-report.md`). ห้ามแก้ topic โดยไม่มี firmware compatibility plan.
 
 | Topic | Direction | Payload | Retain | หมายเหตุ |
 |---|---|---|---:|---|

@@ -1,11 +1,11 @@
-# ESP8266 Firmware V7.2.0
+# ESP8266 Firmware V7.3.0 candidate
 
-Firmware source lives in `src/main.ino` and is based on the V7.2.0 OTA stable firmware inspected in the read-only reference repository. It retains the original relay, safety, MQTT and provisioning implementation rather than inventing hardware mapping.
+Firmware source lives in `src/main.ino` and is based on the V7.2.0 OTA stable firmware inspected in the read-only reference repository. It retains the original relay, safety, MQTT and provisioning implementation; only the optional external alert ingress has been removed.
 
 ## Board and dependencies
 
 - PlatformIO environment `nodemcuv2` / ESP8266 NodeMCU.
-- Firmware version macro: `V7.2.0-OTA-STABLE`.
+- Firmware version macro: `V7.3.0-OTA-STABLE`.
 - Build from this directory:
   ```sh
   pio pkg install -e nodemcuv2
@@ -13,7 +13,8 @@ Firmware source lives in `src/main.ino` and is based on the V7.2.0 OTA stable fi
   PYTHONWARNINGS=error::SyntaxWarning pio run -e nodemcuv2
   ```
 - The patch script changes only PlatformIO's local ESP8266 framework cache. It applies the upstream `elf2bin.py` raw-regex fix for Python's invalid-escape warning; it does not change firmware source or binary behavior. Run it again after reinstalling the framework package.
-- Output: `.pio/build/nodemcuv2/firmware.bin`.
+- Build output: `.pio/build/nodemcuv2/firmware.bin`.
+- Checked-in candidate: `../../releases/firmware/SmartFarm_V7.3.0.bin` with a sibling SHA-256 file.
 
 ## Hardware contract
 
@@ -25,4 +26,4 @@ Firmware source lives in `src/main.ino` and is based on the V7.2.0 OTA stable fi
 
 Configure Wi-Fi, MQTT username/password and OTA password using the firmware's WiFiManager setup portal/device procedure. Never commit these secrets. MQTT and Telegram use TLS with CA validation and a valid system clock; `setInsecure` must not be used. HTTP OTA is disabled by default; if explicitly enabled for a controlled lab build, keep it on a trusted farm LAN and never expose its port publicly. ArduinoOTA uses port 8266 and a device-provisioned password. OTA is not declared successful until the device reports the actual result.
 
-The static source build must be compiled and verified before claiming a binary release. Physical OTA, TLS broker auth and relay output still require the target device/network for integration verification.
+V7.3.0 candidate compiles successfully; see [`docs/build-report.md`](../../docs/build-report.md) for build and checksum details. Physical OTA, TLS broker auth and relay output still require the target device/network for integration verification; this candidate has not been flashed.

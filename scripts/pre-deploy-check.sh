@@ -14,7 +14,6 @@ while IFS= read -r -d '' file; do
   node --check "$file"
 done < <(find dashboard/js -type f -name '*.js' -print0 | sort -z)
 node --check dashboard/sw.js
-node --check ai-worker/src/index.mjs
 
 log 'Checking dashboard JSON manifest'
 python3 -m json.tool dashboard/manifest.json >/dev/null

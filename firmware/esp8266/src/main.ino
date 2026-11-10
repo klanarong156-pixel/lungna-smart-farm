@@ -23,7 +23,7 @@
 
 struct ScheduleSlot;
 
-#define SMARTFARM_VERSION "V7.2.0-OTA-STABLE"
+#define SMARTFARM_VERSION "V7.3.0-OTA-STABLE"
 #define MQTT_SERVER "25305924f68c41f2a1e089a1836d3287.s1.eu.hivemq.cloud"
 #define MQTT_PORT 8883
 #define MQTT_BASE "smartfarm"
@@ -111,8 +111,7 @@ const char *const MQTT_COMMAND_TOPICS[] = {
     MQTT_BASE "/emergency/set",
     MQTT_BASE "/config/telegram/set",
     MQTT_BASE "/config/telegram/test",
-    MQTT_BASE "/reminder/set",
-    MQTT_BASE "/ai/alert/set"};
+    MQTT_BASE "/reminder/set"};
 const uint8_t MQTT_COMMAND_TOPIC_COUNT =
     sizeof(MQTT_COMMAND_TOPICS) / sizeof(MQTT_COMMAND_TOPICS[0]);
 
@@ -1573,62 +1572,6 @@ bool handleTelegramConfig(const String &message) {
   return true;
 }
 
-uint32_t lastAiAlertAt = 0;
-String lastAiAlertId;
-void publishAiAlertStatus(const char *status, const String &id = String()) {
-  if (!mqtt.connected()) return;
-  StaticJsonDocument<192> d;
-  d["status"] = status;
-  if (id.length()) d["id"] = id;
-  d["at"] = millis();
-  char out[192];
-  serializeJson(d, out, sizeof(out));
-  mqtt.publish(MQTT_BASE "/ai/alert/status", out, false);
-}
-bool validAiSeverity(const char *value) {
-  return value && (!strcmp(value, "info") || !strcmp(value, "warning") || !strcmp(value, "critical"));
-}
-bool handleAiAlert(const String &message) {
-  if (message.length() > 900) return false;
-  StaticJsonDocument<768> d;
-  if (deserializeJson(d, message)) {
-    publishAiAlertStatus("rejected");
-    return false;
-  }
-  const char *id = d["id"] | "";
-  const char *severity = d["severity"] | "";
-  const char *title = d["title"] | "";
-  const char *text = d["message"] | "";
-  if (!id[0] || strlen(id) >= 48 || !validAiSeverity(severity) || !title[0] || strlen(title) > 96 || !text[0] || strlen(text) > 420) {
-    publishAiAlertStatus("rejected", String(id));
-    return false;
-  }
-  for (const char *p = text; *p; ++p) {
-    if ((uint8_t)*p < 0x09 || (*p == '\r')) {
-      publishAiAlertStatus("rejected", String(id));
-      return false;
-    }
-  }
-  String alertId(id);
-  if (alertId == lastAiAlertId && (uint32_t)(millis() - lastAiAlertAt) < 900000UL) {
-    publishAiAlertStatus("duplicate", alertId);
-    return true;
-  }
-  if (lastAiAlertAt && (uint32_t)(millis() - lastAiAlertAt) < 60000UL) {
-    publishAiAlertStatus("rate_limited", alertId);
-    return false;
-  }
-  String telegram = String("AI ฟาร์ม · ") + title + "\n" + text;
-  if (!queueTelegram(telegram)) {
-    publishAiAlertStatus("not_queued", alertId);
-    return false;
-  }
-  lastAiAlertId = alertId;
-  lastAiAlertAt = millis();
-  publishAiAlertStatus("queued", alertId);
-  Serial.printf("AI ALERT: queued id=%s severity=%s\n", id, severity);
-  return true;
-}
 void mqttCallback(char *topic, byte *payload, unsigned int len) {
   String t(topic), msg;
   msg.reserve(len + 1);
@@ -1641,8 +1584,7 @@ void mqttCallback(char *topic, byte *payload, unsigned int len) {
   if (t.startsWith(String(MQTT_BASE) + "/relay/") ||
       t.startsWith(String(MQTT_BASE) + "/schedule/") ||
       t.startsWith(String(MQTT_BASE) + "/config/telegram/") ||
-      t.startsWith(String(MQTT_BASE) + "/reminder/") ||
-      t.startsWith(String(MQTT_BASE) + "/ai/alert/")) {
+      t.startsWith(String(MQTT_BASE) + "/reminder/")) {
     String logMsg = msg;
     if (logMsg.length() > 96)
       logMsg.remove(96);
@@ -1681,10 +1623,6 @@ void mqttCallback(char *topic, byte *payload, unsigned int len) {
     publishTelegramStatus();
     Serial.println(queued ? F("Telegram TEST: queued")
                            : F("Telegram TEST: queue full or not configured"));
-    return;
-  }
-  if (t == MQTT_BASE "/ai/alert/set") {
-    handleAiAlert(msg);
     return;
   }
   if (t == MQTT_BASE "/reminder/set") {
@@ -1889,7 +1827,6 @@ void connectMqtt() {
     publishStatus();
     publishTelegramStatus();
     publishReminderStatus("online");
-    publishAiAlertStatus("online");
     Serial.println(F("MQTT: Connected"));
     queueTelegram(F("เชื่อมต่อ MQTT สำเร็จ"));
     Serial.printf("MQTT: Subscribe command topics=%s\n",
