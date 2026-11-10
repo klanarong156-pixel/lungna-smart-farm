@@ -141,6 +141,7 @@ test('sends only allowlisted snapshot to AI, fixes system state server-side, and
   assert.doesNotMatch(userContent, /must-not-pass|192\.0\.2\.10|private buyer|provider-secret-for-test|one-time-token/);
   assert.equal(upstreamCalls[0].body.model, 'configured-model');
   assert.equal(upstreamCalls[0].body.stream, false);
+  assert.equal('temperature' in upstreamCalls[0].body, false, 'reasoning models reject temperature when effort is not none');
   assert.equal('tools' in upstreamCalls[0].body, false);
   assert.equal(upstreamCalls[0].body.messages[0].role, 'system');
 });

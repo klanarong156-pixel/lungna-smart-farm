@@ -228,7 +228,6 @@ async function requestModel(snapshot, env, fetcher) {
         ],
         response_format: { type: 'json_object' },
         max_completion_tokens: 900,
-        temperature: 0.1,
         n: 1,
         stream: false
       }),
