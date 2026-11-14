@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#173d2f">
+  <meta name="description" content="สวนลุงนะ Smart Farm Dashboard รุ่นถัดไป">
+  <title>สวนลุงนะ · Dashboard Next</title>
+  <link rel="icon" href="../assets/icons/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="เมนู Dashboard Next">
+      <a class="brand" href="#overview" aria-label="กลับหน้าภาพรวมฟาร์ม">
+        <img src="../assets/logo/logo-suanlungna-modern.png" alt="">
+        <span><strong>สวนลุงนะ</strong><small>SMART FARM · NEXT</small></span>
+      </a>
+      <div class="farm-switcher"><span class="farm-avatar">สล</span><span><b>สวนลุงนะ</b><small>นครปฐม · 4.8 ไร่</small></span><span class="chevron">⌄</span></div>
+      <nav class="side-nav" aria-label="ส่วนต่าง ๆ ของแดชบอร์ด">
+        <p class="nav-label">ศูนย์บัญชาการ</p>
+        <button data-route="overview" class="nav-item active"><span class="nav-icon">⌂</span><span>ภาพรวมฟาร์ม</span><kbd>1</kbd></button>
+        <button data-route="farm" class="nav-item"><span class="nav-icon">▦</span><span>แปลงและพืช</span><kbd>2</kbd></button>
+        <p class="nav-label">ลงมือจัดการ</p>
+        <button data-route="water" class="nav-item"><span class="nav-icon">◌</span><span>การให้น้ำ</span><span class="nav-dot warning"></span></button>
+        <button data-route="environment" class="nav-item"><span class="nav-icon">☼</span><span>สภาพแวดล้อม</span></button>
+        <button data-route="crops" class="nav-item"><span class="nav-icon">✦</span><span>สุขภาพพืช</span><span class="nav-dot danger"></span></button>
+        <button data-route="tasks" class="nav-item"><span class="nav-icon">✓</span><span>งานและทีม</span><span class="nav-count">6</span></button>
+        <p class="nav-label">มองให้ลึกขึ้น</p>
+        <button data-route="analytics" class="nav-item"><span class="nav-icon">⌁</span><span>การวิเคราะห์</span></button>
+      </nav>
+      <div class="sidebar-footer"><div class="mini-weather"><span>☀</span><div><b>29°</b><small>แดดดี · ลม 11 km/h</small></div></div><a href="../index.html" class="legacy-link">← กลับ Dashboard เดิม</a></div>
+    </aside>
+
+    <div class="main-shell">
+      <header class="topbar">
+        <div class="mobile-brand"><img src="../assets/logo/logo-suanlungna-modern.png" alt=""><strong>สวนลุงนะ</strong></div>
+        <div class="breadcrumb"><span>สวนลุงนะ</span><b>/</b><strong id="breadcrumbCurrent">ภาพรวมฟาร์ม</strong></div>
+        <div class="topbar-actions">
+          <span class="live-status"><i></i><span>ข้อมูลจำลองล่าสุด</span></span>
+          <button class="icon-button" type="button" data-action="show-notifications" aria-label="เปิดแจ้งเตือน">♢<span class="notification-badge">3</span></button>
+          <button class="user-menu" type="button" data-action="show-profile"><span class="user-avatar">ลน</span><span class="user-copy"><b>ลุงนะ</b><small>ผู้ดูแลฟาร์ม</small></span><span>⌄</span></button>
+        </div>
+      </header>
+
+      <main id="app" tabindex="-1">
+        <div id="page-root"></div>
+      </main>
+      <footer class="site-footer"><span>สวนลุงนะ Smart Farm · Dashboard Next</span><span>ข้อมูลตัวอย่างสำหรับทดสอบ UX · <a href="../index.html">ดูระบบ MQTT เดิม</a></span></footer>
+    </div>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="modal-root"></div>
+  <script src="./app.js" defer></script>
+</body>
+</html>
