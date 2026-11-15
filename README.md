@@ -4,21 +4,21 @@ Production baseline สำหรับ dashboard และ ESP8266 Smart Farm �
 
 ## Architecture
 
-Browser GitHub Pages/PWA ↔ MQTT over WSS ↔ HiveMQ Cloud ↔ ESP8266 NodeMCU ↔ relay/pump/sensor. Finance ledger เป็น local-only และทำงานโดยไม่ต้องมี MQTT. Weather forecast ใช้ Open-Meteo แยกจาก DHT11. รายละเอียดใน [`docs/architecture.md`](docs/architecture.md).
+Browser GitHub Pages/PWA ↔ MQTT over WSS ↔ EMQX Cloud Serverless ↔ ESP8266 NodeMCU ↔ relay/pump/sensor. Finance ledger เป็น local-only และทำงานโดยไม่ต้องมี MQTT. Weather forecast ใช้ Open-Meteo แยกจาก DHT11. รายละเอียดใน [`docs/architecture.md`](docs/architecture.md).
 
 ## Dashboard
 
 Dashboard V2.1.0 candidate (branch `redesign/dashboard-v2-four-tabs`) ใช้ 4 เมนูหลัก: Home, Reports, Alerts และ Profile. Water, Devices, System และ Weather ยังคงเป็น utility views ที่เปิดผ่านลิงก์บริบท/โปรไฟล์และ direct hashes ได้. Home จัดลำดับสถานะจริงจาก MQTT/ESP, DHT11, รีเลย์ 4 ช่อง, ระบบน้ำ, แนวโน้ม และเหตุการณ์ โดยไม่แสดงความชื้นดิน/อายุพืช/ผลผลิตที่ firmware หรือสมุดบันทึกยังไม่มี. เพิ่ม AI วิเคราะห์ snapshot แบบ read-only ที่ผู้ใช้กดเอง; ไม่มี tool หรือเส้นทางสั่ง MQTT และปุ่มยังปิดจนกว่าจะติดตั้ง Worker, Turnstile และตั้ง secret ฝั่ง server. ไม่มี API key ใน browser. Relay command เดิมยังมี dialog ยืนยัน, safety guard และ state machine รอ `relay/status` จาก ESP. Finance ledger, schedule editor, weather และ diagnostics เดิมยังคงไว้. ดูรายละเอียดที่ [`docs/dashboard.md`](docs/dashboard.md) และ [`docs/ai-assistant.md`](docs/ai-assistant.md). การเปลี่ยนแปลงอยู่ใน feature branch ไม่กระทบ production.
 
-MQTT user/password ให้ผู้ดูแลป้อนที่หน้า “ระบบ”; โดยปริยายเก็บ credentials ใน session storage และเลือกบันทึก localStorage ได้. Weather page เรียก Open-Meteo ด้วยจุดอ้างอิงระดับภูมิภาคแบบประมาณ แยกจาก DHT11; integration ที่ไม่มีจริงจะไม่ถูกนำเสนอเป็นฟังก์ชัน.
+MQTT endpoint, username และ password ให้ผู้ดูแลป้อนที่หน้า “ระบบ”; Dashboard ใช้ WSS `8084` ที่ path `/mqtt` และโดยปริยายเก็บค่าใน session storage (เลือกบันทึก localStorage ได้). Firmware ใช้ MQTTS `8883` และต้องตั้ง broker host กับ CA certificate จากหน้า Overview ของ EMQX deployment ก่อน build; MQTT topics และ firmware contract คงเดิม. Weather page เรียก Open-Meteo ด้วยจุดอ้างอิงระดับภูมิภาคแบบประมาณ แยกจาก DHT11; integration ที่ไม่มีจริงจะไม่ถูกนำเสนอเป็นฟังก์ชัน.
 
 ## MQTT
 
-Firmware TLS: HiveMQ Cloud port 8883. Browser: secure WebSocket port 8884 `/mqtt`. Topics: `smartfarm/status/online`, `smartfarm/status/device`, `smartfarm/sensor/dht11`, `smartfarm/relay/{pump|zone1|lighthome|lightsala}/{set|status}`, `smartfarm/mode/{set|status}`, `smartfarm/schedule/{id}/{set|status}`. Exact contract/payload ใน [`docs/mqtt-topics.md`](docs/mqtt-topics.md) และผลตรวจ source ใน [`docs/compatibility-report.md`](docs/compatibility-report.md). ใช้ broker ACL จำกัด topic scope: credential ของ static browser client ไม่สามารถซ่อนจาก user ของ browser ได้.
+EMQX Cloud Serverless: ESP8266 ใช้ MQTT over TLS port `8883`; Browser ใช้ secure WebSocket port `8084` กับ path `/mqtt`. Topics: `smartfarm/status/online`, `smartfarm/status/device`, `smartfarm/sensor/dht11`, `smartfarm/relay/{pump|zone1|lighthome|lightsala}/{set|status}`, `smartfarm/mode/{set|status}`, `smartfarm/schedule/{id}/{set|status}`. Exact contract/payload ใน [`docs/mqtt-topics.md`](docs/mqtt-topics.md); วิธีตั้ง endpoint, CA และสิทธิ์อยู่ใน [`docs/firmware.md`](docs/firmware.md). ใช้ broker authorization จำกัด topic scope และแยก credential ระหว่าง Dashboard กับ ESP; credential ของ static browser client ไม่สามารถซ่อนจาก user ของ browser ได้. Endpoint/CA จริงยังต้องใส่จาก deployment ของเจ้าของระบบ.
 
 ## Hardware and firmware
 
-อ้างอิง source จริง: ESP8266 NodeMCU/ESP-12E, four-channel relay; pump D5, zone1 D6, house light D7, pavilion D8; relay active LOW. DHT11 D2/GPIO4; DS3231 SDA D3/GPIO0, SCL D4/GPIO2. ดู [`docs/relay-logic.md`](docs/relay-logic.md). Firmware V7.2.0-OTA-STABLE อยู่ใน [`firmware/esp8266`](firmware/esp8266/README.md); build with PlatformIO `pio run -e nodemcuv2`. Binary ที่ compile ผ่านและตรวจ SHA-256 แล้วอยู่ใน [`releases/firmware`](releases/firmware/SmartFarm_V7.2.0.bin).
+อ้างอิง source จริง: ESP8266 NodeMCU/ESP-12E, four-channel relay; pump D5, zone1 D6, house light D7, pavilion light D8; relay active LOW. DHT11 D2/GPIO4; DS3231 SDA D3/GPIO0, SCL D4/GPIO2. ดู [`docs/relay-logic.md`](docs/relay-logic.md). Firmware source V7.2.0-OTA-STABLE อยู่ใน [`firmware/esp8266`](firmware/esp8266/README.md); ก่อนใช้กับ EMQX ต้องตั้ง broker host และ CA ตาม [`docs/firmware.md`](docs/firmware.md) แล้ว build ใหม่ด้วย PlatformIO `pio run -e nodemcuv2`. Binary ใน `releases/firmware/` เป็น artifact เก่าจาก baseline ก่อน migration และยังไม่ใช่ build สำหรับ EMQX; ห้ามใช้ binary นั้นแทน build ที่ตั้งค่า deployment แล้ว.
 
 ## Deploy GitHub Pages
 

@@ -24,8 +24,8 @@ if (!Number.isFinite(timeoutMs) || timeoutMs < 5000 || timeoutMs > 120000) {
   console.error('[mqtt-health] MQTT_HEALTHCHECK_TIMEOUT_MS must be between 5000 and 120000');
   process.exit(2);
 }
-if (!/^mqtts?:\/\//.test(url) && !/^wss?:\/\//.test(url)) {
-  console.error('[mqtt-health] MQTT_URL must use mqtt://, mqtts://, ws:// or wss://');
+if (!/^mqtts:\/\//.test(url) && !/^wss:\/\//.test(url)) {
+  console.error('[mqtt-health] EMQX Serverless requires mqtts:// or wss://; unencrypted mqtt:// and ws:// are not supported');
   process.exit(2);
 }
 

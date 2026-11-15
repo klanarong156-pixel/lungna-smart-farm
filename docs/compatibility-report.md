@@ -2,6 +2,8 @@
 
 วันที่ตรวจ: 2026-10-08 · Repository อ้างอิงอ่านอย่างเดียว: `klanarong156-pixel/New140869` · Production repository: `klanarong156-pixel/lungna-smart-farm`
 
+> หมายเหตุ: รายงานนี้บันทึก broker ที่พบใน baseline ก่อนการย้ายระบบ. Branch ที่ปรับใช้นี้ตั้งค่าเป้าหมายเป็น EMQX Cloud Serverless; endpoint และ CA เฉพาะ deployment ต้องกำหนดตาม `docs/firmware.md`.
+
 | Feature | New140869: หลักฐาน source | ใช้ต่อ | เปลี่ยน/ข้อควรทราบ | เหตุผล |
 |---|---|---|---|---|
 | MQTT broker | `SmartFarm_V7.2.0_OTA_STABLE.ino` บรรทัด 27–28: HiveMQ Cloud host, TLS 8883 | ใช้ host และ TLS firmware เดิม | ไม่บันทึก broker password ในเอกสาร | คง endpoint ที่ firmware ใช้จริง |

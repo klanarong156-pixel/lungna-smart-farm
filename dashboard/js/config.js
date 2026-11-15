@@ -1,6 +1,9 @@
 window.SmartFarmConfig = Object.freeze({
   mqtt: {
-    url: 'wss://25305924f68c41f2a1e089a1836d3287.s1.eu.hivemq.cloud:8884/mqtt',
+    url: '',
+    transport: 'wss',
+    port: 8084,
+    path: '/mqtt',
     defaultUsername: 'smartfarm',
     heartbeatTimeoutMs: 25000,
     commandTimeoutMs: 9000,

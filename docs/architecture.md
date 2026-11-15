@@ -5,10 +5,10 @@ Browser Dashboard (GitHub Pages / PWA)
   ├── single FarmState (live source of truth in browser)
   ├── single FarmMqtt manager (WSS TLS, MQTT.js)
   │     ├── subscribes to firmware status topics
-  │     └── sends non-retained command topics → HiveMQ Cloud
+  │     └── sends non-retained command topics → EMQX Cloud Serverless (WSS 8084)
   ├── Finance ledger → browser localStorage (independent of MQTT)
   └── Weather forecast → Open-Meteo HTTPS (separate from DHT11)
-                     ⇵ MQTT/TLS
+                     ⇵ MQTT/TLS 8883
               ESP8266 NodeMCU (controller)
               ├── 4-channel relay / pump / local AUTO + schedule
               ├── DHT11 D2, RTC DS3231 D3/D4
@@ -24,6 +24,7 @@ Browser Dashboard (GitHub Pages / PWA)
 - Finance works while MQTT is disconnected. Current Finance implementation is browser-local and does not sync between devices.
 - Weather API reports forecast values in its own UI; it never fills sensor values.
 - Firmware owns AUTO, relay switching, scheduling, emergency handling and OTA safety.
+- EMQX deployment endpoint and MQTT credentials are deployment-specific. Dashboard uses WSS port 8084 at `/mqtt`; ESP8266 uses TLS port 8883 with the CA downloaded from that deployment's Overview page.
 
 ## Data model for later backend integration
 
@@ -43,4 +44,4 @@ Browser Dashboard (GitHub Pages / PWA)
 
 ## Hosting caveat
 
-Dashboard is a static app deployed from `dashboard/` using GitHub Actions. MQTT browser credentials cannot be kept secret from browser users; use broker ACLs with narrowly scoped topic permissions and rotate credentials according to broker policy. Firmware credentials are provisioned on device and are not checked into this repository.
+Dashboard is a static app deployed from `dashboard/` using GitHub Actions. MQTT browser credentials cannot be kept secret from browser users; use EMQX authorization rules with narrowly scoped topic permissions and separate credentials for Dashboard and firmware. Firmware credentials are provisioned on device and are not checked into this repository. The active broker host and CA must be copied from the target EMQX deployment before building firmware; the repository intentionally does not guess a deployment-specific CA.

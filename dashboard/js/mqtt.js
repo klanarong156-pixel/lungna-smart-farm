@@ -14,58 +14,79 @@
     watchdog: null,
     reconnectTimer: null,
     reconnectAttempt: 0,
-    credentialKeys: ['sf.mqtt.user', 'sf.mqtt.pass'],
+    credentialKeys: ['sf.mqtt.user', 'sf.mqtt.pass', 'sf.mqtt.url'],
 
     credentials() {
       try {
         return {
+          url: sessionStorage.getItem(this.credentialKeys[2]) || localStorage.getItem(this.credentialKeys[2]) || cfg.url,
           user: sessionStorage.getItem(this.credentialKeys[0]) || localStorage.getItem(this.credentialKeys[0]) || cfg.defaultUsername,
           pass: sessionStorage.getItem(this.credentialKeys[1]) || localStorage.getItem(this.credentialKeys[1]) || '',
           remember: Boolean(localStorage.getItem(this.credentialKeys[1]))
         };
       } catch (error) {
         FarmState.addError('storage', error.message);
-        return { user: cfg.defaultUsername, pass: '', remember: false };
+        return { url: cfg.url, user: cfg.defaultUsername, pass: '', remember: false };
       }
     },
 
-    saveCredentials(user, pass, remember) {
+    normalizeBrokerUrl(value) {
+      const input = String(value || '').trim();
+      if (!input) throw Error('กรุณากรอก EMQX Serverless endpoint');
+      let endpoint;
+      try { endpoint = new URL(input.includes('://') ? input : `wss://${input}`); }
+      catch (_) { throw Error('รูปแบบ endpoint ไม่ถูกต้อง'); }
+      if (endpoint.protocol !== 'wss:' || endpoint.username || endpoint.password || endpoint.search || endpoint.hash) {
+        throw Error('ใช้ endpoint แบบ WSS ของ EMQX Cloud เท่านั้น');
+      }
+      if (endpoint.port && endpoint.port !== String(cfg.port)) throw Error(`EMQX Serverless ใช้ WSS port ${cfg.port}`);
+      if (endpoint.pathname !== '/' && endpoint.pathname !== cfg.path) throw Error(`path ต้องเป็น ${cfg.path}`);
+      endpoint.port = String(cfg.port);
+      endpoint.pathname = cfg.path;
+      return endpoint.toString();
+    },
+
+    saveCredentials(url, user, pass, remember) {
       if (!user.trim() || !pass) throw Error('กรุณากรอก MQTT username และ password');
+      const brokerUrl = this.normalizeBrokerUrl(url);
       for (const store of [localStorage, sessionStorage]) {
-        store.removeItem(this.credentialKeys[0]);
-        store.removeItem(this.credentialKeys[1]);
+        for (const key of this.credentialKeys) store.removeItem(key);
       }
       const store = remember ? localStorage : sessionStorage;
       store.setItem(this.credentialKeys[0], user.trim());
       store.setItem(this.credentialKeys[1], pass);
+      store.setItem(this.credentialKeys[2], brokerUrl);
+      return brokerUrl;
     },
 
     autoConnect() {
       const credentials = this.credentials();
-      if (!credentials.pass) {
-        FarmState.setConnection('offline', 'พร้อมเชื่อมต่ออัตโนมัติ · รอ password ครั้งแรก');
+      if (!credentials.pass || !credentials.url) {
+        FarmState.setConnection('offline', 'ระบุ EMQX endpoint และ MQTT credentials เพื่อเชื่อมต่อ');
         return false;
       }
-      return this.connect(credentials.user, credentials.pass, credentials.remember);
+      return this.connect(credentials.url, credentials.user, credentials.pass, credentials.remember);
     },
 
-    connect(user, pass, remember) {
+    connect(url, user, pass, remember) {
       if (typeof window.mqtt === 'undefined') {
         FarmState.setConnection('error', 'ไม่พบ MQTT.js');
         FarmState.addError('mqtt-library', 'MQTT.js load ไม่สำเร็จ');
         return false;
       }
-      try { this.saveCredentials(user, pass, remember); }
+      let brokerUrl;
+      try { brokerUrl = this.saveCredentials(url, user, pass, remember); }
       catch (error) { FarmState.addError('credentials', error.message); return false; }
-      if (this.client?.connected || this.connecting) return true;
+      if (this.client || this.connecting) this.disconnect();
 
       this.manualStop = false;
       this.connecting = true;
-      FarmState.setConnection('connecting', 'กำลังเชื่อมต่อ HiveMQ Cloud');
+      this.activeUrl = brokerUrl;
+      FarmState.setConnection('connecting', 'กำลังเชื่อมต่อ EMQX Cloud Serverless');
       const clientId = `SF-DASH-${crypto.getRandomValues(new Uint32Array(1))[0].toString(16)}`;
       let client;
       try {
-        client = mqtt.connect(cfg.url, {
+        client = mqtt.connect(brokerUrl, {
           clientId, username: user.trim(), password: pass,
           clean: true, reconnectPeriod: 0, connectTimeout: 20000,
           keepalive: 30, resubscribe: true, protocolVersion: 4

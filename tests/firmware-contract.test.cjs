@@ -4,6 +4,11 @@ const fs = require('node:fs');
 const source = fs.readFileSync('firmware/esp8266/src/main.ino', 'utf8');
 
 assert.match(source, /#define SMARTFARM_VERSION "V7\.2\.0-OTA-STABLE"/);
+assert.match(source, /#define MQTT_SERVER "YOUR_EMQX_SERVERLESS_ENDPOINT"/);
+assert.match(source, /#define MQTT_PORT 8883/);
+assert.match(source, /static const char MQTT_ROOT_CA_PEM\[\] PROGMEM = R"EOF\(\s*\)EOF"/);
+assert.match(source, /MQTT_ROOT_CA_PEM/);
+assert.doesNotMatch(source, /hivemq\.cloud/i);
 assert.match(source, /#define ENABLE_HTTP_OTA 0/);
 assert.doesNotMatch(source, /telegramTls\.setInsecure\(\)/);
 assert.match(source, /telegramTls\.setTrustAnchors\(mqttTrustAnchor\)/);

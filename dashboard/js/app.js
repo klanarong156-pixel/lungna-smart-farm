@@ -503,15 +503,17 @@
     render(snapshot);
   });
   window.setInterval(() => renderHomeInsights(FarmState.get()), 60000);
-  $('connectBtn').addEventListener('click', () => { const ok=FarmMqtt.connect($('mqttUser').value,$('mqttPass').value,$('rememberMqtt').checked); $('mqttFeedback').textContent=ok?'กำลังเริ่มเชื่อมต่อ broker…':'ตรวจสอบข้อมูลและการเชื่อมต่อ'; if(ok)$('mqttPass').value=''; });
+  $('connectBtn').addEventListener('click', () => { const ok=FarmMqtt.connect($('brokerHost').value,$('mqttUser').value,$('mqttPass').value,$('rememberMqtt').checked); $('mqttFeedback').textContent=ok?'กำลังเริ่มเชื่อมต่อ EMQX…':'ตรวจสอบ endpoint, username และ password'; if(ok)$('mqttPass').value=''; });
   $('disconnectBtn').addEventListener('click', () => FarmMqtt.disconnect());
-  $('clearCredentials').addEventListener('click', () => { try { for(const store of [localStorage,sessionStorage]) for(const key of ['sf.mqtt.user','sf.mqtt.pass'])store.removeItem(key); $('mqttUser').value=SmartFarmConfig.mqtt.defaultUsername; $('mqttPass').value=''; $('rememberMqtt').checked=false; $('mqttFeedback').textContent='ล้าง credentials ที่บันทึกในเบราว์เซอร์แล้ว'; toast('ล้าง credentials แล้ว'); } catch(error) { $('mqttFeedback').textContent=`ล้างข้อมูลไม่สำเร็จ: ${error.message}`; } });
-  const credentials=FarmMqtt.credentials(); $('mqttUser').value=credentials.user; $('rememberMqtt').checked=credentials.remember;
-  if (credentials.pass) {
+  $('clearCredentials').addEventListener('click', () => { try { for(const store of [localStorage,sessionStorage]) for(const key of ['sf.mqtt.url','sf.mqtt.user','sf.mqtt.pass'])store.removeItem(key); $('brokerHost').value=''; $('mqttUser').value=SmartFarmConfig.mqtt.defaultUsername; $('mqttPass').value=''; $('rememberMqtt').checked=false; $('mqttFeedback').textContent='ล้าง endpoint และ credentials ที่บันทึกในเบราว์เซอร์แล้ว'; toast('ล้างข้อมูล MQTT แล้ว'); } catch(error) { $('mqttFeedback').textContent=`ล้างข้อมูลไม่สำเร็จ: ${error.message}`; } });
+  const credentials=FarmMqtt.credentials(); $('brokerHost').value=credentials.url||''; $('mqttUser').value=credentials.user; $('rememberMqtt').checked=credentials.remember;
+  if (credentials.pass && credentials.url) {
     $('mqttFeedback').textContent='พบ credential ที่บันทึกไว้ · กำลังเชื่อมต่ออัตโนมัติ…';
     window.setTimeout(() => FarmMqtt.autoConnect(), 180);
+  } else if (credentials.pass) {
+    $('mqttFeedback').textContent='กรอก EMQX endpoint แล้วกดเชื่อมต่อเพื่อย้าย broker';
   } else {
-    $('mqttFeedback').textContent='กรอก password ครั้งแรก แล้วครั้งต่อไปจะเชื่อมต่อให้อัตโนมัติ';
+    $('mqttFeedback').textContent='กรอก EMQX endpoint และ MQTT password เพื่อเริ่มเชื่อมต่อ';
   }
 
   function loadFinance() { try { const x=JSON.parse(localStorage.getItem('sf.finance')||'[]'); return Array.isArray(x)?x:[]; } catch(e) { FarmState.addError('finance-storage',e.message); return []; } }

@@ -4,6 +4,8 @@ const vm = require('node:vm');
 class CE { constructor(type, options = {}) { this.type = type; this.detail = options.detail; } }
 const config = {
   mqtt: {
+    port: 8084,
+    path: '/mqtt',
     commandTimeoutMs: 100,
     scheduleCommandTimeoutMs: 100,
     topics: {
@@ -18,7 +20,7 @@ const config = {
 config.scheduleSlotCount = 4;
 const store = { getItem: () => null, setItem() {}, removeItem() {} };
 const context = {
-  console, Date, Math, JSON, Number, String, Object, Array, Set, Map, Error, Promise,
+  console, Date, Math, JSON, Number, String, Object, Array, Set, Map, Error, Promise, URL,
   structuredClone, CustomEvent: CE, setTimeout, clearTimeout, setInterval, clearInterval,
   localStorage: store, sessionStorage: store,
   window: { dispatchEvent() {}, addEventListener() {} },
@@ -42,6 +44,12 @@ manager.client = {
 };
 
 (async () => {
+  assert.equal(manager.normalizeBrokerUrl('farm-example.emqxsl.com'), 'wss://farm-example.emqxsl.com:8084/mqtt');
+  assert.equal(manager.normalizeBrokerUrl('wss://farm-example.emqxsl.com:8084/mqtt'), 'wss://farm-example.emqxsl.com:8084/mqtt');
+  assert.throws(() => manager.normalizeBrokerUrl('mqtt://farm-example.emqxsl.com:1883'), /WSS/);
+  assert.throws(() => manager.normalizeBrokerUrl('wss://farm-example.emqxsl.com:8884/mqtt'), /8084/);
+  assert.throws(() => manager.normalizeBrokerUrl('wss://farm-example.emqxsl.com/not-mqtt'), /path/);
+
   const modePromise = manager.commandMode('AUTO');
   assert.equal(published.at(-1).topic, 'smartfarm/mode/set');
   assert.equal(published.at(-1).payload, 'AUTO');
