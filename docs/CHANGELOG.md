@@ -1,3 +1,12 @@
+## EMQX Cloud Serverless broker migration — 2026-11-15 (feature branch; ยังไม่ deploy)
+
+- เปลี่ยน Dashboard ให้รับ deployment-specific WSS endpoint บน port 8084 `/mqtt`; เก็บ endpoint คู่กับ credentials ตาม session/local storage และตรวจ scheme, port, path ก่อน connect.
+- เปลี่ยน firmware source เป็น MQTTS port 8883 โดยล้าง CA ของ broker เดิมออกโดยตั้งใจ; ต้องใส่ endpoint และ CA จาก EMQX deployment จริงก่อน firmware จะเชื่อมต่อ. MQTT topics, relay logic และ safety behavior ไม่เปลี่ยน.
+- เพิ่มเอกสารการตั้งค่า EMQX Serverless, authentication/ACL และการแยก Dashboard/device credentials; health check ปฏิเสธ plain MQTT/WS.
+- Bump Dashboard assets เป็น v2.1.1 และ PWA shell cache เป็น v23. อัปเดต regression tests สำหรับ endpoint validation และ cache version.
+- Release binary ใน `releases/firmware/` เป็น artifact จาก HiveMQ baseline; ต้อง build source ใหม่หลังตั้ง EMQX endpoint/CA และตรวจบนอุปกรณ์ก่อนใช้.
+- ไม่บันทึก EMQX endpoint/credential จริง; ยังไม่ได้เชื่อม broker/hardware, build/release firmware หรือ deploy GitHub Pages. การเปลี่ยนแปลงอยู่บน feature branch แยกจาก `main` เพื่อ review.
+
 ## AI วิเคราะห์สถานะระบบแบบอ่านอย่างเดียว — 2026-11-08 (feature branch; ยังไม่ deploy)
 
 - เพิ่ม AI analysis แบบผู้ใช้กดเอง ส่ง snapshot allowlist จาก MQTT/ESP, heartbeat, DHT11, thresholds, relay states, mode, Emergency Stop และ firmware; retained relay/mode/E-Stop inactive ถูกทำเป็น unknown จนมี live evidence, active E-Stop คง fail-safe, และ retained status ไม่ยืนยันคำสั่งใหม่. ไม่ส่ง credentials, IP, finance, schedule, raw logs หรือพิกัด
