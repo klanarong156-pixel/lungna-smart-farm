@@ -66,7 +66,7 @@ const uint8_t NTP_SERVER_COUNT = sizeof(NTP_SERVERS) / sizeof(NTP_SERVERS[0]);
 const uint8_t MQTT_AUTH_FAIL_LIMIT = 3;
 const uint32_t MQTT_DIAGNOSTIC_INTERVAL_MS = 30000UL;
 const uint32_t WIFI_RECONNECT_INTERVAL_MS = 15000UL;
-const char MQTT_RECOMMENDED_USERNAME[] = "smartfarm";
+const char MQTT_RECOMMENDED_USERNAME[] = "smartfarm-device";
 const char *const MQTT_COMMAND_TOPICS[] = {
     MQTT_BASE "/relay/+/set",
     MQTT_BASE "/schedule/+/set",
@@ -1601,9 +1601,13 @@ void mqttCallback(char *topic, byte *payload, unsigned int len) {
 
   // Diagnostic: show every inbound control packet without blocking MQTT.
   // Limit payload logging to keep Serial output bounded on ESP8266.
-  if (t.startsWith(String(MQTT_BASE) + "/relay/") ||
+  const bool sensitiveTopic =
+      t == MQTT_BASE "/config/telegram/set" ||
+      t == MQTT_BASE "/config/telegram/test";
+  if (sensitiveTopic) {
+    Serial.printf("MQTT RX: topic=%s payload=[REDACTED]\n", t.c_str());
+  } else if (t.startsWith(String(MQTT_BASE) + "/relay/") ||
       t.startsWith(String(MQTT_BASE) + "/schedule/") ||
-      t.startsWith(String(MQTT_BASE) + "/config/telegram/") ||
       t.startsWith(String(MQTT_BASE) + "/reminder/") ||
       t.startsWith(String(MQTT_BASE) + "/ai/alert/")) {
     String logMsg = msg;
@@ -1838,7 +1842,7 @@ void connectMqtt() {
   // Ensure a failed TLS handshake cannot leak a stale socket into the next try.
   tls.stop();
   Serial.printf("MQTT: Client ID=%s username=%s\n", clientId,
-                strcmp(mqttUser, MQTT_RECOMMENDED_USERNAME) == 0 ? "smartfarm" : "custom");
+                strcmp(mqttUser, MQTT_RECOMMENDED_USERNAME) == 0 ? "recommended" : "custom");
   bool connected = mqtt.connect(clientId, mqttUser, mqttPass,
                                 MQTT_BASE "/status/online", 0, true, "false");
   int8_t state = mqtt.state();
