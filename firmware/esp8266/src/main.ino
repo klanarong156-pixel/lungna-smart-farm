@@ -20,20 +20,14 @@
 #include <WiFiManager.h>
 #include <WiFiUdp.h>
 #include <Wire.h>
+#include "emqx_secrets.h"
 
 struct ScheduleSlot;
 
 #define SMARTFARM_VERSION "V7.2.0-OTA-STABLE"
-#define MQTT_SERVER "YOUR_EMQX_SERVERLESS_ENDPOINT"
 #define MQTT_PORT 8883
 #define MQTT_BASE "smartfarm"
 #define TZ_OFFSET_SECONDS (7L * 3600L)
-
-// Paste the CA certificate downloaded from this EMQX Serverless deployment's
-// Overview page. Empty CA intentionally keeps MQTT disabled until configured.
-// Never replace certificate validation with setInsecure().
-static const char MQTT_ROOT_CA_PEM[] PROGMEM = R"EOF(
-)EOF";
 
 // HTTP OTA is intended for the trusted local farm LAN only.
 // Do NOT expose port 80 to the public Internet. ArduinoOTA remains available
