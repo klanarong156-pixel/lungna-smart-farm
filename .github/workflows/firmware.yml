@@ -53,7 +53,9 @@ jobs:
           import os
           import pathlib
           import re
+          import subprocess
           import sys
+          import tempfile
 
           server = os.environ.get("EMQX_SERVER", "").strip()
           ca = os.environ.get("EMQX_CA_PEM", "").strip().replace("\r\n", "\n")
@@ -71,6 +73,56 @@ jobs:
                   sys.exit("EMQX_CA_PEM must contain a PEM certificate.")
               if ")EMQXCA\"" in ca:
                   sys.exit("EMQX_CA_PEM contains an unsupported raw-string delimiter.")
+              # Reject malformed or mixed PEM data before building. Validate
+              # every certificate block, not only the first one in a bundle.
+              blocks = re.findall(
+                  r"-----BEGIN CERTIFICATE-----\s*.*?\s*-----END CERTIFICATE-----",
+                  ca,
+                  flags=re.DOTALL,
+              )
+              remainder = re.sub(
+                  r"-----BEGIN CERTIFICATE-----\s*.*?\s*-----END CERTIFICATE-----",
+                  "",
+                  ca,
+                  flags=re.DOTALL,
+              )
+              if not blocks or remainder.strip():
+                  sys.exit("EMQX_CA_PEM must contain only one or more PEM certificates.")
+
+              # Parse the CA bundle and verify the live broker certificate
+              # chain and hostname. Never print certificate or OpenSSL output.
+              with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8") as ca_file:
+                  ca_file.write(ca)
+                  ca_file.flush()
+                  parsed = subprocess.run(
+                      ["openssl", "crl2pkcs7", "-nocrl", "-certfile", ca_file.name, "-out", os.devnull],
+                      capture_output=True,
+                      text=True,
+                      timeout=15,
+                  )
+                  if parsed.returncode != 0:
+                      sys.exit("EMQX_CA_PEM is not a valid PEM certificate bundle.")
+
+                  try:
+                      tls = subprocess.run(
+                          [
+                              "openssl", "s_client", "-brief", "-connect", f"{server}:8883",
+                              "-servername", server, "-verify_hostname", server,
+                              "-verify_return_error", "-CAfile", ca_file.name,
+                          ],
+                          input="",
+                          capture_output=True,
+                          text=True,
+                          timeout=25,
+                      )
+                  except subprocess.TimeoutExpired:
+                      sys.exit("Could not complete TLS verification with the EMQX endpoint in time.")
+                  tls_output = tls.stdout + tls.stderr
+                  if tls.returncode != 0 or not any(
+                      marker in tls_output for marker in ("Verification: OK", "Verify return code: 0 (ok)")
+                  ):
+                      sys.exit("EMQX endpoint TLS certificate/hostname verification failed; no firmware artifact will be published.")
+              print("EMQX CA bundle parsed and broker TLS certificate/hostname verified.")
           else:
               server = "YOUR_EMQX_SERVERLESS_ENDPOINT"
               ca = ""
