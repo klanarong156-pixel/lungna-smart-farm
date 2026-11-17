@@ -4,7 +4,7 @@ window.SmartFarmConfig = Object.freeze({
     transport: 'wss',
     port: 8084,
     path: '/mqtt',
-    defaultUsername: 'smartfarm',
+    defaultUsername: 'smartfarm-dashboard',
     heartbeatTimeoutMs: 25000,
     commandTimeoutMs: 9000,
     scheduleCommandTimeoutMs: 15000,
