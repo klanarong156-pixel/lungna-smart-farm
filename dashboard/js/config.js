@@ -1,6 +1,6 @@
 window.SmartFarmConfig = Object.freeze({
   mqtt: {
-    url: '',
+    url: 'wss://w1ee1d8d.ala.asia-southeast1.emqxsl.com:8084/mqtt',
     transport: 'wss',
     port: 8084,
     path: '/mqtt',

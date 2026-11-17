@@ -6,9 +6,9 @@
   <title>สวนลุงนะ · SMART FARM</title>
   <link rel="manifest" href="./manifest.json"><link rel="icon" href="./assets/icons/icon-192.png"><link rel="apple-touch-icon" href="./assets/icons/icon-192.png">
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./css/app.css"><link rel="stylesheet" href="./css/reference-layout.css?v=2.1.0">
+  <link rel="stylesheet" href="./css/app.css"><link rel="stylesheet" href="./css/reference-layout.css?v=2.2.0">
   <script defer src="https://unpkg.com/mqtt@5.14.1/dist/mqtt.min.js"></script>
-  <script defer src="./js/config.js?v=2.1.1"></script><script defer src="./js/state.js?v=2.1.0"></script><script defer src="./js/mqtt.js?v=2.1.1"></script><script defer src="./js/command-flow.js?v=2.0.0"></script><script defer src="./js/sensor-alerts.js?v=2.0.0"></script><script defer src="./js/ai-config.js?v=2.2.0"></script><script defer src="./js/ai-assistant.js?v=2.1.0"></script><script defer src="./js/app.js?v=2.1.1"></script>
+  <script defer src="./js/config.js?v=2.2.0"></script><script defer src="./js/state.js?v=2.1.0"></script><script defer src="./js/mqtt.js?v=2.2.0"></script><script defer src="./js/command-flow.js?v=2.0.0"></script><script defer src="./js/sensor-alerts.js?v=2.0.0"></script><script defer src="./js/ai-config.js?v=2.2.0"></script><script defer src="./js/ai-assistant.js?v=2.1.0"></script><script defer src="./js/app.js?v=2.2.0"></script>
 </head>
 <body>
 <div class="app-shell">
@@ -90,9 +90,9 @@
       <div class="page-heading"><div><p class="eyebrow">SYSTEM SETTINGS</p><h1>ระบบ</h1><p class="muted">ตั้งค่าการเชื่อมต่อและตรวจสอบการทำงานของ Dashboard</p></div><span class="reference-badge">การตั้งค่าและสถานะ</span></div>
       <div class="system-step-list">
         <details class="system-step" open><summary><span class="step-number">1</span><span class="step-title"><b>การเชื่อมต่อ MQTT</b><small>ตั้งค่าข้อมูลสำหรับเชื่อมต่อกับ MQTT Broker</small></span><span class="step-arrow" aria-hidden="true">⌄</span></summary><div class="system-step-body">
-          <div class="system-connection-status"><span class="system-status-dot" id="connectionHeroState">พร้อม</span><div><p class="eyebrow">สถานะการเชื่อมต่อ</p><b id="mqttAutoStatus">พร้อมเชื่อมต่อ</b><small id="mqttAutoDetail">รอ credential สำหรับการเชื่อมต่อครั้งแรก</small></div></div>
-          <div class="mqtt-config-grid"><label>EMQX Serverless endpoint (WSS)<input id="brokerHost" type="text" inputmode="url" autocomplete="url" autocapitalize="off" spellcheck="false" placeholder="wss://&lt;endpoint&gt;:8084/mqtt"></label><label>Username<input id="mqttUser" autocomplete="username" value="smartfarm-dashboard"></label><label>รหัสผ่าน<input id="mqttPass" type="password" autocomplete="current-password" placeholder="กรอก MQTT password"></label></div>
-          <p class="credential-note">ดู endpoint ที่ EMQX Console → Deployment → Overview · credential เก็บในเบราว์เซอร์นี้เท่านั้น · เว็บไซต์ไม่มี backend authentication</p>
+          <div class="system-connection-status"><span class="system-status-dot" id="connectionHeroState">พร้อม</span><div><p class="eyebrow">สถานะการเชื่อมต่อ</p><b id="mqttAutoStatus">พร้อมเชื่อมต่อ</b><small id="mqttAutoDetail">รอ MQTT password สำหรับการเชื่อมต่อครั้งแรก</small></div></div>
+          <div class="mqtt-config-grid"><div class="mqtt-config-item"><span>Broker WSS endpoint</span><output id="brokerHost" class="mqtt-static-value">wss://w1ee1d8d.ala.asia-southeast1.emqxsl.com:8084/mqtt</output></div><div class="mqtt-config-item"><span>MQTT username</span><output id="mqttUser" class="mqtt-static-value">smartfarm-dashboard</output></div><label>MQTT password<input id="mqttPass" type="password" autocomplete="current-password" placeholder="กรอก MQTT password"></label></div>
+          <p class="credential-note">ตั้งค่า Broker, WSS port 8084 และ path /mqtt ไว้ให้แล้ว · กรอกเฉพาะ MQTT password · password เก็บในเบราว์เซอร์นี้เท่านั้น · เว็บไซต์ไม่มี backend authentication</p>
           <div class="button-row"><button id="connectBtn" class="button primary">บันทึกและเชื่อมต่อ</button><button id="disconnectBtn" class="button secondary">ตัดการเชื่อมต่อ</button><button id="clearCredentials" class="button danger-button">ล้าง credential</button></div><p id="mqttFeedback" class="muted" role="status"></p>
           <details class="system-advanced"><summary>รายละเอียด Broker</summary><div class="config-detail"><span>EMQX WSS / Path</span><b>8084 · /mqtt</b><span>เชื่อมต่อตั้งแต่</span><b id="connectedSince">ยังไม่มีข้อมูล</b><span>จำนวน reconnect</span><b id="reconnectCount">0</b><span>ข้อผิดพลาดล่าสุด</span><b id="lastError">ยังไม่มีข้อมูล</b><span>รายละเอียด</span><b id="mqttReason">ยังไม่ได้เชื่อมต่อ</b></div></details>
         </div></details>
@@ -114,7 +114,7 @@
           <div class="system-check-row"><span class="system-check-icon">!</span><span>Emergency Stop</span><b id="systemEmergency">ยังไม่มีข้อมูล</b><small id="systemEmergencySource">รอสถานะจาก ESP8266</small></div>
           <div class="system-check-row"><span class="system-check-icon">⚠</span><span>Firmware error</span><b id="systemFirmwareError">ยังไม่มีข้อมูล</b><small id="systemFirmwareErrorDetail">ยังไม่มีข้อมูล</small></div>
           <p id="systemCheckResult" class="muted" role="status" aria-live="polite"></p>
-          <div class="system-version-grid"><div><span>Dashboard</span><b id="dashboardVersion">v2.1.1</b></div><div><span>Firmware baseline</span><b id="firmwareVersion">ยังไม่มีข้อมูล</b></div><div><span>Shell cache</span><b>lungna-shell-v23</b></div></div>
+          <div class="system-version-grid"><div><span>Dashboard</span><b id="dashboardVersion">v2.2.0</b></div><div><span>Firmware baseline</span><b id="firmwareVersion">ยังไม่มีข้อมูล</b></div><div><span>Shell cache</span><b>lungna-shell-v24</b></div></div>
           <div class="button-row"><button class="button secondary" id="reloadDashboard">โหลด Dashboard ใหม่</button></div>
         </div></details>
       </div>
@@ -173,7 +173,7 @@
       <section class="card profile-storage-note"><h2>ข้อมูลและความเป็นส่วนตัว</h2><p>ไม่มีระบบบัญชีผู้ใช้หรือ Firebase ใน baseline นี้ · MQTT credentials และสมุดรายรับ–รายจ่ายจัดเก็บในเบราว์เซอร์นี้ตามการตั้งค่าเดิม</p><p>Dashboard ไม่ใช่ OTA updater และไม่อัปโหลด firmware</p></section>
     </section>
   </main>
-  <footer class="site-footer"><span>สวนลุงนะ • Smart Farm</span><span>Firmware <b id="footerFirmware">ยังไม่มีข้อมูล</b> · Dashboard v2.1.1</span></footer>
+  <footer class="site-footer"><span>สวนลุงนะ • Smart Farm</span><span>Firmware <b id="footerFirmware">ยังไม่มีข้อมูล</b> · Dashboard v2.2.0</span></footer>
   <nav class="bottom-nav" aria-label="เมนูหลัก"><button data-nav="home" class="active"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg><small>หน้าหลัก</small></button><button data-nav="reports"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V11h4v8M10 19V5h4v14M16 19V8h4v11"/></svg><small>รายงาน</small></button><button data-nav="alerts" aria-label="แจ้งเตือน"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><span class="nav-badge" data-alert-badge hidden>0</span><small>แจ้งเตือน</small></button><button data-nav="profile"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><small>โปรไฟล์</small></button></nav>
 </div>
   <dialog id="commandConfirmDialog" class="command-confirm-dialog" aria-labelledby="commandConfirmTitle"><form method="dialog"><span class="dialog-icon" aria-hidden="true">!</span><h2 id="commandConfirmTitle">ยืนยันคำสั่ง</h2><p id="commandConfirmText">ตรวจสอบอุปกรณ์และคำสั่งก่อนดำเนินการ</p><p class="dialog-safety-note">คำสั่งจะสำเร็จเมื่อ ESP8266 ส่งสถานะกลับมายืนยันเท่านั้น</p><div class="button-row"><button type="button" class="button secondary" id="cancelRelayCommand">ยกเลิก</button><button type="button" class="button primary" id="confirmRelayCommand">ยืนยันคำสั่ง</button></div></form></dialog>

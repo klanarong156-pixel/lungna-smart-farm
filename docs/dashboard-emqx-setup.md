@@ -43,12 +43,11 @@
 ## 3. กรอกค่าที่ Dashboard
 
 1. เปิด Dashboard ผ่าน HTTPS แล้วไปที่หน้า **ระบบ → การเชื่อมต่อ MQTT**
-2. กรอก endpoint เต็ม `wss://<broker-hostname>:8084/mqtt` หรือกรอก hostname อย่างเดียวก็ได้ ระบบจะเติม `wss://`, พอร์ต `8084` และ path `/mqtt` ให้เอง
-3. Username เริ่มต้นในฟอร์มคือ `smartfarm-dashboard`; เปลี่ยนให้ตรงกับ user ที่สร้างไว้ หากใช้ชื่ออื่น
-4. กรอกรหัสผ่านของ MQTT user แล้วกด **บันทึกและเชื่อมต่อ**
-5. ใช้ช่อง **จำ credential** เฉพาะเมื่อยอมรับให้เบราว์เซอร์นี้เก็บ credential ใน `localStorage`; หากไม่เลือก ระบบใช้ `sessionStorage` และค่าจะอยู่ใน session ของเบราว์เซอร์นั้น
+2. ตรวจ endpoint และ username ที่แสดงในหน้าให้ตรงกับ deployment และ MQTT user ที่สร้างไว้; Dashboard รุ่นนี้กำหนด broker endpoint และ username ไว้เป็นค่าคงที่ และแสดงเป็นข้อมูลอ่านอย่างเดียว
+3. กรอกเฉพาะรหัสผ่านของ MQTT user แล้วกด **บันทึกและเชื่อมต่อ**
+4. ใช้ช่อง **จำ credential** เฉพาะเมื่อยอมรับให้เบราว์เซอร์นี้เก็บ password ใน `localStorage`; หากไม่เลือก ระบบใช้ `sessionStorage` และ password จะอยู่ใน session ของเบราว์เซอร์นั้น
 
-ห้ามใส่ MQTT password ใน source code, GitHub repository, URL, issue หรือคอมเมนต์สาธารณะ Dashboard ไม่มี backend สำหรับซ่อน credential จากผู้ใช้ที่เปิดหน้าเว็บ จึงควรใช้ user ที่จำกัดสิทธิ์และแยกจากอุปกรณ์
+ห้ามใส่ MQTT password ใน source code, GitHub repository, URL, issue หรือคอมเมนต์สาธารณะ Dashboard ไม่มี backend สำหรับซ่อน password จากผู้ใช้ที่เปิดหน้าเว็บ จึงควรใช้ user ที่จำกัดสิทธิ์และแยกจากอุปกรณ์
 
 ## 4. ตรวจว่าทำงานครบ
 
