@@ -1,11 +1,11 @@
-# ESP8266 Firmware V7.2.0
+# ESP8266 Firmware V7.2.1
 
-Firmware source lives in `src/main.ino` and is based on the V7.2.0 OTA stable firmware inspected in the read-only reference repository. It retains the original relay, safety, MQTT and provisioning implementation rather than inventing hardware mapping.
+Firmware source lives in `src/main.ino` and is based on the V7.2.0 OTA stable firmware inspected in the read-only reference repository. It retains the original relay, safety, MQTT and provisioning implementation and adds a dedicated physical AP setup button.
 
 ## Board and dependencies
 
 - PlatformIO environment `nodemcuv2` / ESP8266 NodeMCU.
-- Firmware version macro: `V7.2.0-OTA-STABLE`.
+- Firmware version macro: `V7.2.1-PHYSICAL-AP-BUTTON`.
 - Build from this directory:
   ```sh
   pio pkg install -e nodemcuv2
@@ -19,6 +19,7 @@ Firmware source lives in `src/main.ino` and is based on the V7.2.0 OTA stable fi
 
 - 4-channel relay: pump D5, zone1 D6, house light D7, pavilion light D8; ON=LOW and OFF=HIGH.
 - DHT11 D2/GPIO4; DS3231 SDA D3/GPIO0, SCL D4/GPIO2 as defined in source.
+- Wi-Fi reset button remains on D1/GPIO5 (hold 5 seconds to erase saved Wi-Fi). The separate AP setup button uses D0/GPIO16: connect a normally-open momentary pushbutton between D0 and 3V3. GPIO16 uses `INPUT_PULLDOWN_16`, so leave the button open normally and do not connect it to 5 V. With all relays OFF, hold for 2 seconds to open `SmartFarm_Setup`; the saved Wi-Fi credentials are not erased. The AP is blocked while any relay is ON because the setup portal pauses the main loop. The portal times out after 180 seconds. The setup AP has no password, so use it only while physically present and close it after configuration.
 - ESP keeps controller responsibility for schedule, AUTO/MANUAL, safety, emergency and OTA.
 
 ## Provisioning and safety
