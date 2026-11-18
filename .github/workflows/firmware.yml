@@ -155,15 +155,15 @@ jobs:
       - name: Create versioned release image and checksum
         if: steps.emqx.outputs.configured == 'true'
         run: |
-          cp firmware/esp8266/.pio/build/nodemcuv2/firmware.bin releases/firmware/SmartFarm_V7.2.0.bin
-          sha256sum releases/firmware/SmartFarm_V7.2.0.bin > releases/firmware/SmartFarm_V7.2.0.bin.sha256
+          cp firmware/esp8266/.pio/build/nodemcuv2/firmware.bin releases/firmware/SmartFarm_V7.2.1.bin
+          sha256sum releases/firmware/SmartFarm_V7.2.1.bin > releases/firmware/SmartFarm_V7.2.1.bin.sha256
 
       - uses: actions/upload-artifact@v4
         if: steps.emqx.outputs.configured == 'true'
         with:
-          name: SmartFarm_V7.2.0
+          name: SmartFarm_V7.2.1
           path: |
-            releases/firmware/SmartFarm_V7.2.0.bin
-            releases/firmware/SmartFarm_V7.2.0.bin.sha256
+            releases/firmware/SmartFarm_V7.2.1.bin
+            releases/firmware/SmartFarm_V7.2.1.bin.sha256
           if-no-files-found: error
           retention-days: 30

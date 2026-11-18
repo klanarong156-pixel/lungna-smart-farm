@@ -7,6 +7,8 @@ const workflow = fs.readFileSync('.github/workflows/firmware.yml', 'utf8');
 const dashboardConfig = fs.readFileSync('dashboard/js/config.js', 'utf8');
 
 assert.match(source, /#define SMARTFARM_VERSION "V7\.2\.1-PHYSICAL-AP-BUTTON"/);
+assert.match(workflow, /SmartFarm_V7\.2\.1\.bin/);
+assert.match(workflow, /name: SmartFarm_V7\.2\.1/);
 assert.match(source, /^#include "emqx_secrets\.h"$/m);
 assert.match(secretsHeader, /#define MQTT_SERVER "YOUR_EMQX_SERVERLESS_ENDPOINT"/);
 assert.match(secretsHeader, /static const char MQTT_ROOT_CA_PEM\[\] PROGMEM = R"EMQXCA\(\s*\)EMQXCA"/);
