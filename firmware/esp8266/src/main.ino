@@ -1,4 +1,4 @@
-// SmartFarm V6.0 Production - hardened ESP8266 controller + DS3231 RTC
+// SmartFarm V7.2.1 - hardened ESP8266 controller + physical AP setup button
 // Hardware: DHT11 + 4 relays + DS3231
 // Fixes: boot/reset diagnostics, NTP init order, reduced JSON stack usage,
 // non-blocking reconnect behavior, safer WiFiManager recovery, explicit MQTT
@@ -24,7 +24,7 @@
 
 struct ScheduleSlot;
 
-#define SMARTFARM_VERSION "V7.2.0-OTA-STABLE"
+#define SMARTFARM_VERSION "V7.2.1-PHYSICAL-AP-BUTTON"
 #define MQTT_PORT 8883
 #define MQTT_BASE "smartfarm"
 #define TZ_OFFSET_SECONDS (7L * 3600L)
@@ -47,8 +47,11 @@ struct ScheduleSlot;
 #define RELAY_ON LOW
 #define RELAY_OFF HIGH
 #define WIFI_RESET_BUTTON D1
+// AP setup: momentary normally-open button from D0/GPIO16 to 3V3; hold 2 s.
+#define AP_SETUP_BUTTON D0
 
 const uint32_t WIFI_RESET_HOLD_MS = 5000UL;
+const uint32_t AP_SETUP_BUTTON_HOLD_MS = 2000UL;
 // First boot opens SmartFarm_Setup; WiFiManager saves the selected SSID and
 // password in ESP8266 flash so later boots reconnect to the saved network.
 // Close the portal after three minutes when no setup is completed.
@@ -110,6 +113,8 @@ size_t otaUploadMaxBytes = 0;
 bool wifiStateKnown = false, lastWifiConnected = false;
 bool wifiResetPressed = false;
 bool wifiResetLatched = false;
+bool apSetupButtonPressed = false;
+bool apSetupButtonLatched = false;
 bool otaUpdateInProgress = false;
 bool otaFailureLock = false;
 uint8_t otaProgressPercent = 0;
@@ -118,6 +123,7 @@ uint32_t otaLastProgressAt = 0;
 bool otaReady = false;
 char otaHostname[48] = "";
 uint32_t wifiResetStartedAt = 0;
+uint32_t apSetupButtonStartedAt = 0;
 bool mqttTlsReady = false;
 bool readRtcNow(DateTime &value);
 bool prepareTlsValidationTime();
@@ -2221,6 +2227,51 @@ void handleWifiResetButton() {
   clearSavedWifiSettings(F("WiFi reset confirmed"));
 }
 
+void handleApSetupButton() {
+  // GPIO16 (D0) has a built-in pull-down; the momentary button connects it to
+  // 3.3 V. Unlike the D1 Wi-Fi reset button, this input never clears settings.
+  const bool pressed = digitalRead(AP_SETUP_BUTTON) == HIGH;
+
+  if (apSetupButtonLatched) {
+    if (!pressed) {
+      apSetupButtonLatched = false;
+      Serial.println(F("AP setup button released"));
+    }
+    return;
+  }
+
+  if (pressed && !apSetupButtonPressed) {
+    apSetupButtonPressed = true;
+    apSetupButtonStartedAt = millis();
+    Serial.println(F("AP setup button pressed; hold for 2 seconds"));
+  }
+
+  if (!pressed) {
+    if (apSetupButtonPressed)
+      Serial.println(F("AP setup button cancelled"));
+    apSetupButtonPressed = false;
+    apSetupButtonStartedAt = 0;
+    return;
+  }
+
+  if ((uint32_t)(millis() - apSetupButtonStartedAt) <
+      AP_SETUP_BUTTON_HOLD_MS)
+    return;
+
+  apSetupButtonLatched = true;
+  apSetupButtonPressed = false;
+  apSetupButtonStartedAt = 0;
+  for (uint8_t i = 0; i < RELAY_COUNT; i++) {
+    if (relayOn(i)) {
+      Serial.printf("AP setup blocked: relay %s is ON; turn all relays OFF first\n",
+                    relayNames[i]);
+      return;
+    }
+  }
+  Serial.println(F("AP setup requested; saved Wi-Fi settings will be kept"));
+  openMqttSetupPortal();
+}
+
 void handleSerialCommands() {
   if (!Serial.available()) return;
   String command = Serial.readStringUntil('\n');
@@ -2242,6 +2293,7 @@ void setupWifi() {
   WiFi.setAutoReconnect(true);
   WiFi.persistent(true);
   pinMode(WIFI_RESET_BUTTON, INPUT_PULLUP);
+  pinMode(AP_SETUP_BUTTON, INPUT_PULLDOWN_16);
   resetWifiIfButtonHeldAtBoot();
   WiFiManager wm;
   wm.setConfigPortalTimeout(WIFI_PORTAL_TIMEOUT_SECONDS);
@@ -2298,6 +2350,7 @@ void setup() {
   Serial.print(F("Free heap at boot: "));
   Serial.println(ESP.getFreeHeap());
   pinMode(WIFI_RESET_BUTTON, INPUT_PULLUP);
+  pinMode(AP_SETUP_BUTTON, INPUT_PULLDOWN_16);
   for (uint8_t i = 0; i < RELAY_COUNT; i++) {
     // Preload the OFF output latch before switching the GPIO to OUTPUT to
     // reduce transients after setup starts. Strap-pin behavior during reset
@@ -2516,6 +2569,7 @@ void loop() {
 
   handleSerialCommands();
   handleWifiResetButton();
+  handleApSetupButton();
   maintainWifi();
   reportWifiState();
   if (WiFi.status() == WL_CONNECTED) {
