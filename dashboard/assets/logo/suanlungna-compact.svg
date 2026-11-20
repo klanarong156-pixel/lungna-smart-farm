@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 430 128" role="img" aria-labelledby="title desc">
+  <title id="title">สวนลุงนะ</title><desc id="desc">โลโก้ย่อสวนลุงนะสำหรับ Mobile Header</desc>
+  <g transform="translate(8 8) scale(.4375)">
+    <rect x="0" y="0" width="256" height="256" rx="62" fill="#111C30" stroke="#2B4658" stroke-width="6"/>
+    <path d="M128 190V91" fill="none" stroke="#E5EDF8" stroke-width="11" stroke-linecap="round"/>
+    <path d="M128 110C88 105 61 80 61 39c42 2 71 22 73 61" fill="#74F4B9" stroke="#0B1220" stroke-width="9" stroke-linejoin="round"/>
+    <path d="M131 130c2-42 29-70 73-77 0 44-25 73-73 77Z" fill="#39F5A5" stroke="#0B1220" stroke-width="9" stroke-linejoin="round"/>
+    <path d="M50 196c31-25 59-25 78 0 20-25 48-25 78 0" fill="none" stroke="#67D8F5" stroke-width="12" stroke-linecap="round"/>
+    <path d="M50 218c31-25 59-25 78 0 20-25 48-25 78 0" fill="none" stroke="#E5EDF8" stroke-width="9" stroke-linecap="round" opacity=".9"/>
+    <circle cx="128" cy="91" r="9" fill="#67D8F5" stroke="#111C30" stroke-width="5"/><circle cx="128" cy="190" r="9" fill="#39F5A5" stroke="#111C30" stroke-width="5"/>
+  </g>
+  <text x="132" y="79" fill="#E5EDF8" font-family="Noto Sans Thai, IBM Plex Sans Thai, sans-serif" font-size="39" font-weight="700">สวนลุงนะ</text>
+  <text x="134" y="104" fill="#8FA9B7" font-family="Manrope, sans-serif" font-size="10" font-weight="700" letter-spacing="1.5">SMART FARM</text>
+</svg>

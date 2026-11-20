@@ -1,10 +1,10 @@
-const CACHE = 'lungna-shell-v24';
+const CACHE = 'lungna-shell-v25';
 const OWNED_CACHE_PREFIX = 'lungna-shell-';
 const SHELL = [
   './', './index.html', './css/app.css', './css/reference-layout.css?v=2.2.0', './js/config.js?v=2.2.0', './js/state.js?v=2.1.0',
   './js/mqtt.js?v=2.2.0', './js/command-flow.js?v=2.0.0', './js/sensor-alerts.js?v=2.0.0', './js/ai-config.js?v=2.2.0', './js/ai-assistant.js?v=2.1.0', './js/app.js?v=2.2.0', './manifest.json',
-  './assets/icons/icon-192.png', './assets/icons/icon-512.png',
-  './assets/logo/logo-suanlungna-modern.png',
+  './assets/icons/pwa-icon-192.png', './assets/icons/pwa-icon-512.png', './assets/icons/favicon.svg', './assets/icons/favicon-64.png',
+  './assets/logo/suanlungna-icon.svg', './assets/logo/suanlungna-primary.svg', './assets/logo/suanlungna-compact.svg',
   './assets/illustrations/farm-landscape.webp',
   './assets/v2/hero-farmer-garden.jpg', './assets/v2/cucumber-illustration.jpg',
   './assets/v2/water-pump-illustration.jpg', './assets/v2/ai-farm-helper.jpg'

@@ -2,9 +2,9 @@
 <html lang="th">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#168347"><meta name="description" content="สวนลุงนะ SMART FARM — ระบบติดตามฟาร์มและสั่งงานผ่าน ESP8266/MQTT">
-  <title>สวนลุงนะ · SMART FARM</title>
-  <link rel="manifest" href="./manifest.json"><link rel="icon" href="./assets/icons/icon-192.png"><link rel="apple-touch-icon" href="./assets/icons/icon-192.png">
+  <meta name="theme-color" content="#0B1220"><meta name="description" content="สวนลุงนะ — SMART FARM MANAGEMENT SYSTEM สำหรับติดตามสวนและอุปกรณ์ ESP8266/MQTT">
+  <title>สวนลุงนะ · SMART FARM MANAGEMENT SYSTEM</title>
+  <link rel="manifest" href="./manifest.json"><link rel="icon" type="image/svg+xml" href="./assets/icons/favicon.svg"><link rel="icon" type="image/png" sizes="64x64" href="./assets/icons/favicon-64.png"><link rel="apple-touch-icon" href="./assets/icons/pwa-icon-192.png">
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./css/app.css"><link rel="stylesheet" href="./css/reference-layout.css?v=2.2.0">
   <script defer src="https://unpkg.com/mqtt@5.14.1/dist/mqtt.min.js"></script>
@@ -13,16 +13,16 @@
 <body>
 <div class="app-shell">
   <header class="topbar">
-    <a class="brand topbar-brand" href="#home"><img src="./assets/logo/logo-suanlungna-modern.png" alt=""><span><b>สวนลุงนะ</b><small>SMART FARM</small></span></a>
+    <a class="brand topbar-brand" href="#home"><img src="./assets/logo/suanlungna-icon.svg" alt="สวนลุงนะ"><span><b>สวนลุงนะ</b><small>SMART FARM MANAGEMENT SYSTEM</small></span></a>
     <div class="topbar-message"><span>ดูแลสวนได้ทุกที่</span><small>ชีวิตดีขึ้นทุกวัน</small></div>
     <div class="header-status" aria-label="สถานะระบบ">
       <span id="connection" class="connection-pill" data-state="offline"><i></i><span>ระบบออฟไลน์</span></span>
       <span class="header-updated">อัปเดตล่าสุด <b id="headerUpdated">ยังไม่มีข้อมูล</b></span>
-      <button type="button" class="profile-chip" data-route="profile" aria-label="เปิดโปรไฟล์สวน"><img src="./assets/logo/logo-suanlungna-modern.png" alt=""><b>สวนลุงนะ</b><span aria-hidden="true">⌄</span></button>
+      <button type="button" class="profile-chip" data-route="profile" aria-label="เปิดโปรไฟล์สวน"><img src="./assets/logo/suanlungna-icon.svg" alt=""><b>สวนลุงนะ</b><span aria-hidden="true">⌄</span></button>
     </div>
   </header>
   <aside class="sidebar" aria-label="เมนูหลัก">
-    <a class="brand sidebar-brand" href="#home"><img src="./assets/logo/logo-suanlungna-modern.png" alt=""><span><b>สวนลุงนะ</b><small>SMART FARM</small></span></a>
+    <a class="brand sidebar-brand" href="#home"><img src="./assets/logo/suanlungna-icon.svg" alt="สวนลุงนะ"><span><b>สวนลุงนะ</b><small>SMART FARM MANAGEMENT SYSTEM</small></span></a>
     <nav class="sidebar-nav" aria-label="เมนูหลัก">
       <button data-nav="home" class="active"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg>หน้าหลัก</button>
       <button data-nav="reports"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V11h4v8M10 19V5h4v14M16 19V8h4v11"/></svg>รายงาน</button>
@@ -114,7 +114,7 @@
           <div class="system-check-row"><span class="system-check-icon">!</span><span>Emergency Stop</span><b id="systemEmergency">ยังไม่มีข้อมูล</b><small id="systemEmergencySource">รอสถานะจาก ESP8266</small></div>
           <div class="system-check-row"><span class="system-check-icon">⚠</span><span>Firmware error</span><b id="systemFirmwareError">ยังไม่มีข้อมูล</b><small id="systemFirmwareErrorDetail">ยังไม่มีข้อมูล</small></div>
           <p id="systemCheckResult" class="muted" role="status" aria-live="polite"></p>
-          <div class="system-version-grid"><div><span>Dashboard</span><b id="dashboardVersion">v2.2.0</b></div><div><span>Firmware baseline</span><b id="firmwareVersion">ยังไม่มีข้อมูล</b></div><div><span>Shell cache</span><b>lungna-shell-v24</b></div></div>
+          <div class="system-version-grid"><div><span>Dashboard</span><b id="dashboardVersion">v2.2.0</b></div><div><span>Firmware baseline</span><b id="firmwareVersion">ยังไม่มีข้อมูล</b></div><div><span>Shell cache</span><b>lungna-shell-v25</b></div></div>
           <div class="button-row"><button class="button secondary" id="reloadDashboard">โหลด Dashboard ใหม่</button></div>
         </div></details>
       </div>
