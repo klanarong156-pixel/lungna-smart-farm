@@ -31,7 +31,7 @@
 
 ## Screenshots
 
-มีภาพ full-page ของทั้ง 7 หน้าใน mobile 390 px และ desktop 1440 px ใน `screenshots.zip` (14 ภาพ) ใช้สำหรับตรวจ layout; การแสดงสถานะว่างในภาพเกิดจากไม่ได้เชื่อม MQTT/ESP ระหว่างการทดสอบ
+มีภาพ full-page ของทั้ง 7 หน้าใน mobile 390 px และ desktop 1440 px เก็บเป็นไฟล์ PNG แยกรายหน้า (14 ภาพ) ใช้สำหรับตรวจ layout; archive `screenshots.zip` ถูกนำออกจากรีโพเพื่อลดไฟล์ generated ที่ซ้ำซ้อน การแสดงสถานะว่างในภาพเกิดจากไม่ได้เชื่อม MQTT/ESP ระหว่างการทดสอบ
 
 ## Git/deployment
 
