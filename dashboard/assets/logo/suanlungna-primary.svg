@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 220" role="img" aria-labelledby="title desc">
+  <title id="title">สวนลุงนะ</title>
+  <desc id="desc">สัญลักษณ์ใบพืช เส้นทางน้ำ และจุดเชื่อมต่อ Smart Farm พร้อมชื่อสวนลุงนะ</desc>
+  <defs>
+    <linearGradient id="leaf" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#74F4B9"/><stop offset="1" stop-color="#39F5A5"/></linearGradient>
+    <linearGradient id="water" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#67D8F5"/><stop offset="1" stop-color="#39F5A5"/></linearGradient>
+  </defs>
+  <g transform="translate(18 18)">
+    <rect x="0" y="0" width="184" height="184" rx="48" fill="#111C30" stroke="#2B4658" stroke-width="4"/>
+    <path d="M92 146V71" fill="none" stroke="#E5EDF8" stroke-width="8" stroke-linecap="round"/>
+    <path d="M92 86C63 83 43 64 43 34c30 1 52 15 55 43" fill="url(#leaf)" stroke="#0B1220" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M94 101c2-31 22-52 55-57 0 33-19 54-55 57Z" fill="#39F5A5" stroke="#0B1220" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M35 151c23-18 45-18 67 0 22-18 44-18 67 0" fill="none" stroke="url(#water)" stroke-width="9" stroke-linecap="round"/>
+    <path d="M35 168c23-18 45-18 67 0 22-18 44-18 67 0" fill="none" stroke="#E5EDF8" stroke-width="7" stroke-linecap="round" opacity=".9"/>
+    <circle cx="92" cy="71" r="7" fill="#67D8F5" stroke="#111C30" stroke-width="4"/>
+    <circle cx="92" cy="146" r="7" fill="#39F5A5" stroke="#111C30" stroke-width="4"/>
+  </g>
+  <g transform="translate(240 62)">
+    <text x="0" y="62" fill="#E5EDF8" font-family="Noto Sans Thai, IBM Plex Sans Thai, sans-serif" font-size="58" font-weight="700" letter-spacing="1">สวนลุงนะ</text>
+    <rect x="4" y="84" width="58" height="4" rx="2" fill="#39F5A5"/>
+    <text x="78" y="89" fill="#8FA9B7" font-family="Manrope, sans-serif" font-size="19" font-weight="700" letter-spacing="3">SMART FARM MANAGEMENT SYSTEM</text>
+  </g>
+</svg>

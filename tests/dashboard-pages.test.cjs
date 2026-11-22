@@ -27,8 +27,7 @@ assert.match(html, /class="bottom-nav"[\s\S]*data-nav="reports"[\s\S]*data-nav="
 for (const token of ['--primary:','--primary-dark:','--primary-light:','--background:','--surface:','--surface-soft:','--text:','--text-muted:','--border:','--success:','--warning:','--danger:','--info:']) assert.ok(css.includes(token), `missing design token ${token}`);
 assert.match(html, /DHT11/);
 assert.doesNotMatch(html, /Soil Sensor|data-nav="settings"|data-nav="connection-page"|data-nav="events"/);
-assert.match(html, /lungna-shell-v24/);
-assert.match(serviceWorker, /const CACHE = 'lungna-shell-v24'/);
+assert.match(serviceWorker, /const CACHE = 'lungna-shell-v25'/);
 assert.match(html, /reference-layout\.css\?v=2\.2\.0/);
 assert.match(html, /config\.js\?v=2\.2\.0[\s\S]*mqtt\.js\?v=2\.2\.0/);
 assert.match(html, /app\.js\?v=2\.2\.0/);
@@ -52,7 +51,7 @@ assert.match(html, /id="homeAlert"[\s\S]*id="homeAlertTitle"[\s\S]*data-route="s
 assert.match(html, /id="homePumpState"[\s\S]*id="homePumpRuntime"[\s\S]*id="homeNextSchedule"[\s\S]*id="homeModeHint"/);
 assert.match(html, /id="homeTrendChart"[\s\S]*เก็บในเบราว์เซอร์นี้ขณะ Dashboard เปิด/);
 assert.match(html, /id="todayRelayChanges"[\s\S]*id="todayAlerts"/);
-assert.match(html, /logo-suanlungna-modern\.png/);
+assert.match(html, /suanlungna-icon\.svg/);
 assert.match(html, /class="home-live-panel"[\s\S]*id="temperature"[\s\S]*id="homePumpState"[\s\S]*data-home-relay="pump"/);
 assert.doesNotMatch(html, /class="farm-map-card"|data-farm-zone=/, 'illustrative farm map is removed from the primary overview');
 const homeStart = html.indexOf('data-page="home"');
@@ -73,7 +72,6 @@ assert.match(html, /id="page-system"[\s\S]*class="system-step"[\s\S]*id="mqttAut
 assert.match(html, /command-flow\.js\?v=2\.0\.0[\s\S]*sensor-alerts\.js\?v=2\.0\.0/);
 assert.match(html, /id="sensorAlertForm"[\s\S]*id="sensorTempThreshold"[\s\S]*id="sensorHumidityThreshold"[\s\S]*id="resetSensorAlertThresholds"/);
 assert.match(html, /DHT11 ล่าสุดภายใน 90 วินาที[\s\S]*เก็บค่าไว้ในเบราว์เซอร์นี้/);
-assert.match(html, /lungna-shell-v24/);
 assert.doesNotMatch(html, /adminInfo|showAdminInfo|connectionTimeline/);
 assert.match(html, /class="weather-alert-card"[\s\S]*weather-hourly-panel/);
 const weatherStart = html.indexOf('data-page="weather"');
@@ -162,5 +160,5 @@ assert.doesNotMatch(weatherConfig, /\d{1,3}\.\d{3,}/, 'weather reference must be
 const appIds = [...app.matchAll(/\$\('([^']+)'\)/g)].map(m => m[1]);
 for (const id of new Set(appIds)) assert.ok(ids.includes(id), `app references missing DOM id ${id}`);
 assert.match(fs.readFileSync('dashboard/finance/index.html', 'utf8'), /index\.html#finance/);
-assert.match(fs.readFileSync('dashboard/manifest.json', 'utf8'), /"theme_color":"#168347"/);
+assert.match(fs.readFileSync('dashboard/manifest.json', 'utf8'), /"theme_color":"#0B1220"/);
 console.log('PASS dashboard pages: four primary nav items, focused overview, safe controls, interactive notifications, finance, regional weather privacy, and unique DOM hooks');

@@ -524,3 +524,15 @@ home-live-panel{gap:13px;padding:16px}.home-climate-value{background:#f7f5ed;bor
 
   .weather-layout{grid-template-columns:minmax(0,1.35fr) minmax(230px,.65fr)}
 }
+
+/* Suan Lungna brand system: source-controlled logo variants for dark theme. */
+.brand img { background: transparent; }
+.profile-chip img { width: 28px; height: 28px; object-fit: contain; }
+@media (min-width: 760px) {
+  .sidebar-brand { padding: 12px 10px 16px; }
+  .sidebar-brand img { width: 100%; height: auto; max-height: 74px; }
+}
+@media (max-width: 759px) {
+  .topbar-brand img { width: 42px; height: 42px; }
+  .topbar-brand small { font-size: 7px; letter-spacing: 1px; }
+}
