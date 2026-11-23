@@ -1,4 +1,4 @@
-# Relay Logic — V7.2.0
+# Relay Logic — V7.2.1
 
 | UI | Firmware ID | GPIO/board label | ON electrical level | OFF electrical level | MQTT state |
 |---|---|---|---|---|---|

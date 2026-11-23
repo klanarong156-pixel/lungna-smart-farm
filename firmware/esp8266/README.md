@@ -1,6 +1,6 @@
 # ESP8266 Firmware V7.2.1
 
-Firmware source lives in `src/main.ino` and is based on the V7.2.0 OTA stable firmware inspected in the read-only reference repository. It retains the original relay, safety, MQTT and provisioning implementation and adds a dedicated physical AP setup button.
+Firmware source lives in `src/main.ino` and is released as V7.2.1-PHYSICAL-AP-BUTTON. It retains the audited relay, safety, MQTT and provisioning implementation and adds a dedicated physical AP setup button.
 
 ## Board and dependencies
 

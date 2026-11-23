@@ -1,3 +1,9 @@
+## V7.2.1 — physical AP setup button and current release preparation — 2026-11-23
+
+- Firmware source version is `V7.2.1-PHYSICAL-AP-BUTTON` and includes the physical AP setup button while retaining relay, MQTT, schedule, emergency and OTA safety behavior.
+- Release artifact: `releases/firmware/SmartFarm_V7.2.1.bin` with matching SHA-256 checksum; compile-only builds remain distinct from deployment-configured EMQX builds.
+- This commit prepares the source and documentation for release; physical flashing, MQTT/TLS authentication and relay/load verification still require the target device and deployment credentials.
+
 ## EMQX Cloud Serverless broker migration — 2026-11-15 (feature branch; ยังไม่ deploy)
 
 - เปลี่ยน Dashboard ให้รับ deployment-specific WSS endpoint บน port 8084 `/mqtt`; เก็บ endpoint คู่กับ credentials ตาม session/local storage และตรวจ scheme, port, path ก่อน connect.

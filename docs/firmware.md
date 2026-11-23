@@ -1,6 +1,6 @@
 # Firmware Version และ Responsibilities
 
-Firmware V7.2.0-OTA-STABLE เป็น image ที่ตรวจจาก New140869 และย้ายเข้าสู่ repository ใหม่โดยไม่แก้ source safety logic. ESP8266 จัดการ GPIO relay, AUTO/MANUAL, schedule (เมื่อ clock valid), emergency lock, Wi-Fi/MQTT reconnect, DHT11, RTC/NTP และ OTA safe state.
+Firmware V7.2.1-PHYSICAL-AP-BUTTON เป็น source ปัจจุบันที่ต่อยอดจาก baseline ที่ตรวจจาก New140869 โดยคง source safety logic และเพิ่มปุ่ม physical AP setup. ESP8266 จัดการ GPIO relay, AUTO/MANUAL, schedule (เมื่อ clock valid), emergency lock, Wi-Fi/MQTT reconnect, DHT11, RTC/NTP และ OTA safe state.
 
 ## EMQX Cloud Serverless setup
 

@@ -13,7 +13,7 @@ const url = process.env.MQTT_URL;
 const username = process.env.MQTT_USERNAME;
 const password = process.env.MQTT_PASSWORD;
 const timeoutMs = Number(process.env.MQTT_HEALTHCHECK_TIMEOUT_MS || 30000);
-const expectedFirmware = process.env.EXPECTED_FIRMWARE || 'V7.2.0-OTA-STABLE';
+const expectedFirmware = process.env.EXPECTED_FIRMWARE || 'V7.2.1-PHYSICAL-AP-BUTTON';
 const relayIds = ['pump', 'zone1', 'lighthome', 'lightsala'];
 
 if (!url || !username || !password) {
