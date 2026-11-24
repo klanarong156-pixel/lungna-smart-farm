@@ -21,6 +21,8 @@ Firmware source lives in `src/main.ino` and is released as V7.2.1-PHYSICAL-AP-BU
 - DHT11 D2/GPIO4; DS3231 SDA D3/GPIO0, SCL D4/GPIO2 as defined in source.
 - Wi-Fi reset button remains on D1/GPIO5 (hold 5 seconds to erase saved Wi-Fi). The separate AP setup button uses D0/GPIO16: connect a normally-open momentary pushbutton between D0 and 3V3. GPIO16 uses `INPUT_PULLDOWN_16`, so leave the button open normally and do not connect it to 5 V. With all relays OFF, hold for 2 seconds to open `SmartFarm_Setup`; the saved Wi-Fi credentials are not erased. The AP is blocked while any relay is ON because the setup portal pauses the main loop. The portal times out after 180 seconds. The setup AP has no password, so use it only while physically present and close it after configuration.
 - ESP keeps controller responsibility for schedule, AUTO/MANUAL, safety, emergency and OTA.
+- Pump has a 30-minute maximum runtime software backstop (`PUMP_MAX_RUNTIME_MS`). On timeout the pump is forced OFF and safety-latched until the schedule leaves the active interval or the device is otherwise explicitly re-armed. This is not a substitute for an external overload, float switch, contactor, or emergency disconnect.
+- Clearing Emergency Stop never resumes a schedule as a side effect. The firmware keeps every relay OFF, reports `EMERGENCY_RESET_REQUIRES_RESUME`, enters `MANUAL`, and requires a separate `AUTO` command after the operator inspects the equipment.
 
 ## Provisioning and safety
 

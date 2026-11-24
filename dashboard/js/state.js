@@ -82,6 +82,8 @@
     // explicit ESP offline signals and heartbeat timeout clear device state.
     if (status === 'offline') {
       state.espOnline = false;
+      state.heartbeatAt = 0;
+      state.device = null;
       state.mode = null;
       Object.keys(state.relays).forEach(id => { state.relays[id] = null; });
       Object.keys(state.relayObservedAt).forEach(id => { state.relayObservedAt[id] = null; });
@@ -90,6 +92,21 @@
       Object.keys(state.schedules).forEach(id => { state.schedules[id] = null; });
     }
     emit(`connection:${status}`);
+  }
+
+  function beginMqttSession() {
+    // A broker reconnect is a new observation session. Never authorize a
+    // control action with relay/mode/schedule data from the previous session.
+    state.espOnline = null;
+    state.heartbeatAt = 0;
+    state.device = null;
+    state.mode = null;
+    state.modeObservedAt = null;
+    Object.keys(state.relays).forEach(id => { state.relays[id] = null; });
+    Object.keys(state.relayObservedAt).forEach(id => { state.relayObservedAt[id] = null; });
+    Object.keys(state.schedules).forEach(id => { state.schedules[id] = null; });
+    state.emergencyObservedAt = null;
+    emit('mqtt:session-start');
   }
 
   function setEspOffline(reason = 'offline') {
@@ -183,7 +200,7 @@
   }
 
   window.FarmState = Object.freeze({
-    get: () => structuredClone(state), subscribe, setConnection, setEspOffline,
+    get: () => structuredClone(state), subscribe, setConnection, beginMqttSession, setEspOffline,
     setDevice, setSensor, setRelay, setSchedule, setMode, setEmergency, setSystemError, normalizeSchedule, addError
   });
 })();

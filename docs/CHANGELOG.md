@@ -4,6 +4,15 @@
 - Release artifact: `releases/firmware/SmartFarm_V7.2.1.bin` with matching SHA-256 checksum; compile-only builds remain distinct from deployment-configured EMQX builds.
 - This commit prepares the source and documentation for release; physical flashing, MQTT/TLS authentication and relay/load verification still require the target device and deployment credentials.
 
+### Safety hardening patch — 2026-11-25
+
+- Added a 30-minute firmware pump runtime backstop with `PUMP_SAFETY_TIMEOUT`; hardware overload/float protection remains required.
+- Emergency reset now keeps all relays OFF, enters `MANUAL`, and requires an explicit `AUTO` command to resume schedules.
+- Emergency event timestamps use validated RTC/NTP epoch time when available instead of `millis()`.
+- Read-only MQTT health check now requires a live non-retained ESP heartbeat and dashboard MQTT sessions clear stale control observations before re-authorizing controls.
+- Firmware release workflow derives the artifact version from `SMARTFARM_VERSION`; checksum files use a consistent release-directory format.
+- The existing checked-in V7.2.1 binary was not overwritten; a configured EMQX build and hardware validation are still required before publishing a new release artifact.
+
 ## EMQX Cloud Serverless broker migration — 2026-11-15 (feature branch; ยังไม่ deploy)
 
 - เปลี่ยน Dashboard ให้รับ deployment-specific WSS endpoint บน port 8084 `/mqtt`; เก็บ endpoint คู่กับ credentials ตาม session/local storage และตรวจ scheme, port, path ก่อน connect.

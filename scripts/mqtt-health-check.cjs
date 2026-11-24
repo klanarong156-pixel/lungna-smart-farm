@@ -55,7 +55,9 @@ function jsonPayload(topic, value) {
   try { return JSON.parse(value); } catch (_) { fail(`${topic} payload is not valid JSON`); }
 }
 function check() {
-  const device = received.get('smartfarm/status/device')?.payload;
+  const deviceItem = received.get('smartfarm/status/device');
+  if (!deviceItem || deviceItem.retained) fail('ESP heartbeat is retained/stale; no live heartbeat received');
+  const device = deviceItem.payload;
   const sensor = received.get('smartfarm/sensor/dht11')?.payload;
   if (!device || typeof device !== 'object' || device.online !== true || device.mqtt !== true) fail('ESP heartbeat is missing or reports offline');
   if (device.firmware !== expectedFirmware) fail(`firmware mismatch: expected ${expectedFirmware}, got ${device.firmware || 'missing'}`);
@@ -94,8 +96,9 @@ client.on('message', (topic, buffer, packet) => {
   } else {
     received.set(topic, { value, retained: packet.retain });
   }
-  const required = ['smartfarm/status/device', 'smartfarm/sensor/dht11', ...relayIds.map(id => `smartfarm/relay/${id}/status`)];
-  if (required.every(topicName => received.has(topicName))) { clearTimeout(timer); check(); }
+  const required = ['smartfarm/status/device', 'smartfarm/sensor/dht11', ...relayIds.map(id => `smartfarm/relay/${id}/status` )];
+  const liveHeartbeat = received.get('smartfarm/status/device')?.retained === false;
+  if (liveHeartbeat && required.every(topicName => received.has(topicName))) { clearTimeout(timer); check(); }
 });
 
 process.on('SIGINT', () => fail('interrupted'));

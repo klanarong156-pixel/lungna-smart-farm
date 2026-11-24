@@ -19,3 +19,5 @@ Firmware V7.2.1 คง MQTT contract ที่ตรวจพบจาก baseli
 Schedule/relay IDs: `pump`, `zone1`, `lighthome`, `lightsala`. แต่ละรีเลย์มี 4 slots ต่อวัน; ใช้เวลา `HH:MM` ใน timezone ที่ ESP ตั้งจาก RTC/NTP. Slots ที่เปิดใช้งานห้ามทับซ้อน; ข้ามเที่ยงคืนได้. ตารางทำงานเมื่อ ESP อยู่ AUTO. Dashboard validate ก่อน publish และจะแจ้งสำเร็จเมื่อได้รับ `schedule/status` ตรงกับค่าที่ส่งเท่านั้น; timeout ไม่ถือว่าเป็นการบันทึกสำเร็จ.
 
 Dashboard connection ONLINE หมายถึง MQTT broker connection สำเร็จ; ESP ONLINE ต้องอาศัย live heartbeat จาก device (timeout 25 วินาที) ไม่ใช่เพียง browser MQTT connection. การส่ง MQTT PUBACK อย่างเดียวไม่ใช่ ESP schedule acknowledgement.
+
+Read-only health check ต้องได้รับ `smartfarm/status/device` แบบ non-retained/live อย่างน้อยหนึ่ง packet; retained heartbeat เพียงอย่างเดียวถือว่า stale และต้อง FAIL. หลัง `EMERGENCY_RESET` firmware จะคง relay OFF และต้องได้รับ `smartfarm/mode/set` เป็น `AUTO` แยกต่างหากเพื่อ resume schedule. เมื่อปั๊มทำงานเกิน maximum runtime firmware จะตัด OFF และ publish `PUMP_SAFETY_TIMEOUT`.

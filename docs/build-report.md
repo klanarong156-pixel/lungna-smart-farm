@@ -3,10 +3,10 @@
 ## Build record
 
 - Firmware version: `V7.2.1-PHYSICAL-AP-BUTTON` (from `SMARTFARM_VERSION` in `firmware/esp8266/src/main.ino`).
-- Build date: 2026-11-23.
-- Source revision: `9dd9fec` (`Merge feature/son-lung-na-dashboard-redesign into main`).
-- Result: **SUCCESS**; a clean NodeMCU v2 firmware image was built from the current `main` source and copied to the v7.2.1 release artifact.
-- Reproducibility check: built `.pio/build/nodemcuv2/firmware.bin` and `releases/firmware/SmartFarm_V7.2.1.bin` are byte-for-byte identical.
+- Previous release build date: 2026-11-23.
+- Previous source revision: `9dd9fec` (`Merge feature/son-lung-na-dashboard-redesign into main`).
+- Current safety patch build: **SUCCESS**; a compile-only NodeMCU v2 image was rebuilt from the working tree after pump cutoff, emergency resume, and diagnostics changes.
+- The checked-in `V7.2.1` release artifact remains the prior configured-release candidate and is intentionally not overwritten by this placeholder-CA build.
 
 ## Target and toolchain
 
@@ -22,14 +22,16 @@ Run from `firmware/esp8266/`:
 
 ```sh
 pio pkg install -e nodemcuv2
-pio run -e nodemcuv2
+python -W error::SyntaxWarning scripts/patch_elf2bin_syntax_warning.py
+PYTHONWARNINGS=error::SyntaxWarning pio run -e nodemcuv2
 ```
 
 The build completed successfully. The compile-only checkout uses the repository's safe EMQX placeholder header; deployment-specific EMQX host and CA must be injected through the documented release workflow before claiming broker integration.
 
-- RAM: 41,864 / 81,920 bytes (51.1%).
-- Program flash: 593,288 / 1,044,464 bytes (56.8%).
+- RAM: 42,112 / 81,920 bytes (51.4%).
+- Program flash: 594,140 / 1,044,464 bytes (56.9%).
 - Built image: `.pio/build/nodemcuv2/firmware.bin`.
+- Current compile-only SHA-256: `0306808cb606460703a410fb58fad37d2b4ef09db514f77883dab78a3efcd7b3`.
 
 A dependency warning remains in PubSubClient `2.8.0` for a signed/unsigned comparison in `publish_P`; it does not prevent linking or image generation.
 
@@ -39,7 +41,7 @@ A dependency warning remains in PubSubClient `2.8.0` for a signed/unsigned compa
 - Size: **597,440 bytes**.
 - SHA-256: `b678db3979e5a0a730b0bd8eee497e9d35ab0517454d3e6cc0562d13be243791`.
 - Checksum file: `releases/firmware/SmartFarm_V7.2.1.bin.sha256`.
-- The built image and checked-in v7.2.1 image have identical SHA-256 values.
+- The checked-in artifact checksum remains valid for the prior release image; it is not expected to match the current safety-patch compile-only image until a configured EMQX release build is produced and reviewed.
 
 ## Scope and limitations
 

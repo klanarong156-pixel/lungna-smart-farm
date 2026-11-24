@@ -152,18 +152,28 @@ jobs:
           PYTHONWARNINGS: error::SyntaxWarning
         run: pio run -e nodemcuv2
 
+      - name: Read release version from firmware source
+        id: version
+        shell: bash
+        run: |
+          version="$(sed -nE 's/^#define SMARTFARM_VERSION "(V[0-9]+\.[0-9]+\.[0-9]+).*/\1/p' firmware/esp8266/src/main.ino | head -n1)"
+          test -n "$version" || { echo 'Could not determine semantic firmware version'; exit 1; }
+          echo "release_version=$version" >> "$GITHUB_OUTPUT"
+
       - name: Create versioned release image and checksum
         if: steps.emqx.outputs.configured == 'true'
         run: |
-          cp firmware/esp8266/.pio/build/nodemcuv2/firmware.bin releases/firmware/SmartFarm_V7.2.1.bin
-          sha256sum releases/firmware/SmartFarm_V7.2.1.bin > releases/firmware/SmartFarm_V7.2.1.bin.sha256
+          image="SmartFarm_${{ steps.version.outputs.release_version }}.bin"
+          checksum="${image}.sha256"
+          cp firmware/esp8266/.pio/build/nodemcuv2/firmware.bin "releases/firmware/$image"
+          (cd releases/firmware && sha256sum "$image" > "$checksum")
 
       - uses: actions/upload-artifact@v4
         if: steps.emqx.outputs.configured == 'true'
         with:
-          name: SmartFarm_V7.2.1
+          name: SmartFarm_${{ steps.version.outputs.release_version }}
           path: |
-            releases/firmware/SmartFarm_V7.2.1.bin
-            releases/firmware/SmartFarm_V7.2.1.bin.sha256
+            releases/firmware/SmartFarm_${{ steps.version.outputs.release_version }}.bin
+            releases/firmware/SmartFarm_${{ steps.version.outputs.release_version }}.bin.sha256
           if-no-files-found: error
           retention-days: 30

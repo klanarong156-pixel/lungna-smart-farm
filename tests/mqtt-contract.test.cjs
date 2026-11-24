@@ -127,6 +127,11 @@ manager.client = {
   assert.equal(state.get().schedules.pump.slots[0].on, '06:00', 'unconfirmed schedule never overwrites known ESP state');
 
   await assert.rejects(manager.commandSchedule('pump', { slots: [{ enabled: true, on: '06:00', off: '06:30' }] }), /ช่วงเวลา/);
+  // A newly connected MQTT session must not authorize controls with stale data.
+  state.beginMqttSession();
+  assert.equal(state.get().espOnline, null, 'new MQTT session starts with unknown ESP liveness');
+  assert.equal(state.get().relays.pump, null, 'new MQTT session clears stale relay state');
+  assert.equal(state.get().heartbeatAt, 0, 'new MQTT session clears stale heartbeat');
   state.setEspOffline('test');
   assert.equal(state.get().relays.pump, null);
   await assert.rejects(manager.commandSchedule('pump', schedule), /ESP ออฟไลน์/);

@@ -63,6 +63,8 @@ const uint32_t HEARTBEAT_INTERVAL_MS = 10000UL;
 const uint32_t SCHEDULE_INTERVAL_MS = 1000UL;
 const uint32_t RTC_NTP_SYNC_INTERVAL_MS = 6UL * 60UL * 60UL * 1000UL;
 const uint32_t NTP_RETRY_INTERVAL_MS = 10UL * 60UL * 1000UL;
+// Last-resort pump protection; hardware overload/float protection remains required.
+const uint32_t PUMP_MAX_RUNTIME_MS = 30UL * 60UL * 1000UL;
 const uint32_t MIN_VALID_EPOCH = 1704067200UL;
 const char *const NTP_SERVERS[] = {"pool.ntp.org", "time.nist.gov", "asia.pool.ntp.org"};
 const uint8_t NTP_SERVER_COUNT = sizeof(NTP_SERVERS) / sizeof(NTP_SERVERS[0]);
@@ -103,6 +105,7 @@ uint32_t wifiReconnectRequests = 0, mqttConnectAttempts = 0,
 uint8_t mqttAuthFailures = 0;
 bool mqttPortalOpened = false;
 bool autoMode = true;
+bool autoResumePending = false;
 bool mqttConfigReported = false;
 bool otaHttpRestartPending = false;
 unsigned long otaHttpRestartAt = 0;
@@ -1198,6 +1201,13 @@ String rtcIso() {
   return formatLocalIsoSafe(now.year(), now.month(), now.day(), now.hour(),
                             now.minute(), now.second());
 }
+uint32_t currentEpoch() {
+  DateTime now(2000, 1, 1);
+  if (readRtcNow(now)) return now.unixtime();
+  if (ntpTimeValid && ntp.getEpochTime() >= MIN_VALID_EPOCH)
+    return ntp.getEpochTime();
+  return 0;
+}
 void initRTC() {
   Wire.begin(RTC_SDA, RTC_SCL);
   delay(5);
@@ -1404,7 +1414,7 @@ void publishEmergencyStatus() {
   StaticJsonDocument<192> d;
   d["active"] = emergencyLock;
   d["source"] = emergencySource;
-  d["timestamp"] = emergencyTimestamp / 1000UL;
+  if (emergencyTimestamp) d["timestamp"] = emergencyTimestamp;
   String iso = rtcIso();
   if (iso.length()) d["time"] = iso;
   char out[192];
@@ -1413,7 +1423,7 @@ void publishEmergencyStatus() {
 }
 void engageEmergencyStop(const char *source) {
   emergencyLock = true;
-  emergencyTimestamp = millis();
+  emergencyTimestamp = currentEpoch();
   strlcpy(emergencySource, source && source[0] ? source : "unknown", sizeof(emergencySource));
   for (uint8_t i = 0; i < RELAY_COUNT; i++) {
     relaySetRaw(i, false);
@@ -1424,12 +1434,17 @@ void engageEmergencyStop(const char *source) {
 }
 void resetEmergencyStop(const char *source) {
   emergencyLock = false;
-  emergencyTimestamp = millis();
+  emergencyTimestamp = currentEpoch();
   strlcpy(emergencySource, source && source[0] ? source : "reset", sizeof(emergencySource));
   Serial.printf("EMERGENCY STOP: reset source=%s\n", emergencySource);
-  uint16_t resetMinutes;
-  if (scheduleClockMinutes(resetMinutes)) applyAutoState(resetMinutes);
+  // Never re-energize a scheduled load as a side effect of clearing E-stop.
+  // The operator must explicitly publish AUTO after inspecting the equipment.
+  autoMode = false;
+  autoResumePending = true;
+  for (uint8_t i = 0; i < RELAY_COUNT; i++) relaySetRaw(i, false);
   publishStatus();
+  publishSystemError("EMERGENCY_RESET_REQUIRES_RESUME",
+                     "Emergency reset complete; publish AUTO to resume scheduling");
   queueTelegram(String("ปลดล็อกหยุดฉุกเฉิน source=") + emergencySource);
 }
 void publishStatus() {
@@ -1444,7 +1459,7 @@ void publishStatus() {
   publishTimeStatus();
 }
 void applyAutoState(uint16_t now) {
-  if (!autoMode) return;
+  if (!autoMode || autoResumePending) return;
   if (emergencyLock || otaUpdateInProgress || otaFailureLock) {
     for (uint8_t i = 0; i < RELAY_COUNT; i++) relaySetRaw(i, false);
     return;
@@ -1628,6 +1643,12 @@ void mqttCallback(char *topic, byte *payload, unsigned int len) {
     else {
       publishSystemError("INVALID_COMMAND", "Invalid mode command");
       return;
+    }
+    if (autoMode && autoResumePending) {
+      autoResumePending = false;
+      uint16_t resumeMinutes;
+      if (scheduleClockMinutes(resumeMinutes)) applyAutoState(resumeMinutes);
+      publishSystemError("AUTO_RESUMED", "AUTO scheduling resumed after operator confirmation");
     }
     publishModeStatus();
     return;
@@ -2472,8 +2493,15 @@ void runSafety() {
   }
   if (!pumpStartedAt)
     pumpStartedAt = millis();
-  // ไม่มีเพดานเวลาทำงานแบบ 30 นาที รีเลย์จะทำตามตารางหรือคำสั่งล่าสุด
-  // การหลุด MQTT ต้องไม่ตัดการรดน้ำอัตโนมัติที่เก็บไว้ใน ESP8266
+  if ((uint32_t)(millis() - pumpStartedAt) >= PUMP_MAX_RUNTIME_MS) {
+    relaySetRaw(0, false);
+    pumpSafetyLatched = true;
+    publishSystemError("PUMP_SAFETY_TIMEOUT",
+                       "Pump was forced OFF after maximum runtime");
+    publishRelayStatus(0);
+    queueTelegram(F("ปั๊มถูกตัดเพื่อความปลอดภัยเนื่องจากทำงานเกินเวลาสูงสุด"));
+    Serial.println(F("PUMP SAFETY: maximum runtime exceeded; pump latched OFF"));
+  }
 }
 void runSchedules() {
   if (otaUpdateInProgress) return;
@@ -2518,6 +2546,8 @@ void publishHeartbeat() {
   d["mqttConnects"] = mqttConnectAttempts;
   d["mqttFailures"] = mqttConnectFailures;
   d["pumpSafeLock"] = pumpSafetyLatched;
+  d["pumpMaxRuntimeSec"] = PUMP_MAX_RUNTIME_MS / 1000UL;
+  d["autoResumePending"] = autoResumePending;
   d["emergencyLock"] = emergencyLock;
   d["emergencySource"] = emergencySource;
   d["mode"] = autoMode ? "AUTO" : "MANUAL";

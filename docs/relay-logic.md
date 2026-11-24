@@ -20,4 +20,4 @@
 
 ## Safety
 
-AUTO schedule, emergency latch, OTA safe state, relay protection และ pump logic อยู่บน ESP8266. Dashboard เป็น client สำหรับอ่านและส่งคำสั่งเท่านั้น. Firmware contract ที่ตรวจระบุว่า pump ไม่มี forced 30-minute cutoff หรือ MQTT-loss cutoff; อย่าตีความ dashboard เป็น safety interlock. วงจรปั๊มต้องมีอุปกรณ์ hardware safety เหมาะสม.
+AUTO schedule, emergency latch, OTA safe state, relay protection และ pump logic อยู่บน ESP8266. Dashboard เป็น client สำหรับอ่านและส่งคำสั่งเท่านั้น. Firmware มี forced maximum pump runtime 30 นาทีเป็น last-resort software backstop และจะ latch ปั๊ม OFF เมื่อเกินเวลา; ยังต้องมี overload/float switch/contactor เป็น hardware safety แยกต่างหาก. หลัง reset Emergency Stop ระบบคง relay OFF และเปลี่ยนเป็น `MANUAL` พร้อม `autoResumePending`; ผู้ปฏิบัติงานต้องส่ง `AUTO` แยกเพื่อยืนยันการกลับไปทำ schedule.

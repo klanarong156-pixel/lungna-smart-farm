@@ -109,6 +109,7 @@
         this.reconnectTimer = null;
         this.reconnectAttempt = 0;
         this.connecting = false;
+        FarmState.beginMqttSession();
         FarmState.setConnection('online', 'เชื่อมต่อ broker แล้ว');
         this.subscribe(client);
         this.startWatchdog();

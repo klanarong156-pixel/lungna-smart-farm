@@ -7,8 +7,9 @@ const workflow = fs.readFileSync('.github/workflows/firmware.yml', 'utf8');
 const dashboardConfig = fs.readFileSync('dashboard/js/config.js', 'utf8');
 
 assert.match(source, /#define SMARTFARM_VERSION "V7\.2\.1-PHYSICAL-AP-BUTTON"/);
-assert.match(workflow, /SmartFarm_V7\.2\.1\.bin/);
-assert.match(workflow, /name: SmartFarm_V7\.2\.1/);
+assert.match(workflow, /Read release version from firmware source/);
+assert.match(workflow, /release_version=\$version/);
+assert.match(workflow, /SmartFarm_\$\{\{ steps\.version\.outputs\.release_version \}\}\.bin/);
 assert.match(source, /^#include "emqx_secrets\.h"$/m);
 assert.match(secretsHeader, /#define MQTT_SERVER "YOUR_EMQX_SERVERLESS_ENDPOINT"/);
 assert.match(secretsHeader, /static const char MQTT_ROOT_CA_PEM\[\] PROGMEM = R"EMQXCA\(\s*\)EMQXCA"/);
@@ -42,6 +43,11 @@ assert.match(source, /emergency\/status/);
 assert.match(source, /system\/error/);
 assert.match(source, /otaFailureLock/);
 assert.match(source, /digitalWrite\(relayPins\[i\], RELAY_OFF\)/);
+assert.match(source, /PUMP_MAX_RUNTIME_MS = 30UL \* 60UL \* 1000UL/);
+assert.match(source, /PUMP_SAFETY_TIMEOUT/);
+assert.match(source, /EMERGENCY_RESET_REQUIRES_RESUME/);
+assert.match(source, /autoResumePending/);
+assert.match(source, /uint32_t currentEpoch\(\)/);
 
 const mqttCallback = source.slice(
   source.indexOf('void mqttCallback('),
