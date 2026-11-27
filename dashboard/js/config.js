@@ -5,7 +5,8 @@ window.SmartFarmConfig = Object.freeze({
     port: 8084,
     path: '/mqtt',
     defaultUsername: 'smartfarm-dashboard',
-    heartbeatTimeoutMs: 25000,
+    // Three missed 10-second firmware beats provide tolerance for Wi-Fi jitter.
+    heartbeatTimeoutMs: 30000,
     commandTimeoutMs: 9000,
     scheduleCommandTimeoutMs: 15000,
     topics: {

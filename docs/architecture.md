@@ -19,7 +19,7 @@ Browser Dashboard (GitHub Pages / PWA)
 ## Source of truth / state boundaries
 
 - Relay, mode, DHT sensor and ESP liveness come from ESP/MQTT; cloud storage is never a relay controller.
-- Broker ONLINE is not the same as ESP ONLINE. ESP liveness requires a fresh, non-retained heartbeat; 25-second watchdog.
+- Broker ONLINE is not the same as ESP ONLINE. ESP liveness requires a fresh heartbeat (10-second cadence; 30-second watchdog); retained snapshots never establish liveness.
 - All relay values initialize to `null`; only strict `ON`/`OFF` payloads update them.
 - Finance works while MQTT is disconnected. Current Finance implementation is browser-local and does not sync between devices.
 - Weather API reports forecast values in its own UI; it never fills sensor values.

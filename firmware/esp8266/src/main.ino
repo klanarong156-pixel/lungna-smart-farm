@@ -60,6 +60,7 @@ const uint32_t MQTT_RECONNECT_MS = 5000UL;
 const uint32_t MQTT_RECONNECT_MAX_MS = 60000UL;
 const uint32_t SENSOR_INTERVAL_MS = 30000UL;
 const uint32_t HEARTBEAT_INTERVAL_MS = 10000UL;
+const uint16_t MQTT_PACKET_BUFFER_SIZE = 1152;
 const uint32_t SCHEDULE_INTERVAL_MS = 1000UL;
 const uint32_t RTC_NTP_SYNC_INTERVAL_MS = 6UL * 60UL * 60UL * 1000UL;
 const uint32_t NTP_RETRY_INTERVAL_MS = 10UL * 60UL * 1000UL;
@@ -124,6 +125,8 @@ uint8_t otaProgressPercent = 0;
 uint32_t otaStartedAt = 0;
 uint32_t otaLastProgressAt = 0;
 bool otaReady = false;
+bool mqttBufferReady = false;
+uint32_t heartbeatPublishFailures = 0;
 char otaHostname[48] = "";
 uint32_t wifiResetStartedAt = 0;
 uint32_t apSetupButtonStartedAt = 0;
@@ -1831,6 +1834,10 @@ void connectMqtt() {
     }
     return;
   }
+  if (!mqttBufferReady) {
+    Serial.println(F("MQTT: refusing connection; packet buffer is unavailable"));
+    return;
+  }
   if (mqtt.connected())
     return;
   if (!mqttUser[0] || !mqttPass[0]) {
@@ -2412,8 +2419,11 @@ void setup() {
   mqtt.setCallback(mqttCallback);
   mqtt.setSocketTimeout(5);
   mqtt.setKeepAlive(30);
-  // Keep both MQTT and TLS buffers small; current payloads fit comfortably.
-  mqtt.setBufferSize(768);
+  // Heartbeat carries full device diagnostics. Reserve room for JSON plus the
+  // MQTT topic/header and refuse connection if allocation fails.
+  mqttBufferReady = mqtt.setBufferSize(MQTT_PACKET_BUFFER_SIZE);
+  Serial.printf("MQTT: packet buffer %u bytes %s\n", MQTT_PACKET_BUFFER_SIZE,
+                mqttBufferReady ? "READY" : "ALLOCATION FAILED");
   uint16_t bootMinutes;
   if (scheduleClockMinutes(bootMinutes)) applyAutoState(bootMinutes);
   // Use a stable hostname for discovery and a fixed UDP port for Arduino IDE.
@@ -2572,11 +2582,34 @@ void publishHeartbeat() {
                   (uint32_t)(millis() - lastSensorValidAt) <= 90000UL;
   if (iso.length())
     d["time"] = iso;
+  if (d.overflowed()) {
+    heartbeatPublishFailures++;
+    Serial.printf("HEARTBEAT: JSON document overflow (failures=%lu)\n",
+                  (unsigned long)heartbeatPublishFailures);
+    return;
+  }
   char out[1024];
   const size_t written = serializeJson(d, out, sizeof(out));
-  if (written == 0 || written >= sizeof(out) - 1) return;
-  // Retain the latest heartbeat so a freshly opened dashboard can restore RTC time immediately.
-  mqtt.publish(MQTT_BASE "/status/device", out, true);
+  if (written == 0 || written >= sizeof(out) - 1) {
+    heartbeatPublishFailures++;
+    Serial.printf("HEARTBEAT: JSON serialization failed (bytes=%u failures=%lu)\n",
+                  (unsigned)written, (unsigned long)heartbeatPublishFailures);
+    return;
+  }
+  // Retain the latest diagnostics for late subscribers; MQTT delivers future
+  // live publishes with retain=false, and dashboards must ignore retained data
+  // when deciding current liveness.
+  const bool published = mqtt.publish(MQTT_BASE "/status/device", out, true);
+  if (!published) {
+    heartbeatPublishFailures++;
+    Serial.printf("HEARTBEAT: MQTT publish FAILED (bytes=%u failures=%lu heap=%u)\n",
+                  (unsigned)written, (unsigned long)heartbeatPublishFailures,
+                  ESP.getFreeHeap());
+  } else if (heartbeatPublishFailures) {
+    Serial.printf("HEARTBEAT: publish recovered after %lu failure(s)\n",
+                  (unsigned long)heartbeatPublishFailures);
+    heartbeatPublishFailures = 0;
+  }
 }
 
 void loop() {
